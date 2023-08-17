@@ -11,25 +11,24 @@ interface IWegaERC20Escrow {
   bytes32 escrowId;
   uint256 wager; // total amount that should be escrowed (have that multiplied by by accounts)
   address token;
-  address[] accounts;
   uint256 nonce;
+  uint256 totalWager;
  }
 
  /**
  * @notice create wager request
- * @param token address of the nft to trade
- * @param account tokenId of the nft to trade
- * @param deposit amount the user will deposit
- * @param wager amount that should be totaled for all users 
+ * @param token address of the token to used for collatoral
+ * @param creator addres of request creator
+ * @param accountsCount number of accounts in served by the request 
+ * @param wager amount the creator will deposit
  * @dev caller is game controller and at this point should be approved to transfer tokens 
  **/
  function createWagerAndDeposit(
   address token,  
-  address account,
-  uint256 deposit,
+  address creator,
+  uint256 accountsCount,
   uint256 wager
  ) external;
-
 
  /**
  * @notice deposit on existing wager
@@ -48,12 +47,14 @@ interface IWegaERC20Escrow {
  * @notice hashes request into a requestId
  * @param token wager token address
  * @param creator address of player 1
- * @param wager total amount to be held
+ * @param accountsCount number of accounts served by wager request
+ * @param wager amount deposited by creator to escrow
  * @param nonce owner of nft to trade against
  */
  function hash(
   address token,
   address creator,
+  uint256 accountsCount,
   uint256 wager,
   uint256 nonce
  ) external view returns (bytes32 escrowId_);

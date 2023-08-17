@@ -19,12 +19,12 @@ const _abi = [
       },
       {
         internalType: "address",
-        name: "account",
+        name: "creator",
         type: "address",
       },
       {
         internalType: "uint256",
-        name: "deposit",
+        name: "accountsCount",
         type: "uint256",
       },
       {
@@ -84,13 +84,13 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "address[]",
-            name: "accounts",
-            type: "address[]",
+            internalType: "uint256",
+            name: "nonce",
+            type: "uint256",
           },
           {
             internalType: "uint256",
-            name: "nonce",
+            name: "totalWager",
             type: "uint256",
           },
         ],
@@ -129,13 +129,13 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "address[]",
-            name: "accounts",
-            type: "address[]",
+            internalType: "uint256",
+            name: "nonce",
+            type: "uint256",
           },
           {
             internalType: "uint256",
-            name: "nonce",
+            name: "totalWager",
             type: "uint256",
           },
         ],
@@ -158,6 +158,11 @@ const _abi = [
         internalType: "address",
         name: "creator",
         type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "accountsCount",
+        type: "uint256",
       },
       {
         internalType: "uint256",

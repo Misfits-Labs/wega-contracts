@@ -29,8 +29,8 @@ export declare namespace IWegaERC20Escrow {
     escrowId: PromiseOrValue<BytesLike>;
     wager: PromiseOrValue<BigNumberish>;
     token: PromiseOrValue<string>;
-    accounts: PromiseOrValue<string>[];
     nonce: PromiseOrValue<BigNumberish>;
+    totalWager: PromiseOrValue<BigNumberish>;
   };
 
   export type ERC20WagerRequestStructOutput = [
@@ -38,15 +38,15 @@ export declare namespace IWegaERC20Escrow {
     string,
     BigNumber,
     string,
-    string[],
+    BigNumber,
     BigNumber
   ] & {
     state: number;
     escrowId: string;
     wager: BigNumber;
     token: string;
-    accounts: string[];
     nonce: BigNumber;
+    totalWager: BigNumber;
   };
 }
 
@@ -56,7 +56,7 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     "currentNonce()": FunctionFragment;
     "getWagerRequest(bytes32)": FunctionFragment;
     "getWagerRequests()": FunctionFragment;
-    "hash(address,address,uint256,uint256)": FunctionFragment;
+    "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
   };
 
   getFunction(
@@ -94,6 +94,7 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>
     ]
@@ -149,8 +150,8 @@ export interface IWegaERC20Escrow extends BaseContract {
   functions: {
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      deposit: PromiseOrValue<BigNumberish>,
+      creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -169,6 +170,7 @@ export interface IWegaERC20Escrow extends BaseContract {
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -177,8 +179,8 @@ export interface IWegaERC20Escrow extends BaseContract {
 
   createWagerAndDeposit(
     token: PromiseOrValue<string>,
-    account: PromiseOrValue<string>,
-    deposit: PromiseOrValue<BigNumberish>,
+    creator: PromiseOrValue<string>,
+    accountsCount: PromiseOrValue<BigNumberish>,
     wager: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -197,6 +199,7 @@ export interface IWegaERC20Escrow extends BaseContract {
   hash(
     token: PromiseOrValue<string>,
     creator: PromiseOrValue<string>,
+    accountsCount: PromiseOrValue<BigNumberish>,
     wager: PromiseOrValue<BigNumberish>,
     nonce: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
@@ -205,8 +208,8 @@ export interface IWegaERC20Escrow extends BaseContract {
   callStatic: {
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      deposit: PromiseOrValue<BigNumberish>,
+      creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -225,6 +228,7 @@ export interface IWegaERC20Escrow extends BaseContract {
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -236,8 +240,8 @@ export interface IWegaERC20Escrow extends BaseContract {
   estimateGas: {
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      deposit: PromiseOrValue<BigNumberish>,
+      creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -254,6 +258,7 @@ export interface IWegaERC20Escrow extends BaseContract {
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -263,8 +268,8 @@ export interface IWegaERC20Escrow extends BaseContract {
   populateTransaction: {
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      deposit: PromiseOrValue<BigNumberish>,
+      creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -281,6 +286,7 @@ export interface IWegaERC20Escrow extends BaseContract {
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
+      accountsCount: PromiseOrValue<BigNumberish>,
       wager: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides

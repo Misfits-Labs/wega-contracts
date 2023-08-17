@@ -31,6 +31,12 @@ const _abi = [
         name: "creator",
         type: "address",
       },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "wager",
+        type: "uint256",
+      },
     ],
     name: "WagerRequestCreation",
     type: "event",

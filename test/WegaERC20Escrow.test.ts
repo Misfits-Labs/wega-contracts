@@ -35,7 +35,9 @@ describe("WegaERC20Escrow", () => {
       fred: SignerWithAddress;
 
   // amounts
-  // let aliceAmounts, bobAmounts = [utils.parseEther(String(1)), utils.parseEther(String(5)), utils.parseEther(String(10))];
+  let aliceAmounts: BigNumber[]  = [utils.parseEther(String(1)), utils.parseEther(String(5)), utils.parseEther(String(10))];
+  let bobAmounts: BigNumber[] = aliceAmounts;
+  let carlAmounts: BigNumber[] = aliceAmounts;
   
   beforeEach(async () => {
 
@@ -53,7 +55,7 @@ describe("WegaERC20Escrow", () => {
     erc20Dummy = await erc20DummyFactory.deploy();
 
     // mint to users
-    const defaultUserBalance = utils.parseEther(String(10)) // give everyone 10 eth
+    const defaultUserBalance = utils.parseEther(String(1000)) // give everyone 10 eth
     await Promise.all([alice, bob, carl, david, ed, fred].map(
       async (s) => await erc20Dummy.mint(s.address, defaultUserBalance)
     )); 
@@ -61,17 +63,100 @@ describe("WegaERC20Escrow", () => {
 
   describe("Function: hash(address,address,uint256,uint256)", () => {
     it("should correctly return requestId", async () => {
-      const requestTypes = ['address','address','uint256','uint256'];
-      const requestValues = [erc20Dummy.address, alice.address, utils.parseEther(String(10)), 0];
+      const requestTypes = ['address','address','uint256','uint256','uint256'];
+      const requestValues = [erc20Dummy.address, alice.address, 2, utils.parseEther(String(10)), 0];
       const calculatedRequestId = toSolidityShaWithAbiEncoder(requestTypes, requestValues);
-      expect(await erc20Escrow.connect(coinbase).hash(erc20Dummy.address, alice.address, utils.parseEther(String(10)), 0)).to.equal(calculatedRequestId)
+      expect(await erc20Escrow.connect(coinbase).hash(erc20Dummy.address, alice.address, 2, utils.parseEther(String(10)), 0)).to.equal(calculatedRequestId);
     });
   });
   describe("Function: createWagerAndDeposit(address,address,uint256,uint256)", () => {
-    it("should throw if request data is invalid");
-    it("should emit the correct event and create a new escrow request");
+    it("should throw if request data is invalid", async () => {
+      const invalidRequests = [
+        [
+          constants.AddressZero, 
+          alice.address, 
+          2, 
+          utils.parseEther(String(5))
+        ],
+        [
+          erc20Dummy.address, 
+          constants.AddressZero, 
+          2, 
+          utils.parseEther(String(5)), 
+        ],
+        [
+          erc20Dummy.address, 
+          alice.address, 
+          1, 
+          utils.parseEther(String(5)), 
+        ],
+        [
+          erc20Dummy.address, 
+          alice.address, 
+          2, 
+          0, 
+        ],
+      ]
+      await Promise.all(invalidRequests.map(async (request) => {
+        await expect(erc20Escrow.connect(alice).createWagerAndDeposit(
+          request[0] as string, 
+          request[1] as string, 
+          request[2],
+          request[3],
+          )
+        ).to.be.rejectedWith("WegaEscrow_InvalidRequestData()");
+      }))
+    });
+    it("should emit the correct event and create a new escrow request", async () => {
+      const depositors = 2;
+      const token = erc20Dummy.address as string;
+      const account = alice.address as string;
+      const nonce = await erc20Escrow.currentNonce();
+      const wager = aliceAmounts[0] 
+      await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceAmounts[0]);
+      const escId = await erc20Escrow.hash(token, account, depositors, wager, nonce);
+      await expect(erc20Escrow.connect(alice).createWagerAndDeposit(token, account, depositors, wager)).to.emit(erc20Escrow, 'WagerRequestCreation').withArgs(escId, token, account, wager);
+    });
+
   });
 
+  describe("Getters", () => {
+    let accounts: SignerWithAddress[];
+    let escrowId: any;
+    let aliceWager: BigNumber;
+    let nonce: any;
+    beforeEach(async () => {
+      const depositors = 2;
+      const token = erc20Dummy.address as string;
+      accounts = [bob, carl];
+      nonce = await erc20Escrow.currentNonce();
+      aliceWager = utils.parseEther(String(5));
+
+      // for querying one
+      escrowId = await erc20Escrow.hash(token, alice.address, 2, aliceWager, nonce);
+      await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceWager);
+      await erc20Escrow.createWagerAndDeposit(token, alice.address, 2, aliceWager);
+      
+      await Promise.all(accounts.map(async (acc) => {
+        const w = utils.parseEther(String(5));
+        // console.log(await erc20Dummy.balanceOf(acc.address), w);
+        await erc20Dummy.connect(acc).approve(erc20Escrow.address, w);
+        await erc20Escrow.createWagerAndDeposit(token, acc.address, 2, w);
+      }))
+    })
+    it('should return all created escrow requests', async () => {
+      const wagerRequests = await erc20Escrow.getWagerRequests(); 
+      expect(wagerRequests.length).to.equal(accounts.length + 1);
+    })
+    it('should return a single escrow request', async () => {
+      const request = await erc20Escrow.getWagerRequest(escrowId);
+      expect(request.escrowId).to.equal(escrowId);
+      expect(request.wager).to.equal(aliceWager);
+      expect(request.token).to.equal(erc20Dummy.address);
+      expect(request.nonce).to.equal(nonce);
+      expect(request.totalWager).to.equal(aliceWager.mul(BigNumber.from(2)));
+    })
+  })
   // describe('Function: cancelRequest()', () => {
   //   it('should throw if caller is not ownerAgainst or ownerFor', async () => {});
   //   it('should emit correct RequestCancelation event and transfer NFTs to respected owners', async () => {});
@@ -80,24 +165,4 @@ describe("WegaERC20Escrow", () => {
   //   it('should allow only the escrow request creator to approve a request', async () => {});
   //   it('should emit the Approval event and set the correct information on the request', async () => {});
   // });
-  describe("Getters", () => {
-    
-    // beforeEach(async () => {
-    //   let tokenIdAgainst1 = BigNumber.from(aliceTokenIds[0]),
-    //       tokenIdFor1 = BigNumber.from(bobTokenIds[0]),
-    //       tokenIdAgainst2 = BigNumber.from(aliceTokenIds[1]),
-    //       tokenIdFor2 = BigNumber.from(bobTokenIds[1]),
-    //       tokenIdAgainst3 = BigNumber.from(bobTokenIds[2]),
-    //       tokenIdFor3 = BigNumber.from(aliceTokenIds[2]);
-
-    //   await nftDummyOne.connect(alice).approve(nftEscrow.address, tokenIdAgainst1);
-    //   await nftDummyOne.connect(alice).approve(nftEscrow.address, tokenIdAgainst2);
-    //   await nftDummyTwo.connect(bob).approve(nftEscrow.address, tokenIdAgainst3);
-    //   await nftEscrow.connect(alice).createRequestAndDeposit(nftDummyOne.address, tokenIdAgainst1, getRandomExpiryDate());
-    //   await nftEscrow.connect(alice).createRequestAndDeposit(nftDummyOne.address, tokenIdAgainst2, getRandomExpiryDate());
-    //   await nftEscrow.connect(bob).createRequestAndDeposit(nftDummyTwo.address, tokenIdAgainst3, getRandomExpiryDate());
-    // })
-    it('should return all created escrow requests')
-    it('should return a single escrow request')
-  })
 });

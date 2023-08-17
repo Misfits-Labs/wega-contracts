@@ -5,6 +5,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "hardhat/console.sol";
 
@@ -37,12 +38,16 @@ contract WegaERC20Escrow is
 
   using Counters for Counters.Counter;
   using EnumerableSet for EnumerableSet.Bytes32Set;
+  using EnumerableSet for EnumerableSet.AddressSet;
 
   // mapping of requestHash(escrowId) -> escrowRequest
   mapping(bytes32 => ERC20WagerRequest) private _wagerRequests;
 
   // for keeping track of user deposits
   mapping(address => uint256) private _deposits;
+
+  // for keeping track of depositor addresses
+  mapping(bytes32 => EnumerableSet.AddressSet) _depositors;
 
   // mapping of creators -> request
   Counters.Counter private _wagerNonces;
@@ -59,11 +64,16 @@ contract WegaERC20Escrow is
   // then modifiers
   modifier onlyValidRequesData(
       address token, 
-      address account, 
-      uint256 wager,
-      uint256 deposit
+      address account,
+      uint256 accountsCount, 
+      uint256 wager
   ) {
-     if(token == address(0) || account == address(0) || wager <= 0 && deposit <= 0) revert WegaEscrow_InvalidRequestData();
+     if(
+        token == address(0) || 
+        account == address(0) ||
+        accountsCount <= 1 ||
+        wager <= 0 
+      ) revert WegaEscrow_InvalidRequestData();
      _;
   } 
   
@@ -76,52 +86,56 @@ contract WegaERC20Escrow is
   function createWagerAndDeposit(
     address token, 
     address account,
-    uint256 deposit,
+    uint256 accountsCount,
     uint256 wager
-  ) public override onlyValidRequesData(token, account, wager, deposit)  {
-
+  ) public override onlyValidRequesData(token, account, accountsCount, wager)  {
       // initialize request struct
       ERC20WagerRequest memory wagerRequest_;
       
       // set request data
       wagerRequest_.state = IEscrow.TransactionState.OPEN;
-      wagerRequest_.accounts[wagerRequest_.accounts.length] = account;
       wagerRequest_.token = token;
       wagerRequest_.wager = wager;
+      wagerRequest_.totalWager = wager * accountsCount;
       wagerRequest_.nonce = currentNonce();
       
       // record deposit amount
-      _deposits[account] = deposit;
+      _deposits[account] = wager;
 
       // increment user nonce
       _wagerNonces.increment();
 
       // create escrowId
-      bytes32 escrowId_ = hash(wagerRequest_.token, account, wagerRequest_.wager, wagerRequest_.nonce);
+      bytes32 escrowId_ = hash(wagerRequest_.token, account, accountsCount, wager, wagerRequest_.nonce);
 
       wagerRequest_.escrowId = escrowId_;
       _escrowIds.add(escrowId_);
       _wagerRequests[escrowId_] = wagerRequest_;
+
+      // add depositors
+      _depositors[escrowId_].add(account);
       
       // deposit to escrow 
       IERC20(wagerRequest_.token).transferFrom(
         account, 
         address(this),
-        deposit
+        wager
       );
 
-      emit WagerRequestCreation(wagerRequest_.escrowId, wagerRequest_.token, account);
+      emit WagerRequestCreation(wagerRequest_.escrowId, wagerRequest_.token, account, wager);
   }
     
   function hash(
     address token,
     address creator,
+    uint256 accountsCount,
     uint256 wager,
     uint256 nonce
   ) public pure override returns (bytes32 escrowId_) {
     escrowId_ = keccak256(abi.encodePacked(
       token,
       creator,
+      accountsCount,
       wager,
       nonce
      )
