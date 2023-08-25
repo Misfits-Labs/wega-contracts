@@ -51,9 +51,8 @@ const DEFAULT_OPTIONS: DeployerOptions = {
 
 async function getArtifacts (): Promise<ArtifactsMap> {
   return {
-    WegaERC721Escrow: await ethers.getContractFactory('WegaERC721Escrow'),
-    ERC721DummyOne: await ethers.getContractFactory('ERC721DummyOne'),
-    ERC721DummyTwo: await ethers.getContractFactory('ERC721DummyTwo'),
+    WegaERC20Escrow: await ethers.getContractFactory('WegaERC20Escrow'),
+    WegaERC20Dummy: await ethers.getContractFactory('WegaERC20Dummy'),
   };
 }
 

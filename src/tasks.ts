@@ -1,7 +1,7 @@
-import { network, upgrades, signers } from 'hardhat';
-import { Contract, utils } from 'ethers';
-import { merge } from 'lodash';
+import { network, upgrades } from 'hardhat';
+import { BigNumber, Contract, utils } from 'ethers';
 import { Deployer } from './deployer';
+
 
 
 import { ArtifactName, DependenciesMap, ContractName, DeployedContractList } from './types';
@@ -20,49 +20,12 @@ export type Task = {
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList) => DependenciesMap;
 };
 
-/**
-* boilerplate code
-*/
-const deployDummyTask: Task = {
-  tags: ['dummy'],
-  priority: 1,
-  inputOptions: true,
-  run: async (
-    ctx: Deployer, 
-    dependencies: DependenciesMap, 
-    inputs: any
-  ) => {
-    ctx.log('Deploying dummy');
-    const { owner } = ctx.accounts;
-
-    // dependencies
-    const [] = unwrapDependencies(
-      dependencies,
-      [],
-    );
-  },
-  ensureDependencies: (ctx: Deployer, config?: DeployedContractList) => {
-    config = merge(ctx.getDeployConfig(), config);
-
-    const { } = config?.contracts || {};
-
-    const dependencies = {};
-
-    // for (const [key, value] of Object.entries(dependencies)) {
-    //   if (!value || !value.address) {
-    //     throw new Error(`${key} contract not found for network ${network.config.chainId}`);
-    //   }
-    // }
-
-    return dependencies;
-  }
-}
 
 /**
 * deploys the wega nft escrow
 */
 const deployNftEscrowTask: Task = {
-  tags: ['wega_nft_escrow', 'full'],
+  tags: ['wega_erc20_escrow', 'full'],
   priority: 2,
   inputOptions: true,
   run: async (
@@ -72,16 +35,9 @@ const deployNftEscrowTask: Task = {
   ) => {
     ctx.log('Deploying Wega NFT Escrow');
     const { owner } = ctx.accounts;
-    const { WegaERC721Escrow } = ctx.artifacts
-
-    // // dependencies
-    // const [] = unwrapDependencies(
-    //   dependencies,
-    //   [],
-    // );
-
-    const nftEscrow = await WegaERC721Escrow.connect(owner).deploy(...inputs.escrow);
-    await ctx.saveContractConfig(ContractName.WegaERC721Escrow, nftEscrow);
+    const { WegaERC20Escrow } = ctx.artifacts;
+    const nftEscrow = await WegaERC20Escrow.connect(owner).deploy(...inputs.escrow);
+    await ctx.saveContractConfig(ContractName.WegaERC20Escrow, nftEscrow);
     await nftEscrow.deployTransaction.wait();
     await verify(ctx, nftEscrow.address, [...inputs.escrow]);
   },
@@ -90,8 +46,8 @@ const deployNftEscrowTask: Task = {
 /**
 * deploys the wega nft dummies
 */
-const deployNftDummiesTask: Task = {
-  tags: ['nft_dummies', 'full'],
+const deployERC20DummyTask: Task = {
+  tags: ['erc20_dummy', 'full'],
   priority: 1,
   inputOptions: true,
   run: async (
@@ -99,40 +55,34 @@ const deployNftDummiesTask: Task = {
     dependencies: DependenciesMap, 
     inputs: any
   ) => {
-    ctx.log('Deploying Wega NFT Dummies');
+    ctx.log('Deploying Wega ERC20 Dummies');
     const { owner } = ctx.accounts;
-    const { ERC721DummyOne, ERC721DummyTwo } = ctx.artifacts
-
-    // // // dependencies
-    // // const [] = unwrapDependencies(
-    // //   dependencies,
-    // //   [],
-    // // );
-    // const tokenIds = [1, 2, 3, 4, 5, 6];
-
-    const dummyOne = await ERC721DummyOne.connect(owner).deploy(...inputs.dummyOne);
-    await ctx.saveContractConfig(ContractName.ERC721DummyOne, dummyOne);
-    await dummyOne.deployTransaction.wait();
-    await verify(ctx, dummyOne.address, [...inputs.dummyOne]);
-    
-    const dummyTwo = await ERC721DummyTwo.connect(owner).deploy(...inputs.dummyTwo);
-    await ctx.saveContractConfig(ContractName.ERC721DummyTwo, dummyTwo);
-    await dummyTwo.deployTransaction.wait();
-    await verify(ctx, dummyTwo.address, [...inputs.dummyTwo]);
-    
+    const { WegaERC20Dummy } = ctx.artifacts
+    const erc20Dummy = await WegaERC20Dummy.connect(owner).deploy();
+    await ctx.saveContractConfig(ContractName.WegaERC20Dummy, erc20Dummy);
+    await erc20Dummy.deployTransaction.wait();
+    await verify(ctx, erc20Dummy.address, []);
     // // mint Token Ids
-    // await Promise.all(tokenIds.map(async tId => {
-    //   inputs.nftOwners.forEach(async (owner: string) => {
-    //     console.log('minting....', owner)
-    //     await dummyOne.safeMint(owner, tId);
-    //     await dummyTwo.safeMint(owner, tId);
-    //   })
-    // }))
+    if (inputs.tokenReceivers.length > 0) {
+      let chunkSize = 2;
+      for (let i = 0, j = inputs.tokenReceivers.length; i < j; i += chunkSize){
+        const array = inputs.tokenReceivers.slice(i, i + chunkSize);
+        await Promise.all(array.map(async (receiver: string) => {
+          console.log('minting tokens', array);
+          const tokenAmount = 10000;
+          const gp = await erc20Dummy.provider.getGasPrice();
+          const tenPercent = gp.mul(BigNumber.from(10)).div(100);
+          const tx = await erc20Dummy.connect(owner).mint(receiver, utils.parseEther(String(tokenAmount)), { gasPrice: gp.add(tenPercent) });
+          await tx.wait();
+          console.log(`successfully minted ${tokenAmount} to ${receiver}`);
+        }))
+      }
+    }
   },
   ensureDependencies: () =>({})
 }
 
 export const tasks: Task[] = [
   deployNftEscrowTask,
-  deployNftDummiesTask,
+  deployERC20DummyTask,
 ];

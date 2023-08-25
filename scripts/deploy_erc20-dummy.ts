@@ -14,7 +14,7 @@ async function main() {
   }
 
   const deployer = await Deployer.create();
-  const deployConfig = await deployer.execute(['full'], config, {
+  const deployConfig = await deployer.execute(['erc20_dummy'], config, {
     tokenReceivers: chainId == 1337 ? [
       '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
       '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
@@ -30,9 +30,9 @@ async function main() {
     ] : [
       "0x34fc161801F76173352b1C43f904d2F7cC5cB6C9",
       "0x6f915E4e31755c09CCCc0B12DA730377913802f3",
-      "0x24597c5c68687e816ffc0c69e064cb70bb62a9cd"
+      "0x24597c5c68687e816ffc0c69e064cb70bb62a9cd",
+      "0x011dF297Da65Cb87a9a8878fF4C8F7d0D3814314",
     ],
-    escrow: ['Wega ERC20 Escrow Service', '0.0.0']
   });
   mergeNetworkConfig(deployConfig);
   console.log('Deployed!');

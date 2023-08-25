@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 // protocol imports
 import "./IEscrow.sol";
@@ -19,7 +19,10 @@ import {
     WegaEscrow_NotNftOwner, 
     WegaEscrow_InvalidRequestState,
     WegaEscrow_DepositorNotApproved,
-    WegaEscrow_CallerNotApproved
+    WegaEscrow_CallerNotApproved,
+    WegaEscrow_InvalidWagerAmount,
+    WegaEscrow_CanOnlyDepositOnce,
+    WegaEscrow_MaximumWagerAmountReached
 } from '../errors/EscrowErrors.sol';
 import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
 
@@ -40,17 +43,20 @@ contract WegaERC20Escrow is
   using EnumerableSet for EnumerableSet.Bytes32Set;
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  // mapping of requestHash(escrowId) -> escrowRequest
-  mapping(bytes32 => ERC20WagerRequest) private _wagerRequests;
+  // mapping of requestHash(wagerId) -> escrowRequest
+  mapping(bytes32 => ERC20WagerRequest) private _wagerRequests; 
 
   // for keeping track of user deposits
-  mapping(address => uint256) private _deposits;
+  mapping(bytes32 => mapping(address => uint256)) private _deposits;
 
   // for keeping track of depositor addresses
   mapping(bytes32 => EnumerableSet.AddressSet) _depositors;
 
-  // mapping of creators -> request
-  Counters.Counter private _wagerNonces;
+  // mapping of creators -> nonces
+  mapping(address => Counters.Counter) private _wagerNonces;
+  
+  // request balance
+  mapping(bytes32 => uint256) private _balances;
   
   // stores all the transfer Ids, will be used enumeration
   EnumerableSet.Bytes32Set private _escrowIds;
@@ -97,24 +103,29 @@ contract WegaERC20Escrow is
       wagerRequest_.token = token;
       wagerRequest_.wager = wager;
       wagerRequest_.totalWager = wager * accountsCount;
-      wagerRequest_.nonce = currentNonce();
+      wagerRequest_.nonce = currentNonce(account);
       
-      // record deposit amount
-      _deposits[account] = wager;
 
       // increment user nonce
-      _wagerNonces.increment();
+      _wagerNonces[account].increment();
 
       // create escrowId
       bytes32 escrowId_ = hash(wagerRequest_.token, account, accountsCount, wager, wagerRequest_.nonce);
 
       wagerRequest_.escrowId = escrowId_;
+      
+      // record deposit amount
+      _deposits[escrowId_][account] = wager;
+
       _escrowIds.add(escrowId_);
       _wagerRequests[escrowId_] = wagerRequest_;
 
       // add depositors
       _depositors[escrowId_].add(account);
       
+      // add to balance
+      _balances[escrowId_] += wager;
+
       // deposit to escrow 
       IERC20(wagerRequest_.token).transferFrom(
         account, 
@@ -142,8 +153,8 @@ contract WegaERC20Escrow is
     );
   }
 
-  function currentNonce() public view override returns (uint256) {
-   return _escrowIds.length() + 1;
+  function currentNonce(address account) public view override returns (uint256) {
+   return _wagerNonces[account].current();
   }
 
   function getWagerRequests() external view override returns(ERC20WagerRequest[] memory) {
@@ -157,5 +168,44 @@ contract WegaERC20Escrow is
 
   function getWagerRequest(bytes32 escrowId) external view override returns (ERC20WagerRequest memory){
     return _wagerRequests[escrowId];
+  }
+
+  function depositOf(bytes32 escrowId, address account) external view override returns (uint256){
+    return _deposits[escrowId][account];
+  }
+
+  function deposit(bytes32 escrowId, uint256 wager) external {
+    ERC20WagerRequest memory request = _wagerRequests[escrowId];
+    if(request.state != IEscrow.TransactionState.OPEN) revert WegaEscrow_InvalidRequestState();
+    if(wager != request.wager) revert WegaEscrow_InvalidWagerAmount();
+    if(_balances[escrowId] + wager >  request.totalWager) revert WegaEscrow_MaximumWagerAmountReached();
+    if(_deposits[escrowId][_msgSender()] > 0) revert WegaEscrow_CanOnlyDepositOnce();
+        
+    // update depositor on escrow
+    _depositors[escrowId].add(_msgSender());
+
+    // update deposits on escrow
+    _deposits[escrowId][_msgSender()] = wager;
+
+    // add balance 
+    _balances[escrowId] += wager;
+
+    // change state to pending if total wager amount is reached
+    if(request.totalWager == _balances[escrowId]){
+      _wagerRequests[escrowId].state = IEscrow.TransactionState.PENDING;
+    }
+    // deposit to escrow 
+    IERC20(request.token).transferFrom(
+      _msgSender(), 
+      address(this),
+      wager
+    );
+
+    // emit deposit 
+    emit WagerDeposit(escrowId, wager, _msgSender());
+  }
+
+  function wagerBalance(bytes32 escrowId) public view returns (uint256) {
+    return _balances[escrowId];
   }
 }

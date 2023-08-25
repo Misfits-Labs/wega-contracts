@@ -21,6 +21,31 @@ const _abi = [
       },
       {
         indexed: true,
+        internalType: "uint256",
+        name: "wager",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "WagerDeposit",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "escrowId",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
         internalType: "address",
         name: "token",
         type: "address",

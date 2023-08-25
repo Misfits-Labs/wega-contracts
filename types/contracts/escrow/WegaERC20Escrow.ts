@@ -60,11 +60,14 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "TYPE()": FunctionFragment;
     "VERSION()": FunctionFragment;
     "createWagerAndDeposit(address,address,uint256,uint256)": FunctionFragment;
-    "currentNonce()": FunctionFragment;
+    "currentNonce(address)": FunctionFragment;
+    "deposit(bytes32,uint256)": FunctionFragment;
+    "depositOf(bytes32,address)": FunctionFragment;
     "getWagerRequest(bytes32)": FunctionFragment;
     "getWagerRequests()": FunctionFragment;
     "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
     "isTrustedForwarder(address)": FunctionFragment;
+    "wagerBalance(bytes32)": FunctionFragment;
   };
 
   getFunction(
@@ -74,10 +77,13 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "VERSION"
       | "createWagerAndDeposit"
       | "currentNonce"
+      | "deposit"
+      | "depositOf"
       | "getWagerRequest"
       | "getWagerRequests"
       | "hash"
       | "isTrustedForwarder"
+      | "wagerBalance"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
@@ -94,7 +100,15 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "currentNonce",
-    values?: undefined
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deposit",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositOf",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getWagerRequest",
@@ -118,6 +132,10 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "isTrustedForwarder",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "wagerBalance",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
 
   decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "TYPE", data: BytesLike): Result;
@@ -130,6 +148,8 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "currentNonce",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "depositOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getWagerRequest",
     data: BytesLike
@@ -143,13 +163,31 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "isTrustedForwarder",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "wagerBalance",
+    data: BytesLike
+  ): Result;
 
   events: {
+    "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
 }
+
+export interface WagerDepositEventObject {
+  escrowId: string;
+  wager: BigNumber;
+  player: string;
+}
+export type WagerDepositEvent = TypedEvent<
+  [string, BigNumber, string],
+  WagerDepositEventObject
+>;
+
+export type WagerDepositEventFilter = TypedEventFilter<WagerDepositEvent>;
 
 export interface WagerRequestCreationEventObject {
   escrowId: string;
@@ -206,7 +244,22 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    currentNonce(overrides?: CallOverrides): Promise<[BigNumber]>;
+    currentNonce(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    deposit(
+      escrowId: PromiseOrValue<BytesLike>,
+      wager: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    depositOf(
+      escrowId: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     getWagerRequest(
       escrowId: PromiseOrValue<BytesLike>,
@@ -230,6 +283,11 @@ export interface WegaERC20Escrow extends BaseContract {
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    wagerBalance(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
   };
 
   NAME(overrides?: CallOverrides): Promise<string>;
@@ -246,7 +304,22 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  currentNonce(overrides?: CallOverrides): Promise<BigNumber>;
+  currentNonce(
+    account: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  deposit(
+    escrowId: PromiseOrValue<BytesLike>,
+    wager: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  depositOf(
+    escrowId: PromiseOrValue<BytesLike>,
+    account: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   getWagerRequest(
     escrowId: PromiseOrValue<BytesLike>,
@@ -271,6 +344,11 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  wagerBalance(
+    escrowId: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   callStatic: {
     NAME(overrides?: CallOverrides): Promise<string>;
 
@@ -286,7 +364,22 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    currentNonce(overrides?: CallOverrides): Promise<BigNumber>;
+    currentNonce(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    deposit(
+      escrowId: PromiseOrValue<BytesLike>,
+      wager: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    depositOf(
+      escrowId: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getWagerRequest(
       escrowId: PromiseOrValue<BytesLike>,
@@ -310,9 +403,25 @@ export interface WegaERC20Escrow extends BaseContract {
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    wagerBalance(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   filters: {
+    "WagerDeposit(bytes32,uint256,address)"(
+      escrowId?: PromiseOrValue<BytesLike> | null,
+      wager?: PromiseOrValue<BigNumberish> | null,
+      player?: PromiseOrValue<string> | null
+    ): WagerDepositEventFilter;
+    WagerDeposit(
+      escrowId?: PromiseOrValue<BytesLike> | null,
+      wager?: PromiseOrValue<BigNumberish> | null,
+      player?: PromiseOrValue<string> | null
+    ): WagerDepositEventFilter;
+
     "WagerRequestCreation(bytes32,address,address,uint256)"(
       escrowId?: PromiseOrValue<BytesLike> | null,
       token?: PromiseOrValue<string> | null,
@@ -342,7 +451,22 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    currentNonce(overrides?: CallOverrides): Promise<BigNumber>;
+    currentNonce(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    deposit(
+      escrowId: PromiseOrValue<BytesLike>,
+      wager: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    depositOf(
+      escrowId: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getWagerRequest(
       escrowId: PromiseOrValue<BytesLike>,
@@ -364,6 +488,11 @@ export interface WegaERC20Escrow extends BaseContract {
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    wagerBalance(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -381,7 +510,22 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    currentNonce(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    currentNonce(
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    deposit(
+      escrowId: PromiseOrValue<BytesLike>,
+      wager: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    depositOf(
+      escrowId: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     getWagerRequest(
       escrowId: PromiseOrValue<BytesLike>,
@@ -401,6 +545,11 @@ export interface WegaERC20Escrow extends BaseContract {
 
     isTrustedForwarder(
       forwarder: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    wagerBalance(
+      escrowId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

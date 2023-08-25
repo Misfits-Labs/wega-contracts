@@ -13,6 +13,7 @@ import { toSolidityShaWithAbiEncoder } from './helpers/eth.utils'
 
 export type RequestInput = (string | number | BigNumber)[]
 
+
 describe("WegaERC20Escrow", () => {
 
   // contracts
@@ -57,7 +58,7 @@ describe("WegaERC20Escrow", () => {
     // mint to users
     const defaultUserBalance = utils.parseEther(String(1000)) // give everyone 10 eth
     await Promise.all([alice, bob, carl, david, ed, fred].map(
-      async (s) => await erc20Dummy.mint(s.address, defaultUserBalance)
+      async (s) => await erc20Dummy.mint(s.address, defaultUserBalance) 
     )); 
   });
 
@@ -111,13 +112,86 @@ describe("WegaERC20Escrow", () => {
       const depositors = 2;
       const token = erc20Dummy.address as string;
       const account = alice.address as string;
-      const nonce = await erc20Escrow.currentNonce();
+      const nonce = await erc20Escrow.currentNonce(alice.address);
       const wager = aliceAmounts[0] 
       await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceAmounts[0]);
       const escId = await erc20Escrow.hash(token, account, depositors, wager, nonce);
       await expect(erc20Escrow.connect(alice).createWagerAndDeposit(token, account, depositors, wager)).to.emit(erc20Escrow, 'WagerRequestCreation').withArgs(escId, token, account, wager);
     });
+  });
+  describe("Function: deposit(bytes32,uint256)", () => {
+    let accounts: SignerWithAddress[];
+    let escrowId: any;
+    let wager: BigNumber = utils.parseEther("5");
+    let creator: SignerWithAddress;  
+    let nonce: any;
+    let token: any;
+    let depositors: number;
+    beforeEach(async () => {
+      token = erc20Dummy.address as string;
+      accounts = [bob, ed, carl];
+      depositors = accounts.length;
+      creator = bob;
+      nonce = await erc20Escrow.currentNonce(creator.address);
 
+      // simulate wager creation
+      escrowId = await erc20Escrow.hash(token, creator.address, depositors, wager, nonce);
+      await erc20Dummy.connect(creator).approve(erc20Escrow.address, wager);
+      await erc20Escrow.createWagerAndDeposit(token, bob.address, depositors, wager);
+    })
+    it("should throw if wager amount is more or less then ask amount", async () => {
+      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
+      await expect(erc20Escrow.connect(accounts[1]).deposit(escrowId, wager.sub(BigNumber.from("2")))).to.be.rejectedWith("WegaEscrow_InvalidWagerAmount()")
+      await expect(erc20Escrow.connect(accounts[1]).deposit(escrowId, wager.add(BigNumber.from("4")))).to.be.rejectedWith("WegaEscrow_InvalidWagerAmount()")
+    });
+    it("should throw if creator is the one depositing", async () => {
+      await erc20Dummy.connect(creator).increaseAllowance(erc20Escrow.address, wager);
+      await expect(erc20Escrow.connect(creator).deposit(escrowId, wager.add(BigNumber.from("4")))).to.be.rejectedWith("WegaEscrow_CanOnlyDepositOnce()")
+    })
+    it("should deposit wager amount and emit the correct event", async ()=> {
+      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
+      await expect(erc20Escrow.connect(accounts[2]).deposit(escrowId, wager)).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, accounts[2].address);
+    });
+    it("should throw if the totalWagerAmount is reached", async () => {
+      // arrange
+      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(ed).increaseAllowance(erc20Escrow.address, wager);
+      
+      // act 
+      await erc20Escrow.connect(accounts[1]).deposit(escrowId, wager);
+      await erc20Escrow.connect(accounts[2]).deposit(escrowId, wager);
+      
+      // assert
+      await expect(erc20Escrow.connect(ed).deposit(escrowId, wager)).to.be.rejectedWith("WegaEscrow_MaximumWagerAmountReached()")
+    });
+    it("should correctly change state if the total wager amount is reached", async () => {
+      // arrange
+      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
+      
+      // act 
+      await erc20Escrow.connect(accounts[1]).deposit(escrowId, wager);
+      await erc20Escrow.connect(accounts[2]).deposit(escrowId, wager);
+      
+      // assert
+      const request = await erc20Escrow.getWagerRequest(escrowId);
+      expect(request.state).to.be.equal(TransactionState.PENDING);
+    });
+
+    it("should reject if tx state is not OPEN", async () => {
+      // arrange
+      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(fred).increaseAllowance(erc20Escrow.address, wager);
+      
+      // act 
+      await erc20Escrow.connect(accounts[1]).deposit(escrowId, wager);
+      await erc20Escrow.connect(accounts[2]).deposit(escrowId, wager);
+      
+      // assert
+      await expect(erc20Escrow.connect(fred).deposit(escrowId, wager)).to.be.rejectedWith("WegaEscrow_InvalidRequestState()");
+    });
   });
 
   describe("Getters", () => {
@@ -129,7 +203,7 @@ describe("WegaERC20Escrow", () => {
       const depositors = 2;
       const token = erc20Dummy.address as string;
       accounts = [bob, carl];
-      nonce = await erc20Escrow.currentNonce();
+      nonce = await erc20Escrow.currentNonce(alice.address);
       aliceWager = utils.parseEther(String(5));
 
       // for querying one
@@ -144,10 +218,12 @@ describe("WegaERC20Escrow", () => {
         await erc20Escrow.createWagerAndDeposit(token, acc.address, 2, w);
       }))
     })
+
     it('should return all created escrow requests', async () => {
       const wagerRequests = await erc20Escrow.getWagerRequests(); 
       expect(wagerRequests.length).to.equal(accounts.length + 1);
-    })
+    });
+
     it('should return a single escrow request', async () => {
       const request = await erc20Escrow.getWagerRequest(escrowId);
       expect(request.escrowId).to.equal(escrowId);
@@ -155,6 +231,9 @@ describe("WegaERC20Escrow", () => {
       expect(request.token).to.equal(erc20Dummy.address);
       expect(request.nonce).to.equal(nonce);
       expect(request.totalWager).to.equal(aliceWager.mul(BigNumber.from(2)));
+    });
+    it('should return the correct deposit amount of a user', async () => {
+      expect(await erc20Escrow.depositOf(escrowId, alice.address)).to.equal(aliceWager);
     })
   })
   // describe('Function: cancelRequest()', () => {

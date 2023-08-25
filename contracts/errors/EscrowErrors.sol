@@ -15,3 +15,12 @@ error WegaEscrow_DepositorNotApproved();
 
 // @notice only approved owner can deposit
 error WegaEscrow_CallerNotApproved();
+
+// @notice only approved owner can deposit
+error WegaEscrow_InvalidWagerAmount();
+
+// @notice only approved owner can deposit
+error WegaEscrow_CanOnlyDepositOnce();
+
+// @notice only approved owner can deposit
+error WegaEscrow_MaximumWagerAmountReached();

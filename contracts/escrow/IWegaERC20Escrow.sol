@@ -12,7 +12,7 @@ interface IWegaERC20Escrow {
   uint256 wager; // total amount that should be escrowed (have that multiplied by by accounts)
   address token;
   uint256 nonce;
-  uint256 totalWager;
+  uint256 totalWager; // todo update to maxWager
  }
 
  /**
@@ -60,9 +60,10 @@ interface IWegaERC20Escrow {
  ) external view returns (bytes32 escrowId_);
 
  /**
- * @notice retrieves the current escrow nonce
+ * @notice retrieves the current nonce of account that wants to create a wager
+ * @param account is the account that will create the wager
  */
- function currentNonce() external view returns (uint256);
+ function currentNonce(address account) external view returns (uint256);
 
  /**
  * @notice retrieves all erc20 wager requests in existance
@@ -74,4 +75,17 @@ interface IWegaERC20Escrow {
  * @param escrowId id of the wager request
  */
  function getWagerRequest(bytes32 escrowId) external view returns (ERC20WagerRequest memory);
+
+ /**
+ * @notice retrieves a erc20 wager deposit of a user
+ * @param account escrow depositors' account
+ * @param escrowId id of the wager request
+ */
+ function depositOf(bytes32 escrowId, address account) external returns (uint256);
+
+ /**
+ * @notice retrieves current total deposits on a wager
+ * @param escrowId id of the wager request
+ */
+ function wagerBalance(bytes32 escrowId) external view returns (uint256);
 }

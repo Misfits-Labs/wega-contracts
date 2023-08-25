@@ -1,15 +1,13 @@
 import { BigNumber } from 'ethers';
 
 export enum ArtifactName {
-  WegaERC721Escrow = 'WegaERC721Escrow',
-  ERC721DummyOne = 'ERC721DummyOne',
-  ERC721DummyTwo = 'ERC721DummyTwo',
+  WegaERC20Escrow = 'WegaERC20Escrow',
+  WegaERC20Dummy = 'WegaERC20Dummy',
 }
 
 export enum ContractName {
-  WegaERC721Escrow = 'WegaERC721Escrow',
-  ERC721DummyOne = 'ERC721DummyOne',
-  ERC721DummyTwo = 'ERC721DummyTwo',
+  WegaERC20Escrow = 'WegaERC20Escrow',
+  WegaERC20Dummy = 'WegaERC20Dummy',
 }
 
 export type DeployedContract = {
@@ -40,4 +38,4 @@ export type DependenciesMap = {
   [k in ArtifactName]?: DeployedContract
 }
 
-export enum TransactionState { OPEN, APPROVED, READY, CLOSED }
+export enum TransactionState { OPEN, PENDING, READY, CLOSED }
