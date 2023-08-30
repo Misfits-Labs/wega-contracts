@@ -48,6 +48,26 @@ declare module "hardhat/types/runtime" {
       name: "IERC20EscrowEvents",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20EscrowEvents__factory>;
+    getContractFactory(
+      name: "IGameControllerEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IGameControllerEvents__factory>;
+    getContractFactory(
+      name: "GameController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.GameController__factory>;
+    getContractFactory(
+      name: "ITwoWayChanceGame",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ITwoWayChanceGame__factory>;
+    getContractFactory(
+      name: "TwoWayChanceGame",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TwoWayChanceGame__factory>;
+    getContractFactory(
+      name: "IGameController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IGameController__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -94,6 +114,31 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20EscrowEvents>;
+    getContractAt(
+      name: "IGameControllerEvents",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IGameControllerEvents>;
+    getContractAt(
+      name: "GameController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.GameController>;
+    getContractAt(
+      name: "ITwoWayChanceGame",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ITwoWayChanceGame>;
+    getContractAt(
+      name: "TwoWayChanceGame",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TwoWayChanceGame>;
+    getContractAt(
+      name: "IGameController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IGameController>;
 
     // default types
     getContractFactory(

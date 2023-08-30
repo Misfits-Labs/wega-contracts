@@ -7,3 +7,7 @@ import type * as escrow from "./escrow";
 export type { escrow };
 import type * as events from "./events";
 export type { events };
+import type * as games from "./games";
+export type { games };
+export type { GameController } from "./GameController";
+export type { IGameController } from "./IGameController";

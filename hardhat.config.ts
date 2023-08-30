@@ -143,6 +143,15 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      {
+        version: '0.8.21',
+        settings: {
+          ...settings,
+          metadata: {
+            bytecodeHash: 'none',
+          },
+        },
+      },
     ],
   },
   paths: {

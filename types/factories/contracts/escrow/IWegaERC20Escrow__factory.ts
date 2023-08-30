@@ -13,6 +13,30 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "bytes32",
+        name: "escrowId",
+        type: "bytes32",
+      },
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "containsPlayer",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "token",
         type: "address",
@@ -214,6 +238,37 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "gameController",
+        type: "address",
+      },
+    ],
+    name: "setGameController",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowId",
+        type: "bytes32",
+      },
+      {
+        internalType: "address",
+        name: "winner",
+        type: "address",
+      },
+    ],
+    name: "setWithdrawer",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

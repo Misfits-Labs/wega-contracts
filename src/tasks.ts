@@ -58,26 +58,27 @@ const deployERC20DummyTask: Task = {
     ctx.log('Deploying Wega ERC20 Dummies');
     const { owner } = ctx.accounts;
     const { WegaERC20Dummy } = ctx.artifacts
-    const erc20Dummy = await WegaERC20Dummy.connect(owner).deploy();
+    const erc20Dummy = await WegaERC20Dummy.connect(owner).deploy(inputs.tokenReceivers);
     await ctx.saveContractConfig(ContractName.WegaERC20Dummy, erc20Dummy);
     await erc20Dummy.deployTransaction.wait();
     await verify(ctx, erc20Dummy.address, []);
+    
     // // mint Token Ids
-    if (inputs.tokenReceivers.length > 0) {
-      let chunkSize = 2;
-      for (let i = 0, j = inputs.tokenReceivers.length; i < j; i += chunkSize){
-        const array = inputs.tokenReceivers.slice(i, i + chunkSize);
-        await Promise.all(array.map(async (receiver: string) => {
-          console.log('minting tokens', array);
-          const tokenAmount = 10000;
-          const gp = await erc20Dummy.provider.getGasPrice();
-          const tenPercent = gp.mul(BigNumber.from(10)).div(100);
-          const tx = await erc20Dummy.connect(owner).mint(receiver, utils.parseEther(String(tokenAmount)), { gasPrice: gp.add(tenPercent) });
-          await tx.wait();
-          console.log(`successfully minted ${tokenAmount} to ${receiver}`);
-        }))
-      }
-    }
+    // if (inputs.tokenReceivers.length > 0) {
+    //   let chunkSize = 2;
+    //   for (let i = 0, j = inputs.tokenReceivers.length; i < j; i += chunkSize){
+    //     const array = inputs.tokenReceivers.slice(i, i + chunkSize);
+    //     await Promise.all(array.map(async (receiver: string) => {
+    //       console.log('minting tokens', array);
+    //       const tokenAmount = 10000;
+    //       const gp = await erc20Dummy.provider.getGasPrice();
+    //       const tenPercent = gp.mul(BigNumber.from(10)).div(100);
+    //       const tx = await erc20Dummy.connect(owner).mint(receiver, utils.parseEther(String(tokenAmount)), { gasPrice: gp.add(tenPercent) });
+    //       await tx.wait();
+    //       console.log(`successfully minted ${tokenAmount} to ${receiver}`);
+    //     }))
+    //   }
+    // }
   },
   ensureDependencies: () =>({})
 }

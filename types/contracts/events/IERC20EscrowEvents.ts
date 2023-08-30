@@ -23,13 +23,39 @@ export interface IERC20EscrowEventsInterface extends utils.Interface {
   functions: {};
 
   events: {
+    "SetGameControler(address)": EventFragment;
+    "SetWithdrawer(bytes32,address)": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetWithdrawer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
 }
+
+export interface SetGameControlerEventObject {
+  gameController: string;
+}
+export type SetGameControlerEvent = TypedEvent<
+  [string],
+  SetGameControlerEventObject
+>;
+
+export type SetGameControlerEventFilter =
+  TypedEventFilter<SetGameControlerEvent>;
+
+export interface SetWithdrawerEventObject {
+  escrowId: string;
+  withdrawer: string;
+}
+export type SetWithdrawerEvent = TypedEvent<
+  [string, string],
+  SetWithdrawerEventObject
+>;
+
+export type SetWithdrawerEventFilter = TypedEventFilter<SetWithdrawerEvent>;
 
 export interface WagerDepositEventObject {
   escrowId: string;
@@ -88,6 +114,22 @@ export interface IERC20EscrowEvents extends BaseContract {
   callStatic: {};
 
   filters: {
+    "SetGameControler(address)"(
+      gameController?: PromiseOrValue<string> | null
+    ): SetGameControlerEventFilter;
+    SetGameControler(
+      gameController?: PromiseOrValue<string> | null
+    ): SetGameControlerEventFilter;
+
+    "SetWithdrawer(bytes32,address)"(
+      escrowId?: PromiseOrValue<BytesLike> | null,
+      withdrawer?: PromiseOrValue<string> | null
+    ): SetWithdrawerEventFilter;
+    SetWithdrawer(
+      escrowId?: PromiseOrValue<BytesLike> | null,
+      withdrawer?: PromiseOrValue<string> | null
+    ): SetWithdrawerEventFilter;
+
     "WagerDeposit(bytes32,uint256,address)"(
       escrowId?: PromiseOrValue<BytesLike> | null,
       wager?: PromiseOrValue<BigNumberish> | null,

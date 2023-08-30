@@ -59,6 +59,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "NAME()": FunctionFragment;
     "TYPE()": FunctionFragment;
     "VERSION()": FunctionFragment;
+    "containsPlayer(bytes32,address)": FunctionFragment;
     "createWagerAndDeposit(address,address,uint256,uint256)": FunctionFragment;
     "currentNonce(address)": FunctionFragment;
     "deposit(bytes32,uint256)": FunctionFragment;
@@ -66,8 +67,13 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "getWagerRequest(bytes32)": FunctionFragment;
     "getWagerRequests()": FunctionFragment;
     "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
-    "isTrustedForwarder(address)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "setGameController(address)": FunctionFragment;
+    "setWithdrawer(bytes32,address)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
     "wagerBalance(bytes32)": FunctionFragment;
+    "winners(bytes32)": FunctionFragment;
   };
 
   getFunction(
@@ -75,6 +81,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "NAME"
       | "TYPE"
       | "VERSION"
+      | "containsPlayer"
       | "createWagerAndDeposit"
       | "currentNonce"
       | "deposit"
@@ -82,13 +89,22 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "getWagerRequest"
       | "getWagerRequests"
       | "hash"
-      | "isTrustedForwarder"
+      | "owner"
+      | "renounceOwnership"
+      | "setGameController"
+      | "setWithdrawer"
+      | "transferOwnership"
       | "wagerBalance"
+      | "winners"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
   encodeFunctionData(functionFragment: "TYPE", values?: undefined): string;
   encodeFunctionData(functionFragment: "VERSION", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "containsPlayer",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "createWagerAndDeposit",
     values: [
@@ -128,18 +144,39 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>
     ]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "isTrustedForwarder",
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setGameController",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setWithdrawer",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "wagerBalance",
     values: [PromiseOrValue<BytesLike>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "winners",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
 
   decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "TYPE", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "VERSION", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "containsPlayer",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "createWagerAndDeposit",
     data: BytesLike
@@ -159,23 +196,77 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "hash", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "isTrustedForwarder",
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setGameController",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setWithdrawer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "wagerBalance",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
 
   events: {
+    "OwnershipTransferred(address,address)": EventFragment;
+    "SetGameControler(address)": EventFragment;
+    "SetWithdrawer(bytes32,address)": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetWithdrawer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
 }
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface SetGameControlerEventObject {
+  gameController: string;
+}
+export type SetGameControlerEvent = TypedEvent<
+  [string],
+  SetGameControlerEventObject
+>;
+
+export type SetGameControlerEventFilter =
+  TypedEventFilter<SetGameControlerEvent>;
+
+export interface SetWithdrawerEventObject {
+  escrowId: string;
+  withdrawer: string;
+}
+export type SetWithdrawerEvent = TypedEvent<
+  [string, string],
+  SetWithdrawerEventObject
+>;
+
+export type SetWithdrawerEventFilter = TypedEventFilter<SetWithdrawerEvent>;
 
 export interface WagerDepositEventObject {
   escrowId: string;
@@ -236,6 +327,12 @@ export interface WegaERC20Escrow extends BaseContract {
 
     VERSION(overrides?: CallOverrides): Promise<[string]>;
 
+    containsPlayer(
+      escrowId: PromiseOrValue<BytesLike>,
+      player: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
       account: PromiseOrValue<string>,
@@ -279,15 +376,37 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string] & { escrowId_: string }>;
 
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setGameController(
+      gameController_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setWithdrawer(
+      escrowId: PromiseOrValue<BytesLike>,
+      winner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     wagerBalance(
       escrowId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    winners(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
   };
 
   NAME(overrides?: CallOverrides): Promise<string>;
@@ -295,6 +414,12 @@ export interface WegaERC20Escrow extends BaseContract {
   TYPE(overrides?: CallOverrides): Promise<string>;
 
   VERSION(overrides?: CallOverrides): Promise<string>;
+
+  containsPlayer(
+    escrowId: PromiseOrValue<BytesLike>,
+    player: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   createWagerAndDeposit(
     token: PromiseOrValue<string>,
@@ -339,15 +464,37 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  isTrustedForwarder(
-    forwarder: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  renounceOwnership(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setGameController(
+    gameController_: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setWithdrawer(
+    escrowId: PromiseOrValue<BytesLike>,
+    winner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  transferOwnership(
+    newOwner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   wagerBalance(
     escrowId: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  winners(
+    arg0: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   callStatic: {
     NAME(overrides?: CallOverrides): Promise<string>;
@@ -355,6 +502,12 @@ export interface WegaERC20Escrow extends BaseContract {
     TYPE(overrides?: CallOverrides): Promise<string>;
 
     VERSION(overrides?: CallOverrides): Promise<string>;
+
+    containsPlayer(
+      escrowId: PromiseOrValue<BytesLike>,
+      player: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
@@ -399,18 +552,63 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setGameController(
+      gameController_: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<void>;
+
+    setWithdrawer(
+      escrowId: PromiseOrValue<BytesLike>,
+      winner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     wagerBalance(
       escrowId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    winners(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
   };
 
   filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+
+    "SetGameControler(address)"(
+      gameController?: PromiseOrValue<string> | null
+    ): SetGameControlerEventFilter;
+    SetGameControler(
+      gameController?: PromiseOrValue<string> | null
+    ): SetGameControlerEventFilter;
+
+    "SetWithdrawer(bytes32,address)"(
+      escrowId?: PromiseOrValue<BytesLike> | null,
+      withdrawer?: PromiseOrValue<string> | null
+    ): SetWithdrawerEventFilter;
+    SetWithdrawer(
+      escrowId?: PromiseOrValue<BytesLike> | null,
+      withdrawer?: PromiseOrValue<string> | null
+    ): SetWithdrawerEventFilter;
+
     "WagerDeposit(bytes32,uint256,address)"(
       escrowId?: PromiseOrValue<BytesLike> | null,
       wager?: PromiseOrValue<BigNumberish> | null,
@@ -442,6 +640,12 @@ export interface WegaERC20Escrow extends BaseContract {
     TYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
     VERSION(overrides?: CallOverrides): Promise<BigNumber>;
+
+    containsPlayer(
+      escrowId: PromiseOrValue<BytesLike>,
+      player: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
@@ -484,13 +688,35 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setGameController(
+      gameController_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setWithdrawer(
+      escrowId: PromiseOrValue<BytesLike>,
+      winner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     wagerBalance(
       escrowId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    winners(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
@@ -501,6 +727,12 @@ export interface WegaERC20Escrow extends BaseContract {
     TYPE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     VERSION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    containsPlayer(
+      escrowId: PromiseOrValue<BytesLike>,
+      player: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     createWagerAndDeposit(
       token: PromiseOrValue<string>,
@@ -543,13 +775,35 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    renounceOwnership(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setGameController(
+      gameController_: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setWithdrawer(
+      escrowId: PromiseOrValue<BytesLike>,
+      winner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     wagerBalance(
       escrowId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    winners(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

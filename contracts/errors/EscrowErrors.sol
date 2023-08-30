@@ -24,3 +24,6 @@ error WegaEscrow_CanOnlyDepositOnce();
 
 // @notice only approved owner can deposit
 error WegaEscrow_MaximumWagerAmountReached();
+
+// @notice only approved owner can deposit
+error WegaEscrow_InvalidState();

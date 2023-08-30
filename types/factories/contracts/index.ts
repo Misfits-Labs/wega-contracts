@@ -4,3 +4,6 @@
 export * as dummies from "./dummies";
 export * as escrow from "./escrow";
 export * as events from "./events";
+export * as games from "./games";
+export { GameController__factory } from "./GameController__factory";
+export { IGameController__factory } from "./IGameController__factory";

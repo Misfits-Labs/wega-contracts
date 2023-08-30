@@ -15,6 +15,38 @@ const _abi = [
     inputs: [
       {
         indexed: true,
+        internalType: "address",
+        name: "gameController",
+        type: "address",
+      },
+    ],
+    name: "SetGameControler",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "escrowId",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "withdrawer",
+        type: "address",
+      },
+    ],
+    name: "SetWithdrawer",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: "bytes32",
         name: "escrowId",
         type: "bytes32",

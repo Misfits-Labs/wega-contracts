@@ -7,12 +7,12 @@ import "./IEscrow.sol";
 interface IWegaERC20Escrow {
  
  struct ERC20WagerRequest {
-  IEscrow.TransactionState state; // state transaction state
+  IEscrow.TransactionState state;
   bytes32 escrowId;
-  uint256 wager; // total amount that should be escrowed (have that multiplied by by accounts)
+  uint256 wager;
   address token;
   uint256 nonce;
-  uint256 totalWager; // todo update to maxWager
+  uint256 totalWager;
  }
 
  /**
@@ -88,4 +88,24 @@ interface IWegaERC20Escrow {
  * @param escrowId id of the wager request
  */
  function wagerBalance(bytes32 escrowId) external view returns (uint256);
+
+ /**
+ * @notice checks if a player is in the escrow 
+ * @param escrowId id of the wager request
+ * @param player address of the player
+ */
+ function containsPlayer(bytes32 escrowId, address player) external view returns (bool);
+
+ /**
+ * @notice sets the address that gets to withdraw the funds  
+ * @param escrowId id of the wager request
+ * @param winner address of the winner
+ */
+ function setWithdrawer(bytes32 escrowId, address winner) external;
+
+ /**
+ * @notice sets the address of the wega game controller contract  
+ * @param gameController address of the new gameController
+ */
+ function setGameController(address gameController) external;
 }

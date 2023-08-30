@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 // import "hardhat/console.sol";
 
 // protocol imports
@@ -37,7 +37,7 @@ import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
 contract WegaERC20Escrow is 
  IWegaERC20Escrow,
  IERC20EscrowEvents,
- ERC2771Context {
+ Ownable {
 
   using Counters for Counters.Counter;
   using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -57,6 +57,12 @@ contract WegaERC20Escrow is
   
   // request balance
   mapping(bytes32 => uint256) private _balances;
+
+  // winner - withdrawers 
+  mapping(bytes32 => address) public winners;
+
+  // game controller
+  address gameController; 
   
   // stores all the transfer Ids, will be used enumeration
   EnumerableSet.Bytes32Set private _escrowIds;
@@ -82,9 +88,14 @@ contract WegaERC20Escrow is
       ) revert WegaEscrow_InvalidRequestData();
      _;
   } 
+
+  modifier onlyGameController {
+    if(_msgSender() != gameController) revert WegaEscrow_CallerNotApproved();
+    _;
+  }
   
   // then constructor
-  constructor(string memory name, string memory version) ERC2771Context(address(0)) {
+  constructor(string memory name, string memory version) {
     NAME = name;
     VERSION = version;
   }
@@ -207,5 +218,21 @@ contract WegaERC20Escrow is
 
   function wagerBalance(bytes32 escrowId) public view returns (uint256) {
     return _balances[escrowId];
+  }
+
+  function containsPlayer(bytes32 escrowId, address player) public view override returns (bool) {
+    return _depositors[escrowId].contains(player);
+  }
+
+  function setWithdrawer(bytes32 escrowId, address winner) external override onlyGameController {
+    if(!containsPlayer(escrowId, winner)) revert WegaEscrow_InvalidRequestData();
+    _wagerRequests[escrowId].state = IEscrow.TransactionState.READY; 
+    winners[escrowId] = winner;
+    emit SetWithdrawer(escrowId, winner); 
+  }
+
+  function setGameController(address gameController_) external onlyOwner {
+    gameController = gameController_;
+    emit SetGameControler(gameController_);
   }
 }

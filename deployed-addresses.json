@@ -4,28 +4,28 @@
         "1337": {
             "contracts": {
                 "WegaERC20Escrow": {
-                    "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+                    "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x1a"
+                    "deploymentBlock": "0x02"
                 },
                 "WegaERC20Dummy": {
-                    "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+                    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x0e"
+                    "deploymentBlock": "0x01"
                 }
             }
         },
         "80001": {
             "contracts": {
                 "WegaERC20Escrow": {
-                    "address": "0xBe51a6996C1ee378400D063f88626928940F7DD7",
+                    "address": "0x148ECFB8f04538fA8CEc9a13DdB9926cCB39e5Cc",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x0257b326"
+                    "deploymentBlock": "0x0258d91b"
                 },
                 "WegaERC20Dummy": {
-                    "address": "0xAC8c9097789A5608e33144EAa868B0E7725d1705",
+                    "address": "0x1214B72be391163457090B99622A749106b72Bce",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x0257b2b7"
+                    "deploymentBlock": "0x0258d915"
                 }
             }
         },

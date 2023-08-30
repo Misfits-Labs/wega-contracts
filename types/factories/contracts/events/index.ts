@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export { IERC20EscrowEvents__factory } from "./IERC20EscrowEvents__factory";
+export { IGameControllerEvents__factory } from "./IGameControllerEvents__factory";
