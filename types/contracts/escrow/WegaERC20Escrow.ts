@@ -74,6 +74,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "transferOwnership(address)": FunctionFragment;
     "wagerBalance(bytes32)": FunctionFragment;
     "winners(bytes32)": FunctionFragment;
+    "withdraw(bytes32)": FunctionFragment;
   };
 
   getFunction(
@@ -96,6 +97,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "transferOwnership"
       | "wagerBalance"
       | "winners"
+      | "withdraw"
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
@@ -169,6 +171,10 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "winners",
     values: [PromiseOrValue<BytesLike>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
 
   decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "TYPE", data: BytesLike): Result;
@@ -218,6 +224,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
     "OwnershipTransferred(address,address)": EventFragment;
@@ -225,6 +232,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "SetWithdrawer(bytes32,address)": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
+    "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
@@ -232,6 +240,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "SetWithdrawer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
 }
 
 export interface OwnershipTransferredEventObject {
@@ -293,6 +302,18 @@ export type WagerRequestCreationEvent = TypedEvent<
 
 export type WagerRequestCreationEventFilter =
   TypedEventFilter<WagerRequestCreationEvent>;
+
+export interface WagerWithdrawalEventObject {
+  escrowHash: string;
+  transferAmount: BigNumber;
+  winner: string;
+}
+export type WagerWithdrawalEvent = TypedEvent<
+  [string, BigNumber, string],
+  WagerWithdrawalEventObject
+>;
+
+export type WagerWithdrawalEventFilter = TypedEventFilter<WagerWithdrawalEvent>;
 
 export interface WegaERC20Escrow extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -407,6 +428,11 @@ export interface WegaERC20Escrow extends BaseContract {
       arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    withdraw(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   NAME(overrides?: CallOverrides): Promise<string>;
@@ -496,6 +522,11 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  withdraw(
+    escrowId: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     NAME(overrides?: CallOverrides): Promise<string>;
 
@@ -581,6 +612,11 @@ export interface WegaERC20Escrow extends BaseContract {
       arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    withdraw(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
@@ -632,6 +668,17 @@ export interface WegaERC20Escrow extends BaseContract {
       creator?: PromiseOrValue<string> | null,
       wager?: null
     ): WagerRequestCreationEventFilter;
+
+    "WagerWithdrawal(bytes32,uint256,address)"(
+      escrowHash?: PromiseOrValue<BytesLike> | null,
+      transferAmount?: PromiseOrValue<BigNumberish> | null,
+      winner?: PromiseOrValue<string> | null
+    ): WagerWithdrawalEventFilter;
+    WagerWithdrawal(
+      escrowHash?: PromiseOrValue<BytesLike> | null,
+      transferAmount?: PromiseOrValue<BigNumberish> | null,
+      winner?: PromiseOrValue<string> | null
+    ): WagerWithdrawalEventFilter;
   };
 
   estimateGas: {
@@ -719,6 +766,11 @@ export interface WegaERC20Escrow extends BaseContract {
       arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    withdraw(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -805,6 +857,11 @@ export interface WegaERC20Escrow extends BaseContract {
     winners(
       arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      escrowId: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

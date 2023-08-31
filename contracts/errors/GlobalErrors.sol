@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.14;
 
 // @notice Zero address passed in where not allowed.
 error Wega_ZeroAddress();

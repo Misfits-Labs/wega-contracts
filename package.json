@@ -28,7 +28,7 @@
     "chai": "^4.3.7",
     "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
-    "hardhat": "^2.12.4",
+    "hardhat": "2.17.2",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-gas-reporter": "^1.0.9",
@@ -52,6 +52,7 @@
     "deploy:mumbai:full": "hardhat run --network mumbai scripts/deploy_full.ts && UI_PATH=../wega-platform-app yarn run exp:demo-ui",
     "exp:demo-ui": "rm -rf $UI_PATH/deployed-addresses.json && cp -rf deployed-addresses.json $UI_PATH",
     "start:node": "hardhat node",
+    "drand": "ts-node ./scripts/crawl-random-numbers.ts",
     "gas-report": "env ENABLE_GAS_REPORT=true yarn test:sol",
     "analyze": "slither . --hardhat-artifacts-directory ./.artifacts --sarif slither.sarif --config-file .slither.json",
     "test": "hardhat test"

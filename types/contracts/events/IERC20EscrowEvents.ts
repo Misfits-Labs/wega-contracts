@@ -27,12 +27,14 @@ export interface IERC20EscrowEventsInterface extends utils.Interface {
     "SetWithdrawer(bytes32,address)": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
+    "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetWithdrawer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
 }
 
 export interface SetGameControlerEventObject {
@@ -82,6 +84,18 @@ export type WagerRequestCreationEvent = TypedEvent<
 
 export type WagerRequestCreationEventFilter =
   TypedEventFilter<WagerRequestCreationEvent>;
+
+export interface WagerWithdrawalEventObject {
+  escrowHash: string;
+  transferAmount: BigNumber;
+  winner: string;
+}
+export type WagerWithdrawalEvent = TypedEvent<
+  [string, BigNumber, string],
+  WagerWithdrawalEventObject
+>;
+
+export type WagerWithdrawalEventFilter = TypedEventFilter<WagerWithdrawalEvent>;
 
 export interface IERC20EscrowEvents extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -153,6 +167,17 @@ export interface IERC20EscrowEvents extends BaseContract {
       creator?: PromiseOrValue<string> | null,
       wager?: null
     ): WagerRequestCreationEventFilter;
+
+    "WagerWithdrawal(bytes32,uint256,address)"(
+      escrowHash?: PromiseOrValue<BytesLike> | null,
+      transferAmount?: PromiseOrValue<BigNumberish> | null,
+      winner?: PromiseOrValue<string> | null
+    ): WagerWithdrawalEventFilter;
+    WagerWithdrawal(
+      escrowHash?: PromiseOrValue<BytesLike> | null,
+      transferAmount?: PromiseOrValue<BigNumberish> | null,
+      winner?: PromiseOrValue<string> | null
+    ): WagerWithdrawalEventFilter;
   };
 
   estimateGas: {};

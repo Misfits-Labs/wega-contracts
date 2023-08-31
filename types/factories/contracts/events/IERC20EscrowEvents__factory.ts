@@ -98,6 +98,31 @@ const _abi = [
     name: "WagerRequestCreation",
     type: "event",
   },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "transferAmount",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "winner",
+        type: "address",
+      },
+    ],
+    name: "WagerWithdrawal",
+    type: "event",
+  },
 ] as const;
 
 export class IERC20EscrowEvents__factory {

@@ -144,7 +144,25 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        version: '0.8.21',
+        version: '0.8.13',
+        settings: {
+          ...settings,
+          metadata: {
+            bytecodeHash: 'none',
+          },
+        },
+      },
+      {
+        version: '0.8.14',
+        settings: {
+          ...settings,
+          metadata: {
+            bytecodeHash: 'none',
+          },
+        },
+      },
+      {
+        version: '0.8.19',
         settings: {
           ...settings,
           metadata: {
@@ -163,7 +181,7 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       blockGasLimit: 10000000,
       initialBaseFeePerGas: 0,
-      hardfork: 'merge',
+      hardfork: 'shanghai',
       chainId: 1337,
     },
     localhost: {

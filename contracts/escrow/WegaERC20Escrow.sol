@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.14;
 
 // lib imports
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -225,7 +225,9 @@ contract WegaERC20Escrow is
   }
 
   function setWithdrawer(bytes32 escrowId, address winner) external override onlyGameController {
+    ERC20WagerRequest memory request = _wagerRequests[escrowId];
     if(!containsPlayer(escrowId, winner)) revert WegaEscrow_InvalidRequestData();
+    if(request.state != IEscrow.TransactionState.PENDING) revert WegaEscrow_InvalidRequestState();
     _wagerRequests[escrowId].state = IEscrow.TransactionState.READY; 
     winners[escrowId] = winner;
     emit SetWithdrawer(escrowId, winner); 
@@ -235,4 +237,17 @@ contract WegaERC20Escrow is
     gameController = gameController_;
     emit SetGameControler(gameController_);
   }
+
+  function withdraw(bytes32 escrowId) public {
+    ERC20WagerRequest memory request = _wagerRequests[escrowId];
+    if(_msgSender() != winners[escrowId]) revert WegaEscrow_CallerNotApproved();
+    uint256 transferAmount = _balances[escrowId];
+    delete _balances[escrowId];
+    _wagerRequests[escrowId].state = IEscrow.TransactionState.CLOSED;
+    IERC20(request.token).transfer(
+      _msgSender(), 
+      transferAmount
+    );
+    emit WagerWithdrawal(escrowId, transferAmount, _msgSender());
+  } 
 }

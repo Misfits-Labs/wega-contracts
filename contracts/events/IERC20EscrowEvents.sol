@@ -6,4 +6,5 @@ interface IERC20EscrowEvents {
     event WagerDeposit(bytes32 indexed escrowId, uint256 indexed wager, address indexed player);
     event SetWithdrawer(bytes32 indexed escrowId, address indexed withdrawer);
     event SetGameControler(address indexed gameController);
+    event WagerWithdrawal(bytes32 indexed escrowHash, uint256 indexed transferAmount, address indexed winner);
 }
