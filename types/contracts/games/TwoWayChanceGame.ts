@@ -7,6 +7,8 @@ import type {
   BigNumberish,
   BytesLike,
   CallOverrides,
+  ContractTransaction,
+  Overrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -23,17 +25,31 @@ import type {
 
 export interface TwoWayChanceGameInterface extends utils.Interface {
   functions: {
+    "addRandomNumbers(uint256[])": FunctionFragment;
     "isTrustedForwarder(address)": FunctionFragment;
+    "randomNumbersCount()": FunctionFragment;
     "roll(uint256,uint256,address)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "isTrustedForwarder" | "roll"
+    nameOrSignatureOrTopic:
+      | "addRandomNumbers"
+      | "isTrustedForwarder"
+      | "randomNumbersCount"
+      | "roll"
   ): FunctionFragment;
 
   encodeFunctionData(
+    functionFragment: "addRandomNumbers",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "isTrustedForwarder",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "randomNumbersCount",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "roll",
@@ -45,7 +61,15 @@ export interface TwoWayChanceGameInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "addRandomNumbers",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "isTrustedForwarder",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "randomNumbersCount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "roll", data: BytesLike): Result;
@@ -80,10 +104,17 @@ export interface TwoWayChanceGame extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     isTrustedForwarder(
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    randomNumbersCount(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     roll(
       denominator: PromiseOrValue<BigNumberish>,
@@ -93,10 +124,17 @@ export interface TwoWayChanceGame extends BaseContract {
     ): Promise<[BigNumber]>;
   };
 
+  addRandomNumbers(
+    randomNumbers: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   isTrustedForwarder(
     forwarder: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
+
+  randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
   roll(
     denominator: PromiseOrValue<BigNumberish>,
@@ -106,10 +144,17 @@ export interface TwoWayChanceGame extends BaseContract {
   ): Promise<BigNumber>;
 
   callStatic: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     isTrustedForwarder(
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
     roll(
       denominator: PromiseOrValue<BigNumberish>,
@@ -122,10 +167,17 @@ export interface TwoWayChanceGame extends BaseContract {
   filters: {};
 
   estimateGas: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     isTrustedForwarder(
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
     roll(
       denominator: PromiseOrValue<BigNumberish>,
@@ -136,8 +188,17 @@ export interface TwoWayChanceGame extends BaseContract {
   };
 
   populateTransaction: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     isTrustedForwarder(
       forwarder: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    randomNumbersCount(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

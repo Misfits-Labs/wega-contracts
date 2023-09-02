@@ -2,11 +2,13 @@
 pragma solidity ^0.8.14;
 
 // lib imports
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
 // import "hardhat/console.sol";
 
 // protocol imports
@@ -24,7 +26,11 @@ import {
     WegaEscrow_CanOnlyDepositOnce,
     WegaEscrow_MaximumWagerAmountReached
 } from '../errors/EscrowErrors.sol';
+
 import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
+import "../roles/WegaEscrowManagerRole.sol";
+
+
 
 /**
   * @title WegaERC20Escrow (MVP)
@@ -34,220 +40,282 @@ import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
   * It temporary holds erc20tokens on new wager requests, waits for the other party to deposit his wager,
   * and then allows for withdrawal of tokens through the game controller.
 */
-contract WegaERC20Escrow is 
- IWegaERC20Escrow,
- IERC20EscrowEvents,
- Ownable {
+contract WegaERC20Escrow is
+    IWegaERC20Escrow,
+    IERC20EscrowEvents,
+    WegaEscrowManagerRole
+{
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using Math for uint256;
 
-  using Counters for Counters.Counter;
-  using EnumerableSet for EnumerableSet.Bytes32Set;
-  using EnumerableSet for EnumerableSet.AddressSet;
+    // mapping of requestHash(wagerId) -> escrowRequest
+    mapping(bytes32 => ERC20WagerRequest) private _wagerRequests;
 
-  // mapping of requestHash(wagerId) -> escrowRequest
-  mapping(bytes32 => ERC20WagerRequest) private _wagerRequests; 
+    // for keeping track of user deposits
+    mapping(bytes32 => mapping(address => uint256)) private _deposits;
 
-  // for keeping track of user deposits
-  mapping(bytes32 => mapping(address => uint256)) private _deposits;
+    // for keeping track of depositor addresses
+    mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) _depositors;
 
-  // for keeping track of depositor addresses
-  mapping(bytes32 => EnumerableSet.AddressSet) _depositors;
+    // mapping of creators -> nonces
+    mapping(address => CountersUpgradeable.Counter) private _wagerNonces;
 
-  // mapping of creators -> nonces
-  mapping(address => Counters.Counter) private _wagerNonces;
-  
-  // request balance
-  mapping(bytes32 => uint256) private _balances;
+    // request balance
+    mapping(bytes32 => uint256) private _escrowBalances;
 
-  // winner - withdrawers 
-  mapping(bytes32 => address) public winners;
+    // request accountBalances
+    mapping(address => uint256) private _accountBalances;
 
-  // game controller
-  address gameController; 
-  
-  // stores all the transfer Ids, will be used enumeration
-  EnumerableSet.Bytes32Set private _escrowIds;
+    // winner - withdrawers
+    mapping(bytes32 => address) public winners;
 
-  // escrow details
-  string public NAME;
-  string public VERSION;
-  string public TYPE = "TOKEN-ERC20";
+    // game controller
+    address gameController;
 
+    // stores all the transfer Ids, will be used enumeration
+    EnumerableSetUpgradeable.Bytes32Set private _escrowHashes;
 
-  // then modifiers
-  modifier onlyValidRequesData(
-      address token, 
-      address account,
-      uint256 accountsCount, 
-      uint256 wager
-  ) {
-     if(
-        token == address(0) || 
-        account == address(0) ||
-        accountsCount <= 1 ||
-        wager <= 0 
-      ) revert WegaEscrow_InvalidRequestData();
-     _;
-  } 
+    // escrow details
+    string public NAME;
+    string public VERSION;
+    string public TYPE = "TOKEN-ERC20";
 
-  modifier onlyGameController {
-    if(_msgSender() != gameController) revert WegaEscrow_CallerNotApproved();
-    _;
-  }
-  
-  // then constructor
-  constructor(string memory name, string memory version) {
-    NAME = name;
-    VERSION = version;
-  }
+    // then modifiers
+    modifier onlyValidRequesData(
+        address token,
+        address account,
+        uint256 accountsCount,
+        uint256 wager
+    ) {
+        if (
+            token == address(0) ||
+            account == address(0) ||
+            accountsCount <= 1 ||
+            wager <= 0
+        ) revert WegaEscrow_InvalidRequestData();
+        _;
+    }
+
+    function __WegaEscrowInit__init(
+        string memory name,
+        string memory version
+    ) public initializer {
+        __WegaEscrowInit__unchained(name, version);
+    }
+
+    function __WegaEscrowInit__unchained(
+        string memory name,
+        string memory version
+    ) internal onlyInitializing {
+        __WegaEscrowManagerRole_init();
+        NAME = name;
+        VERSION = version;
+    }
+
     // then functions
-  function createWagerAndDeposit(
-    address token, 
-    address account,
-    uint256 accountsCount,
-    uint256 wager
-  ) public override onlyValidRequesData(token, account, accountsCount, wager)  {
-      // initialize request struct
-      ERC20WagerRequest memory wagerRequest_;
-      
-      // set request data
-      wagerRequest_.state = IEscrow.TransactionState.OPEN;
-      wagerRequest_.token = token;
-      wagerRequest_.wager = wager;
-      wagerRequest_.totalWager = wager * accountsCount;
-      wagerRequest_.nonce = currentNonce(account);
-      
+    function createWagerRequest(
+        address tokenAddress,
+        address account,
+        uint256 requiredPlayerNum,
+        uint256 wagerAmount
+    )
+        public
+        override
+        onlyWegaEscrowManager
+        onlyValidRequesData(
+            tokenAddress,
+            account,
+            requiredPlayerNum,
+            wagerAmount
+        )
+        returns (bytes32)
+    {
+        // initialize request struct
+        ERC20WagerRequest memory wagerRequest_;
 
-      // increment user nonce
-      _wagerNonces[account].increment();
+        // set request data
+        wagerRequest_.state = IEscrow.TransactionState.OPEN;
+        wagerRequest_.tokenAddress = tokenAddress;
+        wagerRequest_.wagerAmount = wagerAmount;
+        wagerRequest_.totalWager = wagerAmount * requiredPlayerNum;
+        wagerRequest_.nonce = currentNonce(account);
 
-      // create escrowId
-      bytes32 escrowId_ = hash(wagerRequest_.token, account, accountsCount, wager, wagerRequest_.nonce);
+        // increment user nonce
+        _wagerNonces[account].increment();
 
-      wagerRequest_.escrowId = escrowId_;
-      
-      // record deposit amount
-      _deposits[escrowId_][account] = wager;
+        // create escrowHash
+        bytes32 escrowHash_ = hash(
+            wagerRequest_.tokenAddress,
+            account,
+            requiredPlayerNum,
+            wagerAmount,
+            wagerRequest_.nonce
+        );
 
-      _escrowIds.add(escrowId_);
-      _wagerRequests[escrowId_] = wagerRequest_;
+        wagerRequest_.escrowHash = escrowHash_;
 
-      // add depositors
-      _depositors[escrowId_].add(account);
-      
-      // add to balance
-      _balances[escrowId_] += wager;
+        // record deposit amount
+        _deposits[escrowHash_][account] = wagerAmount;
 
-      // deposit to escrow 
-      IERC20(wagerRequest_.token).transferFrom(
-        account, 
-        address(this),
-        wager
-      );
+        _escrowHashes.add(escrowHash_);
+        _wagerRequests[escrowHash_] = wagerRequest_;
 
-      emit WagerRequestCreation(wagerRequest_.escrowId, wagerRequest_.token, account, wager);
-  }
-    
-  function hash(
-    address token,
-    address creator,
-    uint256 accountsCount,
-    uint256 wager,
-    uint256 nonce
-  ) public pure override returns (bytes32 escrowId_) {
-    escrowId_ = keccak256(abi.encodePacked(
-      token,
-      creator,
-      accountsCount,
-      wager,
-      nonce
-     )
-    );
-  }
+        // add depositors
+        _depositors[escrowHash_].add(account);
 
-  function currentNonce(address account) public view override returns (uint256) {
-   return _wagerNonces[account].current();
-  }
+        // add to balance
+        _escrowBalances[escrowHash_] += wagerAmount;
 
-  function getWagerRequests() external view override returns(ERC20WagerRequest[] memory) {
-    uint256 totalWagers = _escrowIds.length();
-    ERC20WagerRequest[] memory wagers = new ERC20WagerRequest[](totalWagers);
-    for(uint256 i = 0; i < totalWagers;i++){
-        wagers[i] = _wagerRequests[_escrowIds.at(i)];
+        // deposit to escrow
+        IERC20Upgradeable(wagerRequest_.tokenAddress).transferFrom(
+            account,
+            address(this),
+            wagerAmount
+        );
+
+        emit WagerRequestCreation(
+            wagerRequest_.escrowHash,
+            wagerRequest_.tokenAddress,
+            account,
+            wagerAmount
+        );
+
+        return wagerRequest_.escrowHash;
     }
-    return wagers;
-  }
 
-  function getWagerRequest(bytes32 escrowId) external view override returns (ERC20WagerRequest memory){
-    return _wagerRequests[escrowId];
-  }
-
-  function depositOf(bytes32 escrowId, address account) external view override returns (uint256){
-    return _deposits[escrowId][account];
-  }
-
-  function deposit(bytes32 escrowId, uint256 wager) external {
-    ERC20WagerRequest memory request = _wagerRequests[escrowId];
-    if(request.state != IEscrow.TransactionState.OPEN) revert WegaEscrow_InvalidRequestState();
-    if(wager != request.wager) revert WegaEscrow_InvalidWagerAmount();
-    if(_balances[escrowId] + wager >  request.totalWager) revert WegaEscrow_MaximumWagerAmountReached();
-    if(_deposits[escrowId][_msgSender()] > 0) revert WegaEscrow_CanOnlyDepositOnce();
-        
-    // update depositor on escrow
-    _depositors[escrowId].add(_msgSender());
-
-    // update deposits on escrow
-    _deposits[escrowId][_msgSender()] = wager;
-
-    // add balance 
-    _balances[escrowId] += wager;
-
-    // change state to pending if total wager amount is reached
-    if(request.totalWager == _balances[escrowId]){
-      _wagerRequests[escrowId].state = IEscrow.TransactionState.PENDING;
+    function hash(
+        address token,
+        address creator,
+        uint256 requiredPlayerNum,
+        uint256 wager,
+        uint256 nonce
+    ) public pure override returns (bytes32 escrowHash_) {
+        escrowHash_ = keccak256(
+            abi.encodePacked(token, creator, requiredPlayerNum, wager, nonce)
+        );
     }
-    // deposit to escrow 
-    IERC20(request.token).transferFrom(
-      _msgSender(), 
-      address(this),
-      wager
-    );
 
-    // emit deposit 
-    emit WagerDeposit(escrowId, wager, _msgSender());
-  }
+    function currentNonce(
+        address account
+    ) public view override returns (uint256) {
+        return _wagerNonces[account].current();
+    }
 
-  function wagerBalance(bytes32 escrowId) public view returns (uint256) {
-    return _balances[escrowId];
-  }
+    function getWagerRequests()
+        external
+        view
+        override
+        returns (ERC20WagerRequest[] memory)
+    {
+        uint256 totalWagers = _escrowHashes.length();
+        ERC20WagerRequest[] memory wagers = new ERC20WagerRequest[](
+            totalWagers
+        );
+        for (uint256 i = 0; i < totalWagers; i++) {
+            wagers[i] = _wagerRequests[_escrowHashes.at(i)];
+        }
+        return wagers;
+    }
 
-  function containsPlayer(bytes32 escrowId, address player) public view override returns (bool) {
-    return _depositors[escrowId].contains(player);
-  }
+    function getWagerRequest(
+        bytes32 escrowHash
+    ) external view override returns (ERC20WagerRequest memory) {
+        return _wagerRequests[escrowHash];
+    }
 
-  function setWithdrawer(bytes32 escrowId, address winner) external override onlyGameController {
-    ERC20WagerRequest memory request = _wagerRequests[escrowId];
-    if(!containsPlayer(escrowId, winner)) revert WegaEscrow_InvalidRequestData();
-    if(request.state != IEscrow.TransactionState.PENDING) revert WegaEscrow_InvalidRequestState();
-    _wagerRequests[escrowId].state = IEscrow.TransactionState.READY; 
-    winners[escrowId] = winner;
-    emit SetWithdrawer(escrowId, winner); 
-  }
+    function depositOf(
+        bytes32 escrowHash,
+        address account
+    ) external view override returns (uint256) {
+        return _deposits[escrowHash][account];
+    }
 
-  function setGameController(address gameController_) external onlyOwner {
-    gameController = gameController_;
-    emit SetGameControler(gameController_);
-  }
+    function deposit(
+        bytes32 escrowHash,
+        address account,
+        uint256 wagerAmount
+    ) external onlyWegaEscrowManager {
+        ERC20WagerRequest memory request = _wagerRequests[escrowHash];
+        if (request.state != IEscrow.TransactionState.OPEN)
+            revert WegaEscrow_InvalidRequestState();
+        if (wagerAmount != request.wagerAmount)
+            revert WegaEscrow_InvalidWagerAmount();
+        if (_escrowBalances[escrowHash] + wagerAmount > request.totalWager)
+            revert WegaEscrow_MaximumWagerAmountReached();
+        if (_deposits[escrowHash][account] > 0)
+            revert WegaEscrow_CanOnlyDepositOnce();
 
-  function withdraw(bytes32 escrowId) public {
-    ERC20WagerRequest memory request = _wagerRequests[escrowId];
-    if(_msgSender() != winners[escrowId]) revert WegaEscrow_CallerNotApproved();
-    uint256 transferAmount = _balances[escrowId];
-    delete _balances[escrowId];
-    _wagerRequests[escrowId].state = IEscrow.TransactionState.CLOSED;
-    IERC20(request.token).transfer(
-      _msgSender(), 
-      transferAmount
-    );
-    emit WagerWithdrawal(escrowId, transferAmount, _msgSender());
-  } 
+        // update depositor on escrow
+        _depositors[escrowHash].add(account);
+
+        // update deposits on escrow
+        _deposits[escrowHash][account] = wagerAmount;
+
+        // transfer tokens to escrow
+        _escrowBalances[escrowHash] += wagerAmount;
+        IERC20Upgradeable(request.tokenAddress).transferFrom(
+            account,
+            address(this),
+            wagerAmount
+        );
+
+        // change state to pending if total wager amount is reached
+        if (request.totalWager == _escrowBalances[escrowHash]) {
+            _wagerRequests[escrowHash].state = IEscrow.TransactionState.PENDING;
+        }
+
+        // emit deposit
+        emit WagerDeposit(escrowHash, wagerAmount, account);
+    }
+
+    function wagerBalance(bytes32 escrowHash) public view returns (uint256) {
+        return _escrowBalances[escrowHash];
+    }
+
+    function containsPlayer(
+        bytes32 escrowHash,
+        address player
+    ) public view override returns (bool) {
+        return _depositors[escrowHash].contains(player);
+    }
+
+    function setWithdrawers(
+        bytes32 escrowHash,
+        address[] memory winners_
+    ) external override onlyWegaEscrowManager {
+        ERC20WagerRequest memory request = _wagerRequests[escrowHash];
+        if (request.state != IEscrow.TransactionState.PENDING)
+            revert WegaEscrow_InvalidRequestState();
+        uint256 withdrawableAmount = _wagerRequests[escrowHash]
+            .totalWager
+            .mulDiv(1, winners_.length);
+        for (uint256 i = 0; i < winners_.length; i++) {
+            if (!containsPlayer(escrowHash, winners_[i]))
+                revert WegaEscrow_InvalidRequestData();
+            _accountBalances[winners_[i]] = withdrawableAmount;
+        }
+        _wagerRequests[escrowHash].state = IEscrow.TransactionState.READY;
+        emit SetWithdrawers(escrowHash, winners_);
+    }
+
+    function withdraw(bytes32 escrowHash) public {
+        ERC20WagerRequest memory request = _wagerRequests[escrowHash];
+        if (request.state != IEscrow.TransactionState.READY)
+            revert WegaEscrow_InvalidRequestState();
+        if (_accountBalances[_msgSender()] == 0 ether)
+            revert WegaEscrow_InvalidRequestData();
+        uint256 transferAmount = _accountBalances[_msgSender()];
+        _escrowBalances[escrowHash] -= transferAmount;
+        delete _accountBalances[_msgSender()];
+        _wagerRequests[escrowHash].state = IEscrow.TransactionState.CLOSED;
+        IERC20Upgradeable(request.tokenAddress).transfer(
+            _msgSender(),
+            transferAmount
+        );
+        emit WagerWithdrawal(escrowHash, transferAmount, _msgSender());
+    }
+
+
 }

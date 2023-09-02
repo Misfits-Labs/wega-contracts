@@ -25,11 +25,23 @@ import type {
 
 export interface ITwoWayChanceGameInterface extends utils.Interface {
   functions: {
+    "addRandomNumbers(uint256[])": FunctionFragment;
+    "randomNumbersCount()": FunctionFragment;
     "roll(uint256,uint256,address)": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "roll"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic: "addRandomNumbers" | "randomNumbersCount" | "roll"
+  ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "addRandomNumbers",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "randomNumbersCount",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "roll",
     values: [
@@ -39,6 +51,14 @@ export interface ITwoWayChanceGameInterface extends utils.Interface {
     ]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "addRandomNumbers",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "randomNumbersCount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "roll", data: BytesLike): Result;
 
   events: {};
@@ -71,6 +91,13 @@ export interface ITwoWayChanceGame extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    randomNumbersCount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
@@ -78,6 +105,13 @@ export interface ITwoWayChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
+
+  addRandomNumbers(
+    randomNumbers: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
   roll(
     denominator: PromiseOrValue<BigNumberish>,
@@ -87,6 +121,13 @@ export interface ITwoWayChanceGame extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
+
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
@@ -98,6 +139,13 @@ export interface ITwoWayChanceGame extends BaseContract {
   filters: {};
 
   estimateGas: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
+
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
@@ -107,6 +155,15 @@ export interface ITwoWayChanceGame extends BaseContract {
   };
 
   populateTransaction: {
+    addRandomNumbers(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    randomNumbersCount(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,

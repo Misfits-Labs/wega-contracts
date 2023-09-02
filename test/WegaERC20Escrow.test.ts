@@ -53,8 +53,15 @@ describe("WegaERC20Escrow", () => {
     
     // deploy contracts
     erc20Escrow = await erc20EscrowFactory.deploy('WegaERC20Escrow', '0.0.0');
-    erc20Dummy = await erc20DummyFactory.deploy([alice.address, bob.address, carl.address, david.address, ed.address, fred.address]);
-
+    erc20Dummy = await erc20DummyFactory.deploy([
+      alice.address, 
+      bob.address, 
+      carl.address, 
+      david.address, 
+      ed.address, 
+      fred.address
+    ]);
+    
   });
 
   describe("Function: hash(address,address,uint256,uint256)", () => {
@@ -208,7 +215,7 @@ describe("WegaERC20Escrow", () => {
       
       await Promise.all(accounts.map(async (acc) => {
         const w = utils.parseEther(String(5));
-        // console.log(await erc20Dummy.balanceOf(acc.address), w);
+        // console.log(await erc20Dummy.balanceOf(acc.address), w); 
         await erc20Dummy.connect(acc).approve(erc20Escrow.address, w);
         await erc20Escrow.createWagerAndDeposit(token, acc.address, 2, w);
       }))
@@ -298,7 +305,7 @@ describe("WegaERC20Escrow", () => {
         const balanceB: BigNumber = await erc20Dummy.balanceOf(winner.address);
         await erc20Escrow.connect(loser).deposit(escrowId, wager);
         await erc20Escrow.connect(gameController).setWithdrawer(escrowId, winner.address);
-        await expect(erc20Escrow.connect(winner).withdraw(escrowId)).to.emit(erc20Escrow, 'WagerWithdrawal').withArgs(escrowId, wager.add(wager), winner.address);
+        await expect(erc20Escrow.connect( winner).withdraw(escrowId)).to.emit(erc20Escrow, 'WagerWithdrawal').withArgs(escrowId, wager.add(wager), winner.address);
         expect(await erc20Dummy.balanceOf(winner.address)).to.equal(balanceB.add(wager.add(wager)));
         expect((await erc20Escrow.getWagerRequest(escrowId)).state).to.equal(TransactionState.CLOSED);
       })

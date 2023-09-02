@@ -27,9 +27,7 @@ contract TwoWayChanceGame is ITwoWayChanceGame, ERC2771Context {
  EnumerableMap.UintToUintMap private _randomNumbers;
 
  constructor (uint256[] memory randomNumbers) ERC2771Context(address(0)) {
-  for(uint256 i = 0; i< randomNumbers.length ;i++){
-   _randomNumbers.set(i, randomNumbers[i]); 
-  }
+  addRandomNumbers(randomNumbers);
  }
 
  // roll function
@@ -47,8 +45,18 @@ contract TwoWayChanceGame is ITwoWayChanceGame, ERC2771Context {
   uint256 nonce, 
   address player
   ) internal view returns (uint256){
-  uint256 randomNumbersCount = _randomNumbers.length();
-  uint256 index = (block.prevrandao + uint256(uint160(player)) * (nonce + block.timestamp)) % randomNumbersCount;
+  uint256 count = _randomNumbers.length();
+  uint256 index = (block.prevrandao + uint256(uint160(player)) * (nonce + block.timestamp)) % count;
   return _randomNumbers.get(index); 
+ }
+
+ function randomNumbersCount() external view override returns (uint256) {
+  return _randomNumbers.length();
+ }
+
+ function addRandomNumbers(uint256[] memory randomNumbers) public override {
+  for(uint256 i = _randomNumbers.length(); i<randomNumbers.length;i++) {
+   _randomNumbers.set(i, randomNumbers[i]);
+  }
  }
 }
