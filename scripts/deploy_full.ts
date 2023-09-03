@@ -1,19 +1,29 @@
 import { ethers, network } from "hardhat";
-import { getNetworkConfig, mergeNetworkConfig } from '../src/config';
+import { 
+  getNetworkConfig, 
+  mergeNetworkConfig, 
+  getRandomNumbersConfig, 
+  mergeRandomNumConfig
+} from '../src/config';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';
-
+import { BigNumber } from 'ethers';
 
 async function main() {
   console.log('Network:', network.name);
 
   const chainId: number = unwrap(network.config, 'chainId');
+  const drandChainhash: string = "dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493";
+  const randomNumConfig = getRandomNumbersConfig(drandChainhash);
   const config = getNetworkConfig(chainId);
   if (!config) {
     throw new Error(`Config not found for network ${chainId}`);
   }
 
   const deployer = await Deployer.create();
+  const drandIndexesToAdd = 500;
+  const initialDrands = randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(0, 101); 
+  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(101, drandIndexesToAdd + 1); 
   const deployConfig = await deployer.execute(['full'], config, {
     tokenReceivers: chainId == 1337 ? [
       '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
@@ -32,9 +42,15 @@ async function main() {
       "0x6f915E4e31755c09CCCc0B12DA730377913802f3",
       "0x24597c5c68687e816ffc0c69e064cb70bb62a9cd"
     ],
-    escrow: ['Wega ERC20 Escrow Service', '0.0.0']
+    escrow: ['Wega ERC20 Escrow Service', '0.0.0'],
+    initialDrands,
+    drands,
   });
   mergeNetworkConfig(deployConfig);
+  mergeRandomNumConfig({[chainId]: {
+    ...randomNumConfig[chainId], 
+    lastStoredIndex: drandIndexesToAdd + 100,  
+  }}, drandChainhash);
   console.log('Deployed!');
 }
 

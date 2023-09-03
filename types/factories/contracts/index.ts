@@ -6,8 +6,5 @@ export * as escrow from "./escrow";
 export * as events from "./events";
 export * as games from "./games";
 export * as roles from "./roles";
-export * as utils from "./utils";
-export { GameController__factory } from "./GameController__factory";
-export { IGameController__factory } from "./IGameController__factory";
 export { IWegaGameController__factory } from "./IWegaGameController__factory";
 export { WegaGameController__factory } from "./WegaGameController__factory";

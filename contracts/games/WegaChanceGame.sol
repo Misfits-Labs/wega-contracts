@@ -11,6 +11,8 @@ pragma solidity ^0.8.19;
   * @dev note this is draft contract not meant to be used in production
 */
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
 
 
 import "../escrow/WegaERC20Escrow.sol";
@@ -20,16 +22,22 @@ import {
     WegaEscrow_CallerNotApproved
 } from '../errors/WegaEscrowErrors.sol';
 
-contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole {
+contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole, UUPSUpgradeable {
 
- using EnumerableMap for EnumerableMap.UintToUintMap;
+  using EnumerableMap for EnumerableMap.UintToUintMap;
+  EnumerableMap.UintToUintMap private _randomNumbers;
 
- EnumerableMap.UintToUintMap private _randomNumbers;
 
-
-  function __WegaChanceGame_init(uint256[] memory randomNumbers) public initializer {
-    __Ownable_init();
+  function initialize(
+    uint256[] memory randomNumbers
+  ) initializer public {
+      __UUPSUpgradeable_init();
     __WegaGameManagerRole_init();
+    addWegaGameManager(owner());
+    __WegaChanceGame_init(randomNumbers);
+  }
+
+  function __WegaChanceGame_init(uint256[] memory randomNumbers) public onlyInitializing {
     __WegaChanceGame_init_unchained(randomNumbers);
   } 
 
@@ -43,24 +51,27 @@ contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole {
   uint256 nonce, 
   address player
   ) external view override onlyWegaGameManager returns(uint256) {
-  uint256 randomNumber = _retrieveRandomNumber(nonce, player);
-  uint256 result = (randomNumber % denominator) + 1; 
-  return result;
+    uint256 randomNumber = _retrieveRandomNumber(nonce, player);
+    uint256 result = (randomNumber % denominator) + 1; 
+    return result;
  }
 
  function _retrieveRandomNumber(uint256 nonce, address player) internal view returns (uint256){
-  uint256 count = _randomNumbers.length();
-  uint256 index = (block.prevrandao + uint256(uint160(player)) * (nonce + block.timestamp)) % count;
-  return _randomNumbers.get(index); 
+    uint256 count = _randomNumbers.length();
+    uint256 index = (block.prevrandao + uint256(uint160(player)) * (nonce + block.timestamp)) % count;
+    return _randomNumbers.get(index); 
  }
 
  function randomNumbersCount() public view override returns (uint256) {
-  return _randomNumbers.length();
+    return _randomNumbers.length();
  }
 
  function addRandomNumbers(uint256[] memory randomNumbers) public override onlyWegaGameManager {
-  for(uint256 i = _randomNumbers.length(); i<randomNumbers.length;i++) {
-   _randomNumbers.set(i, randomNumbers[i]);
-  }
+    for(uint256 i = _randomNumbers.length(); i < randomNumbers.length;i++) {
+      _randomNumbers.set(i, randomNumbers[i]);
+    }
  }
+
+  function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
 }

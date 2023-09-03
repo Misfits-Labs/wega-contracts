@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+    import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 // protocol imports
@@ -40,7 +41,8 @@ contract WegaERC20Escrow is
     IEscrow,
     IWegaERC20Escrow,
     IERC20EscrowEvents,
-    WegaEscrowManagerRole
+    WegaEscrowManagerRole,
+    UUPSUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
@@ -77,7 +79,7 @@ contract WegaERC20Escrow is
     // escrow details
     string public NAME;
     string public VERSION;
-    string public TYPE = "TOKEN-ERC20";
+    string public TYPE;
 
     // then modifiers
     modifier onlyValidRequesData(
@@ -94,21 +96,34 @@ contract WegaERC20Escrow is
         ) revert WegaEscrow_InvalidRequestData();
         _;
     }
+    // constructor() {
+    //     _disableInitializers();
+    // }
 
-    function __WegaEscrowInit__init(
+    function initialize(
         string memory name,
         string memory version
-    ) public initializer {
-        __WegaEscrowInit__unchained(name, version);
+    ) initializer public {
+        __UUPSUpgradeable_init();
+        __WegaEscrow_init(name, version);
+        __WegaEscrowManagerRole_init();
     }
 
-    function __WegaEscrowInit__unchained(
+
+    function __WegaEscrow_init(
+        string memory name,
+        string memory version
+    ) public onlyInitializing {
+        __WegaEscrowInit_init_unchained(name, version);
+    }
+
+    function __WegaEscrowInit_init_unchained(
         string memory name,
         string memory version
     ) internal onlyInitializing {
-        __WegaEscrowManagerRole_init();
         NAME = name;
         VERSION = version;
+        TYPE = "TOKEN-ERC20";
     }
 
     // then functions
@@ -314,5 +329,5 @@ contract WegaERC20Escrow is
         emit WagerWithdrawal(escrowHash, transferAmount, _msgSender());
     }
 
-
+    function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 }

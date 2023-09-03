@@ -4,14 +4,27 @@
         "1337": {
             "contracts": {
                 "WegaERC20Escrow": {
-                    "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+                    "address": "0xB0f05d25e41FbC2b52013099ED9616f1206Ae21B",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x02"
+                    "deploymentBlock": "0x8b",
+                    "implementation": "0xB0f05d25e41FbC2b52013099ED9616f1206Ae21B"
                 },
                 "WegaERC20Dummy": {
-                    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+                    "address": "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x01"
+                    "deploymentBlock": "0x8a"
+                },
+                "WegaGameController": {
+                    "address": "0xD42912755319665397FF090fBB63B1a31aE87Cee",
+                    "legacyAddresses": [],
+                    "deploymentBlock": "0x8f",
+                    "implementation": "0xD42912755319665397FF090fBB63B1a31aE87Cee"
+                },
+                "WegaChanceGame": {
+                    "address": "0x976fcd02f7C4773dd89C309fBF55D5923B4c98a1",
+                    "legacyAddresses": [],
+                    "deploymentBlock": "0x8d",
+                    "implementation": "0x976fcd02f7C4773dd89C309fBF55D5923B4c98a1"
                 }
             }
         },
@@ -26,6 +39,12 @@
                     "address": "0x1214B72be391163457090B99622A749106b72Bce",
                     "legacyAddresses": [],
                     "deploymentBlock": "0x0258d915"
+                },
+                "WegaGameController": {
+                    "address": "0x0000000000000000000000000000000000000000"
+                },
+                "WegaChanceGame": {
+                    "address": "0x0000000000000000000000000000000000000000"
                 }
             }
         },
@@ -35,6 +54,12 @@
                     "address": "0x0000000000000000000000000000000000000000"
                 },
                 "WegaERC20Dummy": {
+                    "address": "0x0000000000000000000000000000000000000000"
+                },
+                "WegaGameController": {
+                    "address": "0x0000000000000000000000000000000000000000"
+                },
+                "WegaChanceGame": {
                     "address": "0x0000000000000000000000000000000000000000"
                 }
             }

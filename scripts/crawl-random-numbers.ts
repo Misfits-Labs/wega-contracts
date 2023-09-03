@@ -1,29 +1,28 @@
-import path from 'path';
-import fs from 'fs';
-import { merge, defaultsDeep } from 'lodash';
+import { getRandomNumbersConfig, mergeRandomNumConfig } from '../src/config'
 import { utils, BigNumber } from 'ethers';
+import { unwrap } from '../src/helpers';
+import { network } from "hardhat";
 
-type RandomNumbers = {
- lastParsedRound: number;
- drands: ({ round: number, randomness: string, signature: string })[];
-}
-const storagePath = './.random-numbers';
 
-async function main(){
- const chainHash = "dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493";
- const totalRounds = 5000;
- let current = getRandomNumbersFile(chainHash);
+async function main(){  
+  const chainId: number = unwrap(network.config, 'chainId');
+  const chainHash = "dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493";
+  const totalRounds = 5000;
+  let current = getRandomNumbersConfig(chainHash);
+
  
- // for number of rounds - make a fetch call to drand api;
- let lastParsedRound: number = 0;
- for(let round = current.lastParsedRound ?? 1; round <= totalRounds;round++) {
-    console.log(`Retrieving...`);
-    const randomNumber = await getRandomNumber(chainHash, round);
-    console.log(`retrieval round: ${round} success \n ${JSON.stringify(randomNumber)}`);
-    await _save(current, chainHash, current.drands ? [...current.drands, randomNumber] : [randomNumber], lastParsedRound);
-    current = getRandomNumbersFile(chainHash);
-    lastParsedRound = round;
-  }
+  // for number of rounds - make a fetch call to drand api;
+  for(let round = current[chainId].lastParsedRound ?? 1; round <= totalRounds;round++) {
+      console.log(`Retrieving...`);
+      const randomNumber = await getRandomNumber(chainHash, round);
+      console.log(`retrieval round: ${round} success \n ${JSON.stringify(randomNumber)}`);
+      current = mergeRandomNumConfig({[chainId]: {
+          drands: current[chainId].drands ? [...current[chainId].drands, randomNumber] : [randomNumber],
+          lastParsedRound: round,
+        }},
+        chainHash
+      )
+    }
 }
 
 async function getRandomNumber(
@@ -65,34 +64,6 @@ async function getRandomNumber(
 
 function convertBytesToNumber(bytes: string){
  return BigNumber.from(String(utils.sha256(utils.arrayify("0x".concat(bytes))))).toString()
-}
-
-async function _save(
- config: unknown,
- chainHash: string,
- drands: ({ round: number, randomness: string, signature: string })[],
- lastParsedRound: number
- ) {
- const _config = merge(config, {
-  lastParsedRound,
-  drands,
- });
- const configPath = path.resolve(
-   storagePath,
-   `random-numbers-${chainHash}.json`,
- );
-  fs.writeFileSync(configPath, JSON.stringify(_config, null, 2));
-}
-
-function getRandomNumbersFile(chainHash: string): RandomNumbers {
- const configPath = path.resolve(
-   storagePath,
-   `random-numbers-${chainHash}.json`,
- );
- const file = fs.existsSync(configPath)
-   ? fs.readFileSync(configPath).toString()
-   : '{}';
- return JSON.parse(file.length ? file : '{}');
 }
 
 main().then(() => console.log('DONE!')).catch(e => {

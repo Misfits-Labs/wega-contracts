@@ -17,35 +17,34 @@ import type {
   TypedEvent,
   TypedListener,
   OnEvent,
-  PromiseOrValue,
-} from "../../../common";
+} from "../../../../common";
 
-export interface ERC2771ContextInterface extends utils.Interface {
+export interface IBeaconUpgradeableInterface extends utils.Interface {
   functions: {
-    "isTrustedForwarder(address)": FunctionFragment;
+    "implementation()": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "isTrustedForwarder"): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "implementation"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "isTrustedForwarder",
-    values: [PromiseOrValue<string>]
+    functionFragment: "implementation",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "isTrustedForwarder",
+    functionFragment: "implementation",
     data: BytesLike
   ): Result;
 
   events: {};
 }
 
-export interface ERC2771Context extends BaseContract {
+export interface IBeaconUpgradeable extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: ERC2771ContextInterface;
+  interface: IBeaconUpgradeableInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -67,37 +66,22 @@ export interface ERC2771Context extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+    implementation(overrides?: CallOverrides): Promise<[string]>;
   };
 
-  isTrustedForwarder(
-    forwarder: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  implementation(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
+    implementation(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {};
 
   estimateGas: {
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    implementation(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    isTrustedForwarder(
-      forwarder: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    implementation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

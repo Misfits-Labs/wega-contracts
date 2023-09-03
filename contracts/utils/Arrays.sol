@@ -5,18 +5,17 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 /**
  * @author @RasenGUY @Daosourced.
  */
-
 library Arrays {
     
     using Math for uint256;
 
-    function findMax(uint256[] memory values) public pure returns (uint256 max) {
+    function findMax(uint256[] memory values) internal pure returns (uint256 max) {
         for(uint256 i = 0; i < values.length; i++) {
             max = values[i].max(max);
         }
     }
 
-    function hasDraw(uint256[] memory values) public pure returns (bool) {
+    function hasDraw(uint256[] memory values) internal pure returns (bool) {
         uint256 max = findMax(values);
         for(uint256 i = 0; i < values.length; i++) {
             if(values[i] < max) {

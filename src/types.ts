@@ -3,11 +3,16 @@ import { BigNumber } from 'ethers';
 export enum ArtifactName {
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
+  WegaGameController = 'WegaGameController',
+  WegaChanceGame = 'WegaChanceGame',
 }
 
 export enum ContractName {
+  ProxyAdmin = 'ProxyAdmin',
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
+  WegaGameController = 'WegaGameController',
+  WegaChanceGame = 'WegaChanceGame',
 }
 
 export type DeployedContract = {
@@ -39,3 +44,14 @@ export type DependenciesMap = {
 }
 
 export enum TransactionState { OPEN, PENDING, READY, CLOSED }
+
+
+// For DRAND
+export type RandomNumbersConfig = {
+  [chainId: number]: {
+    lastParsedRound: number;
+    lastStoredIndex?: number;
+    drands: ({ round: number, randomness: string, signature: string })[];
+  }
+}
+ 

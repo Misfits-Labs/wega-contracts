@@ -62,7 +62,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "TYPE()": FunctionFragment;
     "VERSION()": FunctionFragment;
     "WEGA_ESCROW_MANAGER_ROLE()": FunctionFragment;
-    "__WegaEscrowInit__init(string,string)": FunctionFragment;
+    "__WegaEscrow_init(string,string)": FunctionFragment;
     "addWegaEscrowManager(address)": FunctionFragment;
     "addWegaEscrowManagers(address[])": FunctionFragment;
     "closeWegaEscrowManager(address)": FunctionFragment;
@@ -77,8 +77,10 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
     "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
+    "initialize(string,string)": FunctionFragment;
     "isWegaEscrowManager(address)": FunctionFragment;
     "owner()": FunctionFragment;
+    "proxiableUUID()": FunctionFragment;
     "removeWegaEscrowManager(address)": FunctionFragment;
     "removeWegaEscrowManagers(address[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
@@ -89,6 +91,8 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "setWithdrawers(bytes32,address[])": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "upgradeTo(address)": FunctionFragment;
+    "upgradeToAndCall(address,bytes)": FunctionFragment;
     "wagerBalance(bytes32)": FunctionFragment;
     "winners(bytes32)": FunctionFragment;
     "withdraw(bytes32)": FunctionFragment;
@@ -101,7 +105,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "TYPE"
       | "VERSION"
       | "WEGA_ESCROW_MANAGER_ROLE"
-      | "__WegaEscrowInit__init"
+      | "__WegaEscrow_init"
       | "addWegaEscrowManager"
       | "addWegaEscrowManagers"
       | "closeWegaEscrowManager"
@@ -116,8 +120,10 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "grantRole"
       | "hasRole"
       | "hash"
+      | "initialize"
       | "isWegaEscrowManager"
       | "owner"
+      | "proxiableUUID"
       | "removeWegaEscrowManager"
       | "removeWegaEscrowManagers"
       | "renounceOwnership"
@@ -128,6 +134,8 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "setWithdrawers"
       | "supportsInterface"
       | "transferOwnership"
+      | "upgradeTo"
+      | "upgradeToAndCall"
       | "wagerBalance"
       | "winners"
       | "withdraw"
@@ -145,7 +153,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "__WegaEscrowInit__init",
+    functionFragment: "__WegaEscrow_init",
     values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -220,10 +228,18 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "initialize",
+    values: [PromiseOrValue<string>, PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "isWegaEscrowManager",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "proxiableUUID",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "removeWegaEscrowManager",
     values: [PromiseOrValue<string>]
@@ -265,6 +281,14 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "upgradeTo",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "upgradeToAndCall",
+    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "wagerBalance",
     values: [PromiseOrValue<BytesLike>]
   ): string;
@@ -289,7 +313,7 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "__WegaEscrowInit__init",
+    functionFragment: "__WegaEscrow_init",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -333,11 +357,16 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hash", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isWegaEscrowManager",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "proxiableUUID",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "removeWegaEscrowManager",
     data: BytesLike
@@ -375,6 +404,11 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "upgradeToAndCall",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "wagerBalance",
     data: BytesLike
@@ -383,6 +417,8 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
+    "AdminChanged(address,address)": EventFragment;
+    "BeaconUpgraded(address)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
@@ -390,11 +426,14 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "RoleRevoked(bytes32,address,address)": EventFragment;
     "SetGameControler(address)": EventFragment;
     "SetWithdrawers(bytes32,address[])": EventFragment;
+    "Upgraded(address)": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
     "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
@@ -402,10 +441,32 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetWithdrawers"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
 }
+
+export interface AdminChangedEventObject {
+  previousAdmin: string;
+  newAdmin: string;
+}
+export type AdminChangedEvent = TypedEvent<
+  [string, string],
+  AdminChangedEventObject
+>;
+
+export type AdminChangedEventFilter = TypedEventFilter<AdminChangedEvent>;
+
+export interface BeaconUpgradedEventObject {
+  beacon: string;
+}
+export type BeaconUpgradedEvent = TypedEvent<
+  [string],
+  BeaconUpgradedEventObject
+>;
+
+export type BeaconUpgradedEventFilter = TypedEventFilter<BeaconUpgradedEvent>;
 
 export interface InitializedEventObject {
   version: number;
@@ -485,6 +546,13 @@ export type SetWithdrawersEvent = TypedEvent<
 
 export type SetWithdrawersEventFilter = TypedEventFilter<SetWithdrawersEvent>;
 
+export interface UpgradedEventObject {
+  implementation: string;
+}
+export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
+
+export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
+
 export interface WagerDepositEventObject {
   escrowId: string;
   wager: BigNumber;
@@ -560,7 +628,7 @@ export interface WegaERC20Escrow extends BaseContract {
 
     WEGA_ESCROW_MANAGER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    __WegaEscrowInit__init(
+    __WegaEscrow_init(
       name: PromiseOrValue<string>,
       version: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -648,12 +716,20 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string] & { escrowHash_: string }>;
 
+    initialize(
+      name: PromiseOrValue<string>,
+      version: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     isWegaEscrowManager(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
 
     removeWegaEscrowManager(
       account: PromiseOrValue<string>,
@@ -706,6 +782,17 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    upgradeTo(
+      newImplementation: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    upgradeToAndCall(
+      newImplementation: PromiseOrValue<string>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     wagerBalance(
       escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -732,7 +819,7 @@ export interface WegaERC20Escrow extends BaseContract {
 
   WEGA_ESCROW_MANAGER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  __WegaEscrowInit__init(
+  __WegaEscrow_init(
     name: PromiseOrValue<string>,
     version: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -820,12 +907,20 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  initialize(
+    name: PromiseOrValue<string>,
+    version: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   isWegaEscrowManager(
     account: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   owner(overrides?: CallOverrides): Promise<string>;
+
+  proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
   removeWegaEscrowManager(
     account: PromiseOrValue<string>,
@@ -878,6 +973,17 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  upgradeTo(
+    newImplementation: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  upgradeToAndCall(
+    newImplementation: PromiseOrValue<string>,
+    data: PromiseOrValue<BytesLike>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   wagerBalance(
     escrowHash: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
@@ -904,7 +1010,7 @@ export interface WegaERC20Escrow extends BaseContract {
 
     WEGA_ESCROW_MANAGER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    __WegaEscrowInit__init(
+    __WegaEscrow_init(
       name: PromiseOrValue<string>,
       version: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -992,12 +1098,20 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    initialize(
+      name: PromiseOrValue<string>,
+      version: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     isWegaEscrowManager(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     owner(overrides?: CallOverrides): Promise<string>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
     removeWegaEscrowManager(
       account: PromiseOrValue<string>,
@@ -1046,6 +1160,17 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    upgradeTo(
+      newImplementation: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    upgradeToAndCall(
+      newImplementation: PromiseOrValue<string>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     wagerBalance(
       escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -1063,6 +1188,22 @@ export interface WegaERC20Escrow extends BaseContract {
   };
 
   filters: {
+    "AdminChanged(address,address)"(
+      previousAdmin?: null,
+      newAdmin?: null
+    ): AdminChangedEventFilter;
+    AdminChanged(
+      previousAdmin?: null,
+      newAdmin?: null
+    ): AdminChangedEventFilter;
+
+    "BeaconUpgraded(address)"(
+      beacon?: PromiseOrValue<string> | null
+    ): BeaconUpgradedEventFilter;
+    BeaconUpgraded(
+      beacon?: PromiseOrValue<string> | null
+    ): BeaconUpgradedEventFilter;
+
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
@@ -1124,6 +1265,13 @@ export interface WegaERC20Escrow extends BaseContract {
       withdrawers?: PromiseOrValue<string>[] | null
     ): SetWithdrawersEventFilter;
 
+    "Upgraded(address)"(
+      implementation?: PromiseOrValue<string> | null
+    ): UpgradedEventFilter;
+    Upgraded(
+      implementation?: PromiseOrValue<string> | null
+    ): UpgradedEventFilter;
+
     "WagerDeposit(bytes32,uint256,address)"(
       escrowId?: PromiseOrValue<BytesLike> | null,
       wager?: PromiseOrValue<BigNumberish> | null,
@@ -1171,7 +1319,7 @@ export interface WegaERC20Escrow extends BaseContract {
 
     WEGA_ESCROW_MANAGER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    __WegaEscrowInit__init(
+    __WegaEscrow_init(
       name: PromiseOrValue<string>,
       version: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1257,12 +1405,20 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    initialize(
+      name: PromiseOrValue<string>,
+      version: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     isWegaEscrowManager(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
 
     removeWegaEscrowManager(
       account: PromiseOrValue<string>,
@@ -1315,6 +1471,17 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    upgradeTo(
+      newImplementation: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    upgradeToAndCall(
+      newImplementation: PromiseOrValue<string>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     wagerBalance(
       escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -1346,7 +1513,7 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    __WegaEscrowInit__init(
+    __WegaEscrow_init(
       name: PromiseOrValue<string>,
       version: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1432,12 +1599,20 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    initialize(
+      name: PromiseOrValue<string>,
+      version: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     isWegaEscrowManager(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     removeWegaEscrowManager(
       account: PromiseOrValue<string>,
@@ -1488,6 +1663,17 @@ export interface WegaERC20Escrow extends BaseContract {
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    upgradeTo(
+      newImplementation: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    upgradeToAndCall(
+      newImplementation: PromiseOrValue<string>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     wagerBalance(

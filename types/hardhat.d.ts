@@ -25,9 +25,29 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OwnableUpgradeable__factory>;
     getContractFactory(
+      name: "IERC1822ProxiableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1822ProxiableUpgradeable__factory>;
+    getContractFactory(
+      name: "IERC1967Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1967Upgradeable__factory>;
+    getContractFactory(
+      name: "IBeaconUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IBeaconUpgradeable__factory>;
+    getContractFactory(
+      name: "ERC1967UpgradeUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC1967UpgradeUpgradeable__factory>;
+    getContractFactory(
       name: "Initializable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Initializable__factory>;
+    getContractFactory(
+      name: "UUPSUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UUPSUpgradeable__factory>;
     getContractFactory(
       name: "IERC20Upgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -48,10 +68,6 @@ declare module "hardhat/types/runtime" {
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
-    getContractFactory(
-      name: "ERC2771Context",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC2771Context__factory>;
     getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -81,37 +97,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20EscrowEvents__factory>;
     getContractFactory(
-      name: "IGameControllerEvents",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IGameControllerEvents__factory>;
-    getContractFactory(
       name: "IWegaGameControllerEvents",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameControllerEvents__factory>;
-    getContractFactory(
-      name: "GameController",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.GameController__factory>;
-    getContractFactory(
-      name: "ITwoWayChanceGame",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ITwoWayChanceGame__factory>;
     getContractFactory(
       name: "IWegaChanceGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaChanceGame__factory>;
     getContractFactory(
-      name: "TwoWayChanceGame",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.TwoWayChanceGame__factory>;
-    getContractFactory(
       name: "WegaChanceGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaChanceGame__factory>;
-    getContractFactory(
-      name: "IGameController",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IGameController__factory>;
     getContractFactory(
       name: "IWegaGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -124,10 +120,6 @@ declare module "hardhat/types/runtime" {
       name: "WegaGameManagerRole",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaGameManagerRole__factory>;
-    getContractFactory(
-      name: "Arrays",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Arrays__factory>;
     getContractFactory(
       name: "WegaGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -149,10 +141,35 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OwnableUpgradeable>;
     getContractAt(
+      name: "IERC1822ProxiableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1822ProxiableUpgradeable>;
+    getContractAt(
+      name: "IERC1967Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1967Upgradeable>;
+    getContractAt(
+      name: "IBeaconUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IBeaconUpgradeable>;
+    getContractAt(
+      name: "ERC1967UpgradeUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC1967UpgradeUpgradeable>;
+    getContractAt(
       name: "Initializable",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Initializable>;
+    getContractAt(
+      name: "UUPSUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UUPSUpgradeable>;
     getContractAt(
       name: "IERC20Upgradeable",
       address: string,
@@ -178,11 +195,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
-    getContractAt(
-      name: "ERC2771Context",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ERC2771Context>;
     getContractAt(
       name: "ERC20",
       address: string,
@@ -219,45 +231,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20EscrowEvents>;
     getContractAt(
-      name: "IGameControllerEvents",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IGameControllerEvents>;
-    getContractAt(
       name: "IWegaGameControllerEvents",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaGameControllerEvents>;
-    getContractAt(
-      name: "GameController",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.GameController>;
-    getContractAt(
-      name: "ITwoWayChanceGame",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ITwoWayChanceGame>;
     getContractAt(
       name: "IWegaChanceGame",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaChanceGame>;
     getContractAt(
-      name: "TwoWayChanceGame",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.TwoWayChanceGame>;
-    getContractAt(
       name: "WegaChanceGame",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WegaChanceGame>;
-    getContractAt(
-      name: "IGameController",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IGameController>;
     getContractAt(
       name: "IWegaGameController",
       address: string,
@@ -273,11 +260,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WegaGameManagerRole>;
-    getContractAt(
-      name: "Arrays",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Arrays>;
     getContractAt(
       name: "WegaGameController",
       address: string,

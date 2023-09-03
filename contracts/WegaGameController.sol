@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeab
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 
 import "./escrow/IWegaERC20Escrow.sol";
@@ -34,7 +35,8 @@ contract WegaGameController is
   IWegaGameController, 
   IWegaGameControllerEvents,
   IWega,
-  OwnableUpgradeable {
+  OwnableUpgradeable,
+  UUPSUpgradeable {
 
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
   using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
@@ -55,8 +57,19 @@ contract WegaGameController is
 
   IWegaChanceGame private _chanceContract;
 
-  function __WegaGameController_init(address erc20EscrowAddress, address chanceContract) public initializer {
+  function initialize(
+    address erc20EscrowAddress, 
+    address chanceContract
+  ) initializer public {
     __Ownable_init();
+    __WegaGameController_init(erc20EscrowAddress, chanceContract);
+    __UUPSUpgradeable_init();
+  }
+
+  function __WegaGameController_init(
+    address erc20EscrowAddress, 
+    address chanceContract
+  ) public onlyInitializing {
     __WegaGameController_init_unchained(erc20EscrowAddress, chanceContract);
   } 
 
@@ -100,7 +113,6 @@ contract WegaGameController is
     game.requiredPlayers = requiredPlayerNum;
     game.playersDeposited = 1;
     _games[escrowHash] = game;
-
     emit GameCreation(escrowHash, _msgSender(), gameType); 
   }
 
@@ -192,4 +204,5 @@ contract WegaGameController is
       }
     }
   }
+  function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 }
