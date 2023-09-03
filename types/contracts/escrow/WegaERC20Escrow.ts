@@ -94,7 +94,6 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "wagerBalance(bytes32)": FunctionFragment;
-    "winners(bytes32)": FunctionFragment;
     "withdraw(bytes32)": FunctionFragment;
   };
 
@@ -137,7 +136,6 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "upgradeTo"
       | "upgradeToAndCall"
       | "wagerBalance"
-      | "winners"
       | "withdraw"
   ): FunctionFragment;
 
@@ -293,10 +291,6 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "winners",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "withdraw",
     values: [PromiseOrValue<BytesLike>]
   ): string;
@@ -413,7 +407,6 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "wagerBalance",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
@@ -798,11 +791,6 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    winners(
-      arg0: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
     withdraw(
       escrowHash: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -989,11 +977,6 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  winners(
-    arg0: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
   withdraw(
     escrowHash: PromiseOrValue<BytesLike>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1175,11 +1158,6 @@ export interface WegaERC20Escrow extends BaseContract {
       escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    winners(
-      arg0: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     withdraw(
       escrowHash: PromiseOrValue<BytesLike>,
@@ -1487,11 +1465,6 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    winners(
-      arg0: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     withdraw(
       escrowHash: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1678,11 +1651,6 @@ export interface WegaERC20Escrow extends BaseContract {
 
     wagerBalance(
       escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    winners(
-      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

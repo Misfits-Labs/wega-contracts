@@ -26,6 +26,7 @@ describe("WegaERC20Escrow", () => {
 
   // accounts
   let signers: SignerWithAddress[],
+      escrowManager: SignerWithAddress, 
       coinbase: SignerWithAddress, 
       others: SignerWithAddress[],
       alice: SignerWithAddress, 
@@ -44,7 +45,7 @@ describe("WegaERC20Escrow", () => {
 
     // accounts setup
     signers = await ethers.getSigners();
-    [coinbase, ...others] = signers;
+    [coinbase, escrowManager, ...others] = signers;
     [alice, bob, carl, david, ed, fred, ...others] = others;
 
     // factory setup
@@ -62,7 +63,7 @@ describe("WegaERC20Escrow", () => {
       ed.address, 
       fred.address
     ]);
-    
+    await erc20Escrow.connect(coinbase).addWegaEscrowManager(escrowManager.address);
   });
 
   describe("Function: hash(address,address,uint256,uint256)", () => {
@@ -73,8 +74,25 @@ describe("WegaERC20Escrow", () => {
       expect(await erc20Escrow.connect(coinbase).hash(erc20Dummy.address, alice.address, 2, utils.parseEther(String(10)), 0)).to.equal(calculatedRequestId);
     });
   });
-  describe("Function: createWagerAndDeposit(address,address,uint256,uint256)", () => {
+  describe("Function: createWagerRequest(address,address,uint256,uint256)", () => {
+    it("should allow only escrowManager to call", async () => {
+      const request = [
+        constants.AddressZero, 
+        alice.address, 
+        2, 
+        utils.parseEther(String(5))
+      ]
+      await expect(erc20Escrow.connect(alice).createWagerRequest(
+        request[0] as string, 
+        request[1] as string, 
+        request[2],
+        request[3],
+        )
+      ).to.be.revertedWith("WegaAccessControl: CallerNotAllowed");
+    })
     it("should throw if request data is invalid", async () => {
+      await erc20Dummy.connect(alice).approve(erc20Escrow.address, utils.parseEther(String(5)));
+
       const invalidRequests = [
         [
           constants.AddressZero, 
@@ -91,7 +109,7 @@ describe("WegaERC20Escrow", () => {
         [
           erc20Dummy.address, 
           alice.address, 
-          1, 
+          0, 
           utils.parseEther(String(5)), 
         ],
         [
@@ -102,13 +120,13 @@ describe("WegaERC20Escrow", () => {
         ],
       ]
       await Promise.all(invalidRequests.map(async (request) => {
-        await expect(erc20Escrow.connect(alice).createWagerAndDeposit(
+        await expect(erc20Escrow.connect(escrowManager).createWagerRequest(
           request[0] as string, 
           request[1] as string, 
           request[2],
           request[3],
           )
-        ).to.be.rejectedWith("WegaEscrow_InvalidRequestData()");
+        ).to.be.revertedWith("WegaEscrow: InvalidRequestData");
       }))
     });
     it("should emit the correct event and create a new escrow request", async () => {
@@ -119,7 +137,7 @@ describe("WegaERC20Escrow", () => {
       const wager = aliceAmounts[0] 
       await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceAmounts[0]);
       const escId = await erc20Escrow.hash(token, account, depositors, wager, nonce);
-      await expect(erc20Escrow.connect(alice).createWagerAndDeposit(token, account, depositors, wager)).to.emit(erc20Escrow, 'WagerRequestCreation').withArgs(escId, token, account, wager);
+      await expect(erc20Escrow.connect(escrowManager).createWagerRequest(token, account, depositors, wager)).to.emit(erc20Escrow, 'WagerRequestCreation').withArgs(escId, token, account, wager);
     });
   });
   describe("Function: deposit(bytes32,uint256)", () => {
@@ -140,33 +158,27 @@ describe("WegaERC20Escrow", () => {
       // simulate wager creation
       escrowId = await erc20Escrow.hash(token, creator.address, depositors, wager, nonce);
       await erc20Dummy.connect(creator).approve(erc20Escrow.address, wager);
-      await erc20Escrow.createWagerAndDeposit(token, bob.address, depositors, wager);
+      await erc20Escrow.connect(escrowManager).createWagerRequest(token, bob.address, depositors, wager);
+    })
+    it("should allow only escrowManager to call", async () => {
+      await expect(erc20Escrow.connect(alice).deposit(
+        escrowId as string, 
+        alice.address as string, 
+        wager)
+      ).to.be.revertedWith("WegaAccessControl: CallerNotAllowed");
     })
     it("should throw if wager amount is more or less then ask amount", async () => {
       await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
-      await expect(erc20Escrow.connect(accounts[1]).deposit(escrowId, wager.sub(BigNumber.from("2")))).to.be.rejectedWith("WegaEscrow_InvalidWagerAmount()")
-      await expect(erc20Escrow.connect(accounts[1]).deposit(escrowId, wager.add(BigNumber.from("4")))).to.be.rejectedWith("WegaEscrow_InvalidWagerAmount()")
+      await expect(erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[1].address, wager.sub(BigNumber.from("2")))).to.be.revertedWith("WegaEscrow: InvalidWagerAmount")
+      await expect(erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[1].address, wager.add(BigNumber.from("4")))).to.be.revertedWith("WegaEscrow: InvalidWagerAmount")
     });
     it("should throw if creator is the one depositing", async () => {
       await erc20Dummy.connect(creator).increaseAllowance(erc20Escrow.address, wager);
-      await expect(erc20Escrow.connect(creator).deposit(escrowId, wager.add(BigNumber.from("4")))).to.be.rejectedWith("WegaEscrow_CanOnlyDepositOnce()")
+      await expect(erc20Escrow.connect(escrowManager).deposit(escrowId, creator.address, wager)).to.be.revertedWith("WegaEscrow: CanOnlyDepositOnce")
     })
     it("should deposit wager amount and emit the correct event", async ()=> {
       await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
-      await expect(erc20Escrow.connect(accounts[2]).deposit(escrowId, wager)).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, accounts[2].address);
-    });
-    it("should throw if the totalWagerAmount is reached", async () => {
-      // arrange
-      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
-      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
-      await erc20Dummy.connect(ed).increaseAllowance(erc20Escrow.address, wager);
-      
-      // act 
-      await erc20Escrow.connect(accounts[1]).deposit(escrowId, wager);
-      await erc20Escrow.connect(accounts[2]).deposit(escrowId, wager);
-      
-      // assert
-      await expect(erc20Escrow.connect(ed).deposit(escrowId, wager)).to.be.rejectedWith("WegaEscrow_MaximumWagerAmountReached()")
+      await expect(erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[2].address , wager)).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, accounts[2].address);
     });
     it("should correctly change state if the total wager amount is reached", async () => {
       // arrange
@@ -174,8 +186,8 @@ describe("WegaERC20Escrow", () => {
       await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
       
       // act 
-      await erc20Escrow.connect(accounts[1]).deposit(escrowId, wager);
-      await erc20Escrow.connect(accounts[2]).deposit(escrowId, wager);
+      await erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[1].address, wager);
+      await erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[2].address, wager);
       
       // assert
       const request = await erc20Escrow.getWagerRequest(escrowId);
@@ -189,11 +201,11 @@ describe("WegaERC20Escrow", () => {
       await erc20Dummy.connect(fred).increaseAllowance(erc20Escrow.address, wager);
       
       // act 
-      await erc20Escrow.connect(accounts[1]).deposit(escrowId, wager);
-      await erc20Escrow.connect(accounts[2]).deposit(escrowId, wager);
+      await erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[1].address, wager);
+      await erc20Escrow.connect(escrowManager).deposit(escrowId, accounts[2].address, wager);
       
       // assert
-      await expect(erc20Escrow.connect(fred).deposit(escrowId, wager)).to.be.rejectedWith("WegaEscrow_InvalidRequestState()");
+      await expect(erc20Escrow.connect(escrowManager).deposit(escrowId, fred.address, wager)).to.be.revertedWith("WegaEscrow: InvalidRequestState");
     });
   });
 
@@ -212,13 +224,13 @@ describe("WegaERC20Escrow", () => {
       // for querying one
       escrowId = await erc20Escrow.hash(token, alice.address, 2, aliceWager, nonce);
       await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceWager);
-      await erc20Escrow.createWagerAndDeposit(token, alice.address, 2, aliceWager);
+      await erc20Escrow.connect(escrowManager).createWagerRequest(token, alice.address, 2, aliceWager);
       
       await Promise.all(accounts.map(async (acc) => {
         const w = utils.parseEther(String(5));
         // console.log(await erc20Dummy.balanceOf(acc.address), w); 
         await erc20Dummy.connect(acc).approve(erc20Escrow.address, w);
-        await erc20Escrow.createWagerAndDeposit(token, acc.address, 2, w);
+        await erc20Escrow.connect(escrowManager).createWagerRequest(token, acc.address, 2, w);
       }))
     })
 
@@ -229,9 +241,9 @@ describe("WegaERC20Escrow", () => {
 
     it('should return a single escrow request', async () => {
       const request = await erc20Escrow.getWagerRequest(escrowId);
-      expect(request.escrowId).to.equal(escrowId);
-      expect(request.wager).to.equal(aliceWager);
-      expect(request.token).to.equal(erc20Dummy.address);
+      expect(request.escrowHash).to.equal(escrowId);
+      expect(request.wagerAmount).to.equal(aliceWager);
+      expect(request.tokenAddress).to.equal(erc20Dummy.address);
       expect(request.nonce).to.equal(nonce);
       expect(request.totalWager).to.equal(aliceWager.mul(BigNumber.from(2)));
     });
@@ -242,16 +254,7 @@ describe("WegaERC20Escrow", () => {
       expect(await erc20Escrow.containsPlayer(escrowId, alice.address)).to.be.true;
     })
   })
-  describe('function: setGameController(address)', () => {
-    it('can only be called by the owner', async () => {
-      let gameController = fred.address;
-      await expect(erc20Escrow.connect(alice).setGameController(gameController)).to.be.rejectedWith("Ownable: caller is not the owner")
-    })
-    it('should set the correct game controller and emit correct event', async () => {
-      let gameController = fred.address;
-      await expect(erc20Escrow.connect(coinbase).setGameController(gameController)).to.emit(erc20Escrow, 'SetGameControler').withArgs(gameController);
-    })
-  })
+
   describe('Withdrawals', () => {
     let gameController: SignerWithAddress;
     let winner: SignerWithAddress;
@@ -264,7 +267,6 @@ describe("WegaERC20Escrow", () => {
 
     beforeEach(async () => {
       gameController = fred;
-      await erc20Escrow.connect(coinbase).setGameController(gameController.address);
       winner = carl;
       loser = bob; 
       
@@ -276,37 +278,37 @@ describe("WegaERC20Escrow", () => {
       escrowId = await erc20Escrow.hash(token, winner.address, 2, wager, nonce);
       await erc20Dummy.connect(winner).approve(erc20Escrow.address, wager);
       await erc20Dummy.connect(loser).approve(erc20Escrow.address, wager);
-      await erc20Escrow.createWagerAndDeposit(token, winner.address, 2, wager);
+      await erc20Escrow.connect(escrowManager).createWagerRequest(token, winner.address, 2, wager);
     })
     describe('Function: setWithdrawer(bytes32 escrowId, address winner)', () => {
-      it('can only be called by game controller', async () => {
-        await expect(erc20Escrow.connect(alice).setWithdrawer(escrowId, winner.address)).to.be.rejectedWith("WegaEscrow_CallerNotApproved()")
-      });
-      it('must contain withdrawer as player', async () => {
-        await expect(erc20Escrow.connect(gameController).setWithdrawer(escrowId, alice.address)).to.be.rejectedWith("WegaEscrow_InvalidRequestData()")
+      it('can only be called by escrowManager', async () => {
+        await expect(erc20Escrow.connect(alice).setWithdrawers(escrowId, [winner.address])).to.be.revertedWith("WegaAccessControl: CallerNotAllowed")
       });
       it('can only be called if escrow is pending', async () => {
-        await expect(erc20Escrow.connect(gameController).setWithdrawer(escrowId, winner.address)).to.be.rejectedWith("WegaEscrow_InvalidRequestState()")
+        await expect(erc20Escrow.connect(escrowManager).setWithdrawers(escrowId, [winner.address])).to.be.revertedWith("WegaEscrow: InvalidRequestState")
+      });
+      it('must contain withdrawer as player', async () => {
+      await erc20Escrow.connect(escrowManager).deposit(escrowId, loser.address, wager);
+        await expect(erc20Escrow.connect(escrowManager).setWithdrawers(escrowId, [alice.address])).to.be.revertedWith("WegaEscrow: InvalidRequestData")
       });
       it('must emit the correct event and set wager state as READY', async () => {
-        await erc20Escrow.connect(loser).deposit(escrowId, wager);
-        await expect(erc20Escrow.connect(gameController).setWithdrawer(escrowId, winner.address)).to.emit(erc20Escrow, 'SetWithdrawer').withArgs(escrowId, winner.address);
-        expect(await erc20Escrow.winners(escrowId)).to.equal(winner.address);
+        await erc20Escrow.connect(escrowManager).deposit(escrowId, loser.address, wager);
+        await expect(erc20Escrow.connect(escrowManager).setWithdrawers(escrowId, [winner.address])).to.emit(erc20Escrow, 'SetWithdrawers');
         expect((await erc20Escrow.getWagerRequest(escrowId)).state).to.equal(TransactionState.READY);
       });
     })
     describe('Function: withdraw(bytes32 escrowId)', () => {
 
-      it('can only be called by the winner', async () => {
-        await erc20Escrow.connect(loser).deposit(escrowId, wager);
-        await erc20Escrow.connect(gameController).setWithdrawer(escrowId, winner.address);
-        await expect(erc20Escrow.connect(gameController).withdraw(escrowId)).to.be.rejectedWith("WegaEscrow_CallerNotApproved()")
+      it('can only be called by players with balance', async () => {
+        await erc20Escrow.connect(escrowManager).deposit(escrowId, loser.address, wager);
+        await erc20Escrow.connect(escrowManager).setWithdrawers(escrowId, [winner.address]);
+        await expect(erc20Escrow.connect(gameController).withdraw(escrowId)).to.be.revertedWith("WegaEscrow: InsufficientBalance")
       })
       it('it should emit the correct event and transfer the correct amount', async () => {
         const balanceB: BigNumber = await erc20Dummy.balanceOf(winner.address);
-        await erc20Escrow.connect(loser).deposit(escrowId, wager);
-        await erc20Escrow.connect(gameController).setWithdrawer(escrowId, winner.address);
-        await expect(erc20Escrow.connect( winner).withdraw(escrowId)).to.emit(erc20Escrow, 'WagerWithdrawal').withArgs(escrowId, wager.add(wager), winner.address);
+        await erc20Escrow.connect(escrowManager).deposit(escrowId, loser.address, wager);
+        await erc20Escrow.connect(escrowManager).setWithdrawers(escrowId, [winner.address]);
+        await expect(erc20Escrow.connect(winner).withdraw(escrowId)).to.emit(erc20Escrow, 'WagerWithdrawal').withArgs(escrowId, wager.add(wager), winner.address);
         expect(await erc20Dummy.balanceOf(winner.address)).to.equal(balanceB.add(wager.add(wager)));
         expect((await erc20Escrow.getWagerRequest(escrowId)).state).to.equal(TransactionState.CLOSED);
       })

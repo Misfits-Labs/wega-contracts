@@ -17,7 +17,6 @@ import "../events/IERC20EscrowEvents.sol";
 
 import '../errors/WegaEscrowErrors.sol';
 
-import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
 import "../roles/WegaEscrowManagerRole.sol";
 
 /**
@@ -59,9 +58,6 @@ contract WegaERC20Escrow is
     // request accountBalances
     mapping(address => uint256) private _accountBalances;
 
-    // winner - withdrawers
-    mapping(bytes32 => address) public winners;
-
     // game controller
     address gameController;
 
@@ -80,12 +76,9 @@ contract WegaERC20Escrow is
         uint256 accountsCount,
         uint256 wager
     ) {
-        require(token != address(0) && account != address(0) && accountsCount <= 1 && wager <= 0, INVALID_REQUEST_DATA);
+        require(token != address(0) && account != address(0) && accountsCount > 1 && wager > 0, INVALID_REQUEST_DATA);
         _;
     }
-    // constructor() {
-    //     _disableInitializers();
-    // }
 
     function initialize(
         string memory name,
@@ -239,7 +232,6 @@ contract WegaERC20Escrow is
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
         require(request.state == TransactionState.OPEN, INVALID_REQUEST_STATE);
         require(wagerAmount == request.wagerAmount, INVALID_WAGER_AMOUNT);
-        require(_escrowBalances[escrowHash] + wagerAmount <= request.totalWager, MAX_WAGER_REACHED);
         require(_deposits[escrowHash][account] == 0, INVALID_DEPOSIT_CALL);
 
         // update depositor on escrow
@@ -285,7 +277,6 @@ contract WegaERC20Escrow is
         uint256 withdrawableAmount = _wagerRequests[escrowHash].totalWager.mulDiv(1, winners_.length);
         for (uint256 i = 0; i < winners_.length; i++) {
             require(containsPlayer(escrowHash, winners_[i]), INVALID_REQUEST_DATA);
-
             _accountBalances[winners_[i]] = withdrawableAmount;
         }
         _wagerRequests[escrowHash].state = TransactionState.READY;

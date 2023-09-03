@@ -4,10 +4,7 @@ pragma solidity ^0.8.14;
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-import {
-    WegaAccessControl_CallerNotAllowed,
-    WegaAccessControl_ReceiverIsEmpty
-} from '../errors/AccessControl.sol';
+import '../errors/AccessControlErrors.sol';
 
 /**
   * @title WegaEscrowManagerRole
@@ -15,12 +12,12 @@ import {
   * @notice Access control for wega escrow
 */
 
-abstract contract  WegaEscrowManagerRole is OwnableUpgradeable, AccessControlUpgradeable {
+abstract contract  WegaEscrowManagerRole is OwnableUpgradeable, AccessControlErrors, AccessControlUpgradeable {
     
     bytes32 public constant WEGA_ESCROW_MANAGER_ROLE = keccak256('WEGA_ESCROW_MANAGER_ROLE');
 
     modifier onlyWegaEscrowManager() {
-        if(!isWegaEscrowManager(_msgSender())) revert WegaAccessControl_CallerNotAllowed();
+        require(isWegaEscrowManager(_msgSender()), CALLER_NOT_ALLOWED);
         _;
     }
 
@@ -93,7 +90,7 @@ abstract contract  WegaEscrowManagerRole is OwnableUpgradeable, AccessControlUpg
     * @notice minter account with funds' forwarding
     */
     function closeWegaEscrowManager(address payable receiver) external payable onlyWegaEscrowManager {
-        if(receiver == address(0x0)) revert WegaAccessControl_ReceiverIsEmpty();
+        require(receiver != address(0x0), EMPT_RECEIVER);
         renounceWegaEscrowManager();
         receiver.transfer(msg.value);
     }
@@ -102,7 +99,7 @@ abstract contract  WegaEscrowManagerRole is OwnableUpgradeable, AccessControlUpg
     * @notice Replace minter account by new account with funds' forwarding
     */
     function rotateWegaEscrowManager(address payable receiver) external payable onlyWegaEscrowManager {
-        if(receiver == address(0x0)) revert WegaAccessControl_ReceiverIsEmpty();
+        require(receiver != address(0x0), EMPT_RECEIVER);
         _addWegaEscrowManager(receiver);
         renounceWegaEscrowManager();
         receiver.transfer(msg.value);

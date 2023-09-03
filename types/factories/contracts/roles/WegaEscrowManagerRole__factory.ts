@@ -11,16 +11,6 @@ import type {
 
 const _abi = [
   {
-    inputs: [],
-    name: "WegaAccessControl_CallerNotAllowed",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "WegaAccessControl_ReceiverIsEmpty",
-    type: "error",
-  },
-  {
     anonymous: false,
     inputs: [
       {
