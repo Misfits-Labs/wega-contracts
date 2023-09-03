@@ -9,8 +9,6 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeab
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
-// import "hardhat/console.sol";
-
 // protocol imports
 import "./IEscrow.sol";
 import "./IWegaERC20Escrow.sol";
@@ -25,12 +23,10 @@ import {
     WegaEscrow_InvalidWagerAmount,
     WegaEscrow_CanOnlyDepositOnce,
     WegaEscrow_MaximumWagerAmountReached
-} from '../errors/EscrowErrors.sol';
+} from '../errors/WegaEscrowErrors.sol';
 
 import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
 import "../roles/WegaEscrowManagerRole.sol";
-
-
 
 /**
   * @title WegaERC20Escrow (MVP)
@@ -41,6 +37,7 @@ import "../roles/WegaEscrowManagerRole.sol";
   * and then allows for withdrawal of tokens through the game controller.
 */
 contract WegaERC20Escrow is
+    IEscrow,
     IWegaERC20Escrow,
     IERC20EscrowEvents,
     WegaEscrowManagerRole
@@ -136,7 +133,7 @@ contract WegaERC20Escrow is
         ERC20WagerRequest memory wagerRequest_;
 
         // set request data
-        wagerRequest_.state = IEscrow.TransactionState.OPEN;
+        wagerRequest_.state = TransactionState.OPEN;
         wagerRequest_.tokenAddress = tokenAddress;
         wagerRequest_.wagerAmount = wagerAmount;
         wagerRequest_.totalWager = wagerAmount * requiredPlayerNum;
@@ -238,7 +235,7 @@ contract WegaERC20Escrow is
         uint256 wagerAmount
     ) external onlyWegaEscrowManager {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
-        if (request.state != IEscrow.TransactionState.OPEN)
+        if (request.state != TransactionState.OPEN)
             revert WegaEscrow_InvalidRequestState();
         if (wagerAmount != request.wagerAmount)
             revert WegaEscrow_InvalidWagerAmount();
@@ -263,7 +260,7 @@ contract WegaERC20Escrow is
 
         // change state to pending if total wager amount is reached
         if (request.totalWager == _escrowBalances[escrowHash]) {
-            _wagerRequests[escrowHash].state = IEscrow.TransactionState.PENDING;
+            _wagerRequests[escrowHash].state = TransactionState.PENDING;
         }
 
         // emit deposit
@@ -286,7 +283,7 @@ contract WegaERC20Escrow is
         address[] memory winners_
     ) external override onlyWegaEscrowManager {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
-        if (request.state != IEscrow.TransactionState.PENDING)
+        if (request.state != TransactionState.PENDING)
             revert WegaEscrow_InvalidRequestState();
         uint256 withdrawableAmount = _wagerRequests[escrowHash]
             .totalWager
@@ -296,20 +293,20 @@ contract WegaERC20Escrow is
                 revert WegaEscrow_InvalidRequestData();
             _accountBalances[winners_[i]] = withdrawableAmount;
         }
-        _wagerRequests[escrowHash].state = IEscrow.TransactionState.READY;
+        _wagerRequests[escrowHash].state = TransactionState.READY;
         emit SetWithdrawers(escrowHash, winners_);
     }
 
     function withdraw(bytes32 escrowHash) public {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
-        if (request.state != IEscrow.TransactionState.READY)
+        if (request.state != TransactionState.READY)
             revert WegaEscrow_InvalidRequestState();
         if (_accountBalances[_msgSender()] == 0 ether)
             revert WegaEscrow_InvalidRequestData();
         uint256 transferAmount = _accountBalances[_msgSender()];
         _escrowBalances[escrowHash] -= transferAmount;
         delete _accountBalances[_msgSender()];
-        _wagerRequests[escrowHash].state = IEscrow.TransactionState.CLOSED;
+        _wagerRequests[escrowHash].state = TransactionState.CLOSED;
         IERC20Upgradeable(request.tokenAddress).transfer(
             _msgSender(),
             transferAmount

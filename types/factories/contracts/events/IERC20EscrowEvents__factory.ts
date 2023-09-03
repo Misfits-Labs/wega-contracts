@@ -34,12 +34,12 @@ const _abi = [
       },
       {
         indexed: true,
-        internalType: "address",
-        name: "withdrawer",
-        type: "address",
+        internalType: "address[]",
+        name: "withdrawers",
+        type: "address[]",
       },
     ],
-    name: "SetWithdrawer",
+    name: "SetWithdrawers",
     type: "event",
   },
   {

@@ -6,15 +6,6 @@ import "./IEscrow.sol";
 
 interface IWegaERC20Escrow {
  
- struct ERC20WagerRequest {
-  IEscrow.TransactionState state;
-  bytes32 escrowHash;
-  uint256 wagerAmount;
-  address tokenAddress;
-  uint256 totalWager;
-  uint256 nonce;
- }
-
  /**
  * @notice create wager request
  * @param token address of the token to used for collatoral
@@ -68,13 +59,13 @@ interface IWegaERC20Escrow {
  /**
  * @notice retrieves all erc20 wager requests in existance
  */
- function getWagerRequests() external view returns (ERC20WagerRequest[] memory);
+ function getWagerRequests() external view returns (IEscrow.ERC20WagerRequest[] memory);
 
  /**
  * @notice retrieves a erc20 wager requests
  * @param escrowHash id of the wager request
  */
- function getWagerRequest(bytes32 escrowHash) external view returns (ERC20WagerRequest memory);
+ function getWagerRequest(bytes32 escrowHash) external view returns (IEscrow.ERC20WagerRequest memory);
 
  /**
  * @notice retrieves a erc20 wager deposit of a user

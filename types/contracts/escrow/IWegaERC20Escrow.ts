@@ -23,14 +23,14 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export declare namespace IWegaERC20Escrow {
+export declare namespace IEscrow {
   export type ERC20WagerRequestStruct = {
     state: PromiseOrValue<BigNumberish>;
-    escrowId: PromiseOrValue<BytesLike>;
-    wager: PromiseOrValue<BigNumberish>;
-    token: PromiseOrValue<string>;
-    nonce: PromiseOrValue<BigNumberish>;
+    escrowHash: PromiseOrValue<BytesLike>;
+    wagerAmount: PromiseOrValue<BigNumberish>;
+    tokenAddress: PromiseOrValue<string>;
     totalWager: PromiseOrValue<BigNumberish>;
+    nonce: PromiseOrValue<BigNumberish>;
   };
 
   export type ERC20WagerRequestStructOutput = [
@@ -42,39 +42,39 @@ export declare namespace IWegaERC20Escrow {
     BigNumber
   ] & {
     state: number;
-    escrowId: string;
-    wager: BigNumber;
-    token: string;
-    nonce: BigNumber;
+    escrowHash: string;
+    wagerAmount: BigNumber;
+    tokenAddress: string;
     totalWager: BigNumber;
+    nonce: BigNumber;
   };
 }
 
 export interface IWegaERC20EscrowInterface extends utils.Interface {
   functions: {
     "containsPlayer(bytes32,address)": FunctionFragment;
-    "createWagerAndDeposit(address,address,uint256,uint256)": FunctionFragment;
+    "createWagerRequest(address,address,uint256,uint256)": FunctionFragment;
     "currentNonce(address)": FunctionFragment;
+    "deposit(bytes32,address,uint256)": FunctionFragment;
     "depositOf(bytes32,address)": FunctionFragment;
     "getWagerRequest(bytes32)": FunctionFragment;
     "getWagerRequests()": FunctionFragment;
     "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
-    "setGameController(address)": FunctionFragment;
-    "setWithdrawer(bytes32,address)": FunctionFragment;
+    "setWithdrawers(bytes32,address[])": FunctionFragment;
     "wagerBalance(bytes32)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "containsPlayer"
-      | "createWagerAndDeposit"
+      | "createWagerRequest"
       | "currentNonce"
+      | "deposit"
       | "depositOf"
       | "getWagerRequest"
       | "getWagerRequests"
       | "hash"
-      | "setGameController"
-      | "setWithdrawer"
+      | "setWithdrawers"
       | "wagerBalance"
   ): FunctionFragment;
 
@@ -83,7 +83,7 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "createWagerAndDeposit",
+    functionFragment: "createWagerRequest",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
@@ -94,6 +94,14 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "currentNonce",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deposit",
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOf",
@@ -118,12 +126,8 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "setGameController",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setWithdrawer",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    functionFragment: "setWithdrawers",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "wagerBalance",
@@ -135,13 +139,14 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "createWagerAndDeposit",
+    functionFragment: "createWagerRequest",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "currentNonce",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "depositOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getWagerRequest",
@@ -153,11 +158,7 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "hash", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setGameController",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setWithdrawer",
+    functionFragment: "setWithdrawers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -196,16 +197,16 @@ export interface IWegaERC20Escrow extends BaseContract {
 
   functions: {
     containsPlayer(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    createWagerAndDeposit(
+    createWagerRequest(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -214,58 +215,60 @@ export interface IWegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    deposit(
+      escrowHash: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     depositOf(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     getWagerRequest(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
-    ): Promise<[IWegaERC20Escrow.ERC20WagerRequestStructOutput]>;
+    ): Promise<[IEscrow.ERC20WagerRequestStructOutput]>;
 
     getWagerRequests(
       overrides?: CallOverrides
-    ): Promise<[IWegaERC20Escrow.ERC20WagerRequestStructOutput[]]>;
+    ): Promise<[IEscrow.ERC20WagerRequestStructOutput[]]>;
 
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[string] & { escrowId_: string }>;
+    ): Promise<[string] & { escrowHash_: string }>;
 
-    setGameController(
-      gameController: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setWithdrawer(
-      escrowId: PromiseOrValue<BytesLike>,
-      winner: PromiseOrValue<string>,
+    setWithdrawers(
+      escrowHash: PromiseOrValue<BytesLike>,
+      winners: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     wagerBalance(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
   };
 
   containsPlayer(
-    escrowId: PromiseOrValue<BytesLike>,
+    escrowHash: PromiseOrValue<BytesLike>,
     player: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  createWagerAndDeposit(
+  createWagerRequest(
     token: PromiseOrValue<string>,
     creator: PromiseOrValue<string>,
-    accountsCount: PromiseOrValue<BigNumberish>,
-    wager: PromiseOrValue<BigNumberish>,
+    requiredAccountNum: PromiseOrValue<BigNumberish>,
+    wagerAmount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -274,103 +277,107 @@ export interface IWegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  deposit(
+    escrowHash: PromiseOrValue<BytesLike>,
+    account: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   depositOf(
-    escrowId: PromiseOrValue<BytesLike>,
+    escrowHash: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   getWagerRequest(
-    escrowId: PromiseOrValue<BytesLike>,
+    escrowHash: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
-  ): Promise<IWegaERC20Escrow.ERC20WagerRequestStructOutput>;
+  ): Promise<IEscrow.ERC20WagerRequestStructOutput>;
 
   getWagerRequests(
     overrides?: CallOverrides
-  ): Promise<IWegaERC20Escrow.ERC20WagerRequestStructOutput[]>;
+  ): Promise<IEscrow.ERC20WagerRequestStructOutput[]>;
 
   hash(
     token: PromiseOrValue<string>,
     creator: PromiseOrValue<string>,
-    accountsCount: PromiseOrValue<BigNumberish>,
-    wager: PromiseOrValue<BigNumberish>,
+    requiredAccountNum: PromiseOrValue<BigNumberish>,
+    wagerAmount: PromiseOrValue<BigNumberish>,
     nonce: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  setGameController(
-    gameController: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setWithdrawer(
-    escrowId: PromiseOrValue<BytesLike>,
-    winner: PromiseOrValue<string>,
+  setWithdrawers(
+    escrowHash: PromiseOrValue<BytesLike>,
+    winners: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   wagerBalance(
-    escrowId: PromiseOrValue<BytesLike>,
+    escrowHash: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   callStatic: {
     containsPlayer(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    createWagerAndDeposit(
+    createWagerRequest(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
 
     currentNonce(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    deposit(
+      escrowHash: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     depositOf(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getWagerRequest(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
-    ): Promise<IWegaERC20Escrow.ERC20WagerRequestStructOutput>;
+    ): Promise<IEscrow.ERC20WagerRequestStructOutput>;
 
     getWagerRequests(
       overrides?: CallOverrides
-    ): Promise<IWegaERC20Escrow.ERC20WagerRequestStructOutput[]>;
+    ): Promise<IEscrow.ERC20WagerRequestStructOutput[]>;
 
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    setGameController(
-      gameController: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setWithdrawer(
-      escrowId: PromiseOrValue<BytesLike>,
-      winner: PromiseOrValue<string>,
+    setWithdrawers(
+      escrowHash: PromiseOrValue<BytesLike>,
+      winners: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     wagerBalance(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
@@ -379,16 +386,16 @@ export interface IWegaERC20Escrow extends BaseContract {
 
   estimateGas: {
     containsPlayer(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    createWagerAndDeposit(
+    createWagerRequest(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -397,14 +404,21 @@ export interface IWegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    deposit(
+      escrowHash: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     depositOf(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     getWagerRequest(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -413,41 +427,36 @@ export interface IWegaERC20Escrow extends BaseContract {
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    setGameController(
-      gameController: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setWithdrawer(
-      escrowId: PromiseOrValue<BytesLike>,
-      winner: PromiseOrValue<string>,
+    setWithdrawers(
+      escrowHash: PromiseOrValue<BytesLike>,
+      winners: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     wagerBalance(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     containsPlayer(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    createWagerAndDeposit(
+    createWagerRequest(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -456,14 +465,21 @@ export interface IWegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    deposit(
+      escrowHash: PromiseOrValue<BytesLike>,
+      account: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     depositOf(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     getWagerRequest(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -472,25 +488,20 @@ export interface IWegaERC20Escrow extends BaseContract {
     hash(
       token: PromiseOrValue<string>,
       creator: PromiseOrValue<string>,
-      accountsCount: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
+      requiredAccountNum: PromiseOrValue<BigNumberish>,
+      wagerAmount: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    setGameController(
-      gameController: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setWithdrawer(
-      escrowId: PromiseOrValue<BytesLike>,
-      winner: PromiseOrValue<string>,
+    setWithdrawers(
+      escrowHash: PromiseOrValue<BytesLike>,
+      winners: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     wagerBalance(
-      escrowId: PromiseOrValue<BytesLike>,
+      escrowHash: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

@@ -2,4 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ITwoWayChanceGame } from "./ITwoWayChanceGame";
+export type { IWegaChanceGame } from "./IWegaChanceGame";
 export type { TwoWayChanceGame } from "./TwoWayChanceGame";
+export type { WegaChanceGame } from "./WegaChanceGame";

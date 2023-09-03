@@ -13,13 +13,11 @@ import "./events/IWegaGameControllerEvents.sol";
 import "./events/IERC20EscrowEvents.sol";
 import "./IWegaGameController.sol";
 import "./IWega.sol";
-import "./games/ITwoWayChanceGame.sol";
+import "./games/IWegaChanceGame.sol";
 import "./utils/Arrays.sol";
-
 import { 
-    WegaEscrow_CallerNotApproved,
-    WegaEscrow_InvalidState
-} from './errors/EscrowErrors.sol';
+  WegaGameController_InvalidGameState
+} from './errors/WegaGameControllerErrors.sol';
 
 /**
   * @title GameController (MVP)
@@ -46,13 +44,16 @@ contract WegaGameController is
   IWegaERC20Escrow public erc20Escrow;
 
   mapping(bytes32 => mapping(address => EnumerableMapUpgradeable.UintToUintMap)) private _gameResults;
+  mapping(bytes32 => mapping(address => uint256)) private _playerPoints;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _winners;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _players;
-  mapping(bytes32 => mapping(address => uint256)) private _playerPoints;
+  mapping(WegaType => uint256) private _gameDenoms;
+  mapping(WegaType => uint256) private _gameMinRounds;
+  mapping(bytes32 => Wega) _games;
   
   CountersUpgradeable.Counter private _nonce;
 
-  ITwoWayChanceGame private _chanceContract; 
+  IWegaChanceGame private _chanceContract;
 
   function __WegaGameController_init(address erc20EscrowAddress, address chanceContract) public initializer {
     __Ownable_init();
@@ -63,31 +64,65 @@ contract WegaGameController is
     address erc20EscrowAddress, 
     address chanceContract
   ) public onlyInitializing {
+
     erc20Escrow = IWegaERC20Escrow(erc20EscrowAddress);
-    _chanceContract = ITwoWayChanceGame(chanceContract);
+    _chanceContract = IWegaChanceGame(chanceContract);
     _nonce.increment();
+    
+    // configure games
+    _gameDenoms[WegaType.DICE] = 6;
+    _gameDenoms[WegaType.COINFLIP] = 2;
+    
+    _gameMinRounds[WegaType.DICE] = 3;
+    _gameMinRounds[WegaType.COINFLIP] = 2;
+
   } 
   
 
   // should create wager and deposit wager into contract 
   function createGameAndDepositInitialWager(
     address tokenAddress,
-    uint256 requiredPlayerNum, 
+    uint256 requiredPlayerNum,
     uint256 wagerAmount,
-    WegaGameType gameType
+    WegaType gameType
   ) public {
+    
+    // create wager
     bytes32 escrowHash = erc20Escrow.createWagerRequest(tokenAddress, _msgSender(), requiredPlayerNum, wagerAmount);
     _players[escrowHash].add(_msgSender());
+    
+    // create game 
+    Wega memory game;
+    game.gameType = gameType;
+    game.state = WegaState.PENDING;
+    game.denom = _gameDenoms[gameType];
+    game.minRounds = _gameMinRounds[gameType];
+    game.requiredPlayers = requiredPlayerNum;
+    game.playersDeposited = 1;
+    _games[escrowHash] = game;
+
     emit GameCreation(escrowHash, _msgSender(), gameType); 
   }
 
   // // should deposit to contract
-  function depositOrPlay(
-    bytes32 escrowHash, 
-    uint256 rounds,
-    uint256 denominator
-  ){
-    // erc20Escrow.state
+  function depositOrPlay(bytes32 escrowHash) public override {
+    Wega memory game =_games[escrowHash];
+    IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
+    if(game.state != WegaState.PENDING || game.state != WegaState.READY) revert WegaGameController_InvalidGameState();
+    
+    if(game.state == WegaState.PENDING) {
+      erc20Escrow.deposit(escrowHash, _msgSender(), wagerRequest.wagerAmount);
+      if(game.playersDeposited < game.requiredPlayers) {
+        _games[escrowHash].playersDeposited++;
+        _players[escrowHash].add(_msgSender());
+        // should emit a playerJoinedEvent
+      } else {
+        _games[escrowHash].state = WegaState.READY; 
+      } 
+    } else if (game.state == WegaState.READY) {
+      _playWega(escrowHash, _players[escrowHash].values(), game.minRounds, game.denom);
+      _games[escrowHash].state = WegaState.PLAYED;
+    }    
   } 
 
 
@@ -110,7 +145,7 @@ contract WegaGameController is
     uint256 denominator,
     uint256 currentRound,
     uint256 minimumRounds
-  ) private pure returns (uint) {
+  ) private returns (uint) {
     
     if(currentRound > minimumRounds) {
       return 1;

@@ -2,4 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export { ITwoWayChanceGame__factory } from "./ITwoWayChanceGame__factory";
+export { IWegaChanceGame__factory } from "./IWegaChanceGame__factory";
 export { TwoWayChanceGame__factory } from "./TwoWayChanceGame__factory";
+export { WegaChanceGame__factory } from "./WegaChanceGame__factory";

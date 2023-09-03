@@ -24,14 +24,14 @@ export interface IERC20EscrowEventsInterface extends utils.Interface {
 
   events: {
     "SetGameControler(address)": EventFragment;
-    "SetWithdrawer(bytes32,address)": EventFragment;
+    "SetWithdrawers(bytes32,address[])": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
     "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
     "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetWithdrawer"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetWithdrawers"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
@@ -48,16 +48,16 @@ export type SetGameControlerEvent = TypedEvent<
 export type SetGameControlerEventFilter =
   TypedEventFilter<SetGameControlerEvent>;
 
-export interface SetWithdrawerEventObject {
+export interface SetWithdrawersEventObject {
   escrowId: string;
-  withdrawer: string;
+  withdrawers: string[];
 }
-export type SetWithdrawerEvent = TypedEvent<
-  [string, string],
-  SetWithdrawerEventObject
+export type SetWithdrawersEvent = TypedEvent<
+  [string, string[]],
+  SetWithdrawersEventObject
 >;
 
-export type SetWithdrawerEventFilter = TypedEventFilter<SetWithdrawerEvent>;
+export type SetWithdrawersEventFilter = TypedEventFilter<SetWithdrawersEvent>;
 
 export interface WagerDepositEventObject {
   escrowId: string;
@@ -135,14 +135,14 @@ export interface IERC20EscrowEvents extends BaseContract {
       gameController?: PromiseOrValue<string> | null
     ): SetGameControlerEventFilter;
 
-    "SetWithdrawer(bytes32,address)"(
+    "SetWithdrawers(bytes32,address[])"(
       escrowId?: PromiseOrValue<BytesLike> | null,
-      withdrawer?: PromiseOrValue<string> | null
-    ): SetWithdrawerEventFilter;
-    SetWithdrawer(
+      withdrawers?: PromiseOrValue<string>[] | null
+    ): SetWithdrawersEventFilter;
+    SetWithdrawers(
       escrowId?: PromiseOrValue<BytesLike> | null,
-      withdrawer?: PromiseOrValue<string> | null
-    ): SetWithdrawerEventFilter;
+      withdrawers?: PromiseOrValue<string>[] | null
+    ): SetWithdrawersEventFilter;
 
     "WagerDeposit(bytes32,uint256,address)"(
       escrowId?: PromiseOrValue<BytesLike> | null,

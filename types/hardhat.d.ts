@@ -13,6 +13,38 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "AccessControlUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AccessControlUpgradeable__factory>;
+    getContractFactory(
+      name: "IAccessControlUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAccessControlUpgradeable__factory>;
+    getContractFactory(
+      name: "OwnableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OwnableUpgradeable__factory>;
+    getContractFactory(
+      name: "Initializable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Initializable__factory>;
+    getContractFactory(
+      name: "IERC20Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Upgradeable__factory>;
+    getContractFactory(
+      name: "ContextUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ContextUpgradeable__factory>;
+    getContractFactory(
+      name: "ERC165Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC165Upgradeable__factory>;
+    getContractFactory(
+      name: "IERC165Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165Upgradeable__factory>;
+    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -53,6 +85,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IGameControllerEvents__factory>;
     getContractFactory(
+      name: "IWegaGameControllerEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWegaGameControllerEvents__factory>;
+    getContractFactory(
       name: "GameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.GameController__factory>;
@@ -61,14 +97,82 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ITwoWayChanceGame__factory>;
     getContractFactory(
+      name: "IWegaChanceGame",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWegaChanceGame__factory>;
+    getContractFactory(
       name: "TwoWayChanceGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TwoWayChanceGame__factory>;
     getContractFactory(
+      name: "WegaChanceGame",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaChanceGame__factory>;
+    getContractFactory(
       name: "IGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IGameController__factory>;
+    getContractFactory(
+      name: "IWegaGameController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWegaGameController__factory>;
+    getContractFactory(
+      name: "WegaEscrowManagerRole",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaEscrowManagerRole__factory>;
+    getContractFactory(
+      name: "WegaGameManagerRole",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaGameManagerRole__factory>;
+    getContractFactory(
+      name: "Arrays",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Arrays__factory>;
+    getContractFactory(
+      name: "WegaGameController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaGameController__factory>;
 
+    getContractAt(
+      name: "AccessControlUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AccessControlUpgradeable>;
+    getContractAt(
+      name: "IAccessControlUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAccessControlUpgradeable>;
+    getContractAt(
+      name: "OwnableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OwnableUpgradeable>;
+    getContractAt(
+      name: "Initializable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Initializable>;
+    getContractAt(
+      name: "IERC20Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Upgradeable>;
+    getContractAt(
+      name: "ContextUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ContextUpgradeable>;
+    getContractAt(
+      name: "ERC165Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC165Upgradeable>;
+    getContractAt(
+      name: "IERC165Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
       name: "Ownable",
       address: string,
@@ -120,6 +224,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IGameControllerEvents>;
     getContractAt(
+      name: "IWegaGameControllerEvents",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWegaGameControllerEvents>;
+    getContractAt(
       name: "GameController",
       address: string,
       signer?: ethers.Signer
@@ -130,15 +239,50 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ITwoWayChanceGame>;
     getContractAt(
+      name: "IWegaChanceGame",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWegaChanceGame>;
+    getContractAt(
       name: "TwoWayChanceGame",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TwoWayChanceGame>;
     getContractAt(
+      name: "WegaChanceGame",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaChanceGame>;
+    getContractAt(
       name: "IGameController",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IGameController>;
+    getContractAt(
+      name: "IWegaGameController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWegaGameController>;
+    getContractAt(
+      name: "WegaEscrowManagerRole",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaEscrowManagerRole>;
+    getContractAt(
+      name: "WegaGameManagerRole",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaGameManagerRole>;
+    getContractAt(
+      name: "Arrays",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Arrays>;
+    getContractAt(
+      name: "WegaGameController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaGameController>;
 
     // default types
     getContractFactory(

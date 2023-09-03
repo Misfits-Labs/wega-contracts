@@ -14,7 +14,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "escrowId",
+        name: "escrowHash",
         type: "bytes32",
       },
       {
@@ -48,17 +48,23 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "accountsCount",
+        name: "requiredAccountNum",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "wager",
+        name: "wagerAmount",
         type: "uint256",
       },
     ],
-    name: "createWagerAndDeposit",
-    outputs: [],
+    name: "createWagerRequest",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -85,7 +91,30 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "escrowId",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
         type: "bytes32",
       },
       {
@@ -109,7 +138,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "escrowId",
+        name: "escrowHash",
         type: "bytes32",
       },
     ],
@@ -124,31 +153,31 @@ const _abi = [
           },
           {
             internalType: "bytes32",
-            name: "escrowId",
+            name: "escrowHash",
             type: "bytes32",
           },
           {
             internalType: "uint256",
-            name: "wager",
+            name: "wagerAmount",
             type: "uint256",
           },
           {
             internalType: "address",
-            name: "token",
+            name: "tokenAddress",
             type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "nonce",
-            type: "uint256",
           },
           {
             internalType: "uint256",
             name: "totalWager",
             type: "uint256",
           },
+          {
+            internalType: "uint256",
+            name: "nonce",
+            type: "uint256",
+          },
         ],
-        internalType: "struct IWegaERC20Escrow.ERC20WagerRequest",
+        internalType: "struct IEscrow.ERC20WagerRequest",
         name: "",
         type: "tuple",
       },
@@ -169,31 +198,31 @@ const _abi = [
           },
           {
             internalType: "bytes32",
-            name: "escrowId",
+            name: "escrowHash",
             type: "bytes32",
           },
           {
             internalType: "uint256",
-            name: "wager",
+            name: "wagerAmount",
             type: "uint256",
           },
           {
             internalType: "address",
-            name: "token",
+            name: "tokenAddress",
             type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "nonce",
-            type: "uint256",
           },
           {
             internalType: "uint256",
             name: "totalWager",
             type: "uint256",
           },
+          {
+            internalType: "uint256",
+            name: "nonce",
+            type: "uint256",
+          },
         ],
-        internalType: "struct IWegaERC20Escrow.ERC20WagerRequest[]",
+        internalType: "struct IEscrow.ERC20WagerRequest[]",
         name: "",
         type: "tuple[]",
       },
@@ -215,12 +244,12 @@ const _abi = [
       },
       {
         internalType: "uint256",
-        name: "accountsCount",
+        name: "requiredAccountNum",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "wager",
+        name: "wagerAmount",
         type: "uint256",
       },
       {
@@ -233,7 +262,7 @@ const _abi = [
     outputs: [
       {
         internalType: "bytes32",
-        name: "escrowId_",
+        name: "escrowHash_",
         type: "bytes32",
       },
     ],
@@ -243,30 +272,17 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "gameController",
-        type: "address",
-      },
-    ],
-    name: "setGameController",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "bytes32",
-        name: "escrowId",
+        name: "escrowHash",
         type: "bytes32",
       },
       {
-        internalType: "address",
-        name: "winner",
-        type: "address",
+        internalType: "address[]",
+        name: "winners",
+        type: "address[]",
       },
     ],
-    name: "setWithdrawer",
+    name: "setWithdrawers",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -275,7 +291,7 @@ const _abi = [
     inputs: [
       {
         internalType: "bytes32",
-        name: "escrowId",
+        name: "escrowHash",
         type: "bytes32",
       },
     ],

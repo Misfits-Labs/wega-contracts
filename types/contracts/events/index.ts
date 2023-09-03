@@ -3,3 +3,4 @@
 /* eslint-disable */
 export type { IERC20EscrowEvents } from "./IERC20EscrowEvents";
 export type { IGameControllerEvents } from "./IGameControllerEvents";
+export type { IWegaGameControllerEvents } from "./IWegaGameControllerEvents";

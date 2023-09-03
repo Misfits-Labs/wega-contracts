@@ -10,51 +10,55 @@ pragma solidity ^0.8.19;
   * oracle implementation for random numbers
   * @dev note this is draft contract not meant to be used in production
 */
-import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
+
 
 import "../escrow/WegaERC20Escrow.sol";
-import "./ITwoWayChanceGame.sol";
-
+import "./IWegaChanceGame.sol";
+import "../roles/WegaGameManagerRole.sol";
 import { 
     WegaEscrow_CallerNotApproved
-} from '../errors/EscrowErrors.sol';
+} from '../errors/WegaEscrowErrors.sol';
 
-contract TwoWayChanceGame is ITwoWayChanceGame, ERC2771Context {
+contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole {
 
  using EnumerableMap for EnumerableMap.UintToUintMap;
 
  EnumerableMap.UintToUintMap private _randomNumbers;
 
- constructor (uint256[] memory randomNumbers) ERC2771Context(address(0)) {
-  addRandomNumbers(randomNumbers);
- }
+
+  function __WegaChanceGame_init(uint256[] memory randomNumbers) public initializer {
+    __Ownable_init();
+    __WegaGameManagerRole_init();
+    __WegaChanceGame_init_unchained(randomNumbers);
+  } 
+
+  function __WegaChanceGame_init_unchained(uint256[] memory randomNumbers) public onlyInitializing {
+   addRandomNumbers(randomNumbers);
+  } 
 
  // roll function
  function roll(
   uint256 denominator, 
   uint256 nonce, 
   address player
-  ) external view override returns(uint256) {
+  ) external view override onlyWegaGameManager returns(uint256) {
   uint256 randomNumber = _retrieveRandomNumber(nonce, player);
   uint256 result = (randomNumber % denominator) + 1; 
   return result;
  }
 
- function _retrieveRandomNumber(
-  uint256 nonce, 
-  address player
-  ) internal view returns (uint256){
+ function _retrieveRandomNumber(uint256 nonce, address player) internal view returns (uint256){
   uint256 count = _randomNumbers.length();
   uint256 index = (block.prevrandao + uint256(uint160(player)) * (nonce + block.timestamp)) % count;
   return _randomNumbers.get(index); 
  }
 
- function randomNumbersCount() external view override returns (uint256) {
+ function randomNumbersCount() public view override returns (uint256) {
   return _randomNumbers.length();
  }
 
- function addRandomNumbers(uint256[] memory randomNumbers) public override {
+ function addRandomNumbers(uint256[] memory randomNumbers) public override onlyWegaGameManager {
   for(uint256 i = _randomNumbers.length(); i<randomNumbers.length;i++) {
    _randomNumbers.set(i, randomNumbers[i]);
   }

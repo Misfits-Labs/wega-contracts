@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
+import "./IWega.sol";
 
 interface IWegaGameController {
-  
-  enum WegaType { TOKEN, NFT }
-
   /**
   * @notice allows a player to trigger a two-way chance game  
   * @param tokenAddress tokenAddress to be used in the game
@@ -14,18 +12,13 @@ interface IWegaGameController {
   function createGameAndDepositInitialWager(
     address tokenAddress,  
     uint256 requiredPlayerNum, 
-    uint256 wagerAmount
+    uint256 wagerAmount,
+    IWega.WegaType gameType
   ) external;
 
   /**
-   * @notice allows a player to trigger a two-way chance game  
+   * @notice allows a player to trigger a two-way chance game or deploy if the game is not ready  
    * @param escrowHash address of the contract that holds the funds for a game
-   * @param rounds the minimum number of rounds in a game
-   * @param denominator the roll posibilities
-   */
-  function depositOrPlay(
-    bytes32 escrowHash, 
-    uint256 rounds,
-    uint256 denominator
-  ) external;
+  */
+  function depositOrPlay(bytes32 escrowHash) external;
 }
