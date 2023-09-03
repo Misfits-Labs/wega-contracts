@@ -1,29 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-// @notice request data must be valid 
-error WegaEscrow_InvalidRequestData();
-
-// @notice sender must be tokenIdOwner
-error WegaEscrow_NotNftOwner(address sender);
-
-// @notice request state must be valid
-error WegaEscrow_InvalidRequestState();
-
-// @notice only approved owner can deposit
-error WegaEscrow_DepositorNotApproved();
-
-// @notice only approved owner can deposit
-error WegaEscrow_CallerNotApproved();
-
-// @notice only approved owner can deposit
-error WegaEscrow_InvalidWagerAmount();
-
-// @notice only approved owner can deposit
-error WegaEscrow_CanOnlyDepositOnce();
-
-// @notice only approved owner can deposit
-error WegaEscrow_MaximumWagerAmountReached();
-
-// @notice only approved owner can deposit
-error WegaEscrow_InvalidState();
+abstract contract WegaEscrowErrors {
+ string constant INVALID_REQUEST_DATA = "WegaEscrow: InvalidRequestData";
+ string constant INVALID_REQUEST_STATE = "WegaEscrow: InvalidRequestState";
+ string constant MAX_WAGER_REACHED = "WegaEscrow: MaximumWagerAmountReached";
+ string constant INVALID_DEPOSIT_CALL = "WegaEscrow: CanOnlyDepositOnce";
+ string constant INVALID_WAGER_AMOUNT = "WegaEscrow: InvalidWagerAmount";
+ string constant CALLER_NOT_ALLOWED = "WegaEscrow: CallerNotAllowed";
+ string constant INVALID_WITHDRAW_BALANCE = "WegaEscrow: InsufficientBalance";
+}

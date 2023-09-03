@@ -4,22 +4,19 @@ pragma solidity ^0.8.14;
 import '@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-import {
-    WegaAccessControl_CallerNotAllowed,
-    WegaAccessControl_ReceiverIsEmpty
-} from '../errors/AccessControl.sol';
+import '../errors/AccessControlErrors.sol';
 
 /**
   * @title WegaGameManagerRole
   * @author @RasenGUY @Daosourced.
   * @notice Access control for wega game contract
 */
-abstract contract  WegaGameManagerRole is OwnableUpgradeable, AccessControlUpgradeable {
+abstract contract  WegaGameManagerRole is OwnableUpgradeable, AccessControlErrors, AccessControlUpgradeable {
     
     bytes32 public constant WEGA_GAME_MANAGER_ROLE = keccak256('WEGA_GAME_MANAGER_ROLE');
 
     modifier onlyWegaGameManager() {
-        if(!isWegaGameManager(_msgSender())) revert WegaAccessControl_CallerNotAllowed();
+        require(isWegaGameManager(_msgSender()), CALLER_NOT_ALLOWED);
         _;
     }
 
@@ -92,7 +89,7 @@ abstract contract  WegaGameManagerRole is OwnableUpgradeable, AccessControlUpgra
     * @notice minter account with funds' forwarding
     */
     function closeWegaGameManager(address payable receiver) external payable onlyWegaGameManager {
-        if(receiver == address(0x0)) revert WegaAccessControl_ReceiverIsEmpty();
+        require(receiver != address(0x0), EMPT_RECEIVER);
         renounceWegaGameManager();
         receiver.transfer(msg.value);
     }
@@ -100,8 +97,8 @@ abstract contract  WegaGameManagerRole is OwnableUpgradeable, AccessControlUpgra
     /**
     * @notice Replace minter account by new account with funds' forwarding
     */
-    function rotateWegaGameManager(address payable receiver) external payable onlyWegaGameManager {
-        if(receiver == address(0x0)) revert WegaAccessControl_ReceiverIsEmpty();
+    function rotateWegaGameManager(address payable receiver) external payable onlyWegaGameManager {        
+        require(receiver != address(0x0), EMPT_RECEIVER);
         _addWegaGameManager(receiver);
         renounceWegaGameManager();
         receiver.transfer(msg.value);

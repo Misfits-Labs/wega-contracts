@@ -16,9 +16,7 @@ import "./IWegaGameController.sol";
 import "./IWega.sol";
 import "./games/IWegaChanceGame.sol";
 import "./utils/Arrays.sol";
-import { 
-  WegaGameController_InvalidGameState
-} from './errors/WegaGameControllerErrors.sol';
+import './errors/WegaGameControllerErrors.sol';
 
 /**
   * @title GameController (MVP)
@@ -36,6 +34,7 @@ contract WegaGameController is
   IWegaGameControllerEvents,
   IWega,
   OwnableUpgradeable,
+  WegaGameControllerErrors,
   UUPSUpgradeable {
 
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
@@ -120,7 +119,7 @@ contract WegaGameController is
   function depositOrPlay(bytes32 escrowHash) public override {
     Wega memory game =_games[escrowHash];
     IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
-    if(game.state != WegaState.PENDING || game.state != WegaState.READY) revert WegaGameController_InvalidGameState();
+    require(game.state == WegaState.PENDING || game.state == WegaState.READY, INVALID_GAME_STATE);
     
     if(game.state == WegaState.PENDING) {
       erc20Escrow.deposit(escrowHash, _msgSender(), wagerRequest.wagerAmount);

@@ -18,9 +18,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "../escrow/WegaERC20Escrow.sol";
 import "./IWegaChanceGame.sol";
 import "../roles/WegaGameManagerRole.sol";
-import { 
-    WegaEscrow_CallerNotApproved
-} from '../errors/WegaEscrowErrors.sol';
+
 
 contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole, UUPSUpgradeable {
 

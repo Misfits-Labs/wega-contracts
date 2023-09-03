@@ -4,27 +4,27 @@
         "1337": {
             "contracts": {
                 "WegaERC20Escrow": {
-                    "address": "0xB0f05d25e41FbC2b52013099ED9616f1206Ae21B",
+                    "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x8b",
-                    "implementation": "0xB0f05d25e41FbC2b52013099ED9616f1206Ae21B"
+                    "deploymentBlock": "0x03",
+                    "implementation": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
                 },
                 "WegaERC20Dummy": {
-                    "address": "0xCA8c8688914e0F7096c920146cd0Ad85cD7Ae8b9",
+                    "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x8a"
+                    "deploymentBlock": "0x01"
                 },
                 "WegaGameController": {
-                    "address": "0xD42912755319665397FF090fBB63B1a31aE87Cee",
+                    "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x8f",
-                    "implementation": "0xD42912755319665397FF090fBB63B1a31aE87Cee"
+                    "deploymentBlock": "0x09",
+                    "implementation": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"
                 },
                 "WegaChanceGame": {
-                    "address": "0x976fcd02f7C4773dd89C309fBF55D5923B4c98a1",
+                    "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
                     "legacyAddresses": [],
-                    "deploymentBlock": "0x8d",
-                    "implementation": "0x976fcd02f7C4773dd89C309fBF55D5923B4c98a1"
+                    "deploymentBlock": "0x06",
+                    "implementation": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
                 }
             }
         },

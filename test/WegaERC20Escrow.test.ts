@@ -1,4 +1,4 @@
-const { ethers } =  require('hardhat');
+const { ethers, upgrades } =  require('hardhat');
 import { constants, BigNumber, utils } from 'ethers';
 import { expect } from 'chai';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -52,7 +52,8 @@ describe("WegaERC20Escrow", () => {
     erc20DummyFactory = new WegaERC20Dummy__factory(coinbase);
     
     // deploy contracts
-    erc20Escrow = await erc20EscrowFactory.deploy('WegaERC20Escrow', '0.0.0');
+    erc20Escrow = await upgrades.deployProxy(erc20EscrowFactory, ['WegaERC20Escrow', '0.0.0'], { kind: 'uups'});
+    
     erc20Dummy = await erc20DummyFactory.deploy([
       alice.address, 
       bob.address, 

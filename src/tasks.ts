@@ -6,7 +6,6 @@ import { merge } from 'lodash'
 import { ArtifactName, DependenciesMap, ContractName, DeployedContractList } from './types';
 import verify from './verify';
 import { unwrap, unwrapDependencies } from './helpers';
-import { erc20 } from '../types/@openzeppelin/contracts/token';
 
 export type Task = {
   tags: string[];
@@ -56,9 +55,9 @@ const deployWegaGameControllerTask: Task = {
         }
       );
       await gameController.deployTransaction.wait();
-      let gameControllerImpl = await upgrades.upgradeProxy(gameController, ctx.artifacts.WegaGameController);
-      await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameControllerImpl.address);
-      await verify(ctx, gameControllerImpl.address, []);
+      let gameControllerImpl = await upgrades.erc1967.getImplementationAddress(gameController.address);
+      await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameControllerImpl);
+      await verify(ctx, gameControllerImpl, []);
 
     } else {
       gameController = await WegaGameController.connect(owner).deploy();      
@@ -129,9 +128,9 @@ const deployWegaChanceGameTask: Task = {
         }
       );
       await chanceGame.deployTransaction.wait();
-      let chanceGameImpl = await upgrades.upgradeProxy(chanceGame, ctx.artifacts.WegaChanceGame);
-      await ctx.saveContractConfig(ContractName.WegaChanceGame, chanceGame, chanceGameImpl.address);
-      await verify(ctx, chanceGameImpl.address, []);
+      let chanceGameImpl = await upgrades.erc1967.getImplementationAddress(chanceGame.address);
+      await ctx.saveContractConfig(ContractName.WegaChanceGame, chanceGame, chanceGameImpl);
+      await verify(ctx, chanceGameImpl, []);
     } else {
       chanceGame = await ctx.artifacts.WegaChanceGame.connect(owner).deploy();
       await chanceGame.connect(owner).initialize(inputs.initialDrands);
@@ -180,9 +179,9 @@ const deployERC20EscrowTask: Task = {
         }
       );
       await erc20Escrow.deployTransaction.wait();
-      let erc20EscrowImpl = await upgrades.upgradeProxy(erc20Escrow, ctx.artifacts.WegaERC20Escrow);
-      await ctx.saveContractConfig(ContractName.WegaERC20Escrow, erc20Escrow, erc20EscrowImpl.address);
-      await verify(ctx, erc20EscrowImpl.address, []);
+      let erc20EscrowImpl = await upgrades.erc1967.getImplementationAddress(erc20Escrow.address);
+      await ctx.saveContractConfig(ContractName.WegaERC20Escrow, erc20Escrow, erc20EscrowImpl);
+      await verify(ctx, erc20EscrowImpl, []);
     } else {
       erc20Escrow = await WegaERC20Escrow.connect(owner).deploy();
       await erc20Escrow.connect(owner).initialize(...inputs.escrow);

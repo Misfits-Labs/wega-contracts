@@ -15,16 +15,7 @@ import "./IEscrow.sol";
 import "./IWegaERC20Escrow.sol";
 import "../events/IERC20EscrowEvents.sol";
 
-import { 
-    WegaEscrow_InvalidRequestData, 
-    WegaEscrow_NotNftOwner, 
-    WegaEscrow_InvalidRequestState,
-    WegaEscrow_DepositorNotApproved,
-    WegaEscrow_CallerNotApproved,
-    WegaEscrow_InvalidWagerAmount,
-    WegaEscrow_CanOnlyDepositOnce,
-    WegaEscrow_MaximumWagerAmountReached
-} from '../errors/WegaEscrowErrors.sol';
+import '../errors/WegaEscrowErrors.sol';
 
 import { Wega_ZeroAddress } from '../errors/GlobalErrors.sol';
 import "../roles/WegaEscrowManagerRole.sol";
@@ -42,6 +33,7 @@ contract WegaERC20Escrow is
     IWegaERC20Escrow,
     IERC20EscrowEvents,
     WegaEscrowManagerRole,
+    WegaEscrowErrors,
     UUPSUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -88,12 +80,7 @@ contract WegaERC20Escrow is
         uint256 accountsCount,
         uint256 wager
     ) {
-        if (
-            token == address(0) ||
-            account == address(0) ||
-            accountsCount <= 1 ||
-            wager <= 0
-        ) revert WegaEscrow_InvalidRequestData();
+        require(token != address(0) && account != address(0) && accountsCount <= 1 && wager <= 0, INVALID_REQUEST_DATA);
         _;
     }
     // constructor() {
@@ -250,14 +237,10 @@ contract WegaERC20Escrow is
         uint256 wagerAmount
     ) external onlyWegaEscrowManager {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
-        if (request.state != TransactionState.OPEN)
-            revert WegaEscrow_InvalidRequestState();
-        if (wagerAmount != request.wagerAmount)
-            revert WegaEscrow_InvalidWagerAmount();
-        if (_escrowBalances[escrowHash] + wagerAmount > request.totalWager)
-            revert WegaEscrow_MaximumWagerAmountReached();
-        if (_deposits[escrowHash][account] > 0)
-            revert WegaEscrow_CanOnlyDepositOnce();
+        require(request.state == TransactionState.OPEN, INVALID_REQUEST_STATE);
+        require(wagerAmount == request.wagerAmount, INVALID_WAGER_AMOUNT);
+        require(_escrowBalances[escrowHash] + wagerAmount <= request.totalWager, MAX_WAGER_REACHED);
+        require(_deposits[escrowHash][account] == 0, INVALID_DEPOSIT_CALL);
 
         // update depositor on escrow
         _depositors[escrowHash].add(account);
@@ -298,14 +281,11 @@ contract WegaERC20Escrow is
         address[] memory winners_
     ) external override onlyWegaEscrowManager {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
-        if (request.state != TransactionState.PENDING)
-            revert WegaEscrow_InvalidRequestState();
-        uint256 withdrawableAmount = _wagerRequests[escrowHash]
-            .totalWager
-            .mulDiv(1, winners_.length);
+        require(request.state == TransactionState.PENDING, INVALID_REQUEST_STATE);
+        uint256 withdrawableAmount = _wagerRequests[escrowHash].totalWager.mulDiv(1, winners_.length);
         for (uint256 i = 0; i < winners_.length; i++) {
-            if (!containsPlayer(escrowHash, winners_[i]))
-                revert WegaEscrow_InvalidRequestData();
+            require(containsPlayer(escrowHash, winners_[i]), INVALID_REQUEST_DATA);
+
             _accountBalances[winners_[i]] = withdrawableAmount;
         }
         _wagerRequests[escrowHash].state = TransactionState.READY;
@@ -314,10 +294,8 @@ contract WegaERC20Escrow is
 
     function withdraw(bytes32 escrowHash) public {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
-        if (request.state != TransactionState.READY)
-            revert WegaEscrow_InvalidRequestState();
-        if (_accountBalances[_msgSender()] == 0 ether)
-            revert WegaEscrow_InvalidRequestData();
+        require(request.state == TransactionState.READY, INVALID_REQUEST_STATE);
+        require(_accountBalances[_msgSender()] > 0 ether, INVALID_WITHDRAW_BALANCE);
         uint256 transferAmount = _accountBalances[_msgSender()];
         _escrowBalances[escrowHash] -= transferAmount;
         delete _accountBalances[_msgSender()];
