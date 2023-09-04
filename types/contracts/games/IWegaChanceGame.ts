@@ -27,7 +27,7 @@ export interface IWegaChanceGameInterface extends utils.Interface {
   functions: {
     "addRandomNumbers(uint256[])": FunctionFragment;
     "randomNumbersCount()": FunctionFragment;
-    "roll(uint256,uint256,address)": FunctionFragment;
+    "roll(uint256,uint256)": FunctionFragment;
   };
 
   getFunction(
@@ -44,11 +44,7 @@ export interface IWegaChanceGameInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "roll",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>
-    ]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
 
   decodeFunctionResult(
@@ -101,7 +97,6 @@ export interface IWegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
@@ -116,7 +111,6 @@ export interface IWegaChanceGame extends BaseContract {
   roll(
     denominator: PromiseOrValue<BigNumberish>,
     nonce: PromiseOrValue<BigNumberish>,
-    player: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -131,7 +125,6 @@ export interface IWegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
@@ -149,7 +142,6 @@ export interface IWegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -167,7 +159,6 @@ export interface IWegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

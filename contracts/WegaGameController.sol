@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -17,6 +17,7 @@ import "./IWega.sol";
 import "./games/IWegaChanceGame.sol";
 import "./utils/Arrays.sol";
 import './errors/WegaGameControllerErrors.sol';
+import 'hardhat/console.sol';
 
 /**
   * @title GameController (MVP)
@@ -44,7 +45,7 @@ contract WegaGameController is
 
   IWegaERC20Escrow public erc20Escrow;
 
-  mapping(bytes32 => mapping(address => EnumerableMapUpgradeable.UintToUintMap)) private _gameResults;
+  mapping(bytes32 => mapping(address => uint256[])) private _gameResults;
   mapping(bytes32 => mapping(address => uint256)) private _playerPoints;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _winners;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _players;
@@ -106,12 +107,13 @@ contract WegaGameController is
     // create game 
     Wega memory game;
     game.gameType = gameType;
-    game.state = WegaState.PENDING;
+    game.state = WegaState.WAITING;
     game.denom = _gameDenoms[gameType];
     game.minRounds = _gameMinRounds[gameType];
     game.requiredPlayers = requiredPlayerNum;
     game.playersDeposited = 1;
     _games[escrowHash] = game;
+
     emit GameCreation(escrowHash, _msgSender(), gameType); 
   }
 
@@ -119,40 +121,35 @@ contract WegaGameController is
   function depositOrPlay(bytes32 escrowHash) public override {
     Wega memory game =_games[escrowHash];
     IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
-    require(game.state == WegaState.PENDING || game.state == WegaState.READY, INVALID_GAME_STATE);
-    
-    if(game.state == WegaState.PENDING) {
+    require(game.state != WegaState.PLAYED, INVALID_GAME_STATE);
+    if(game.playersDeposited != game.requiredPlayers) {
+      
       erc20Escrow.deposit(escrowHash, _msgSender(), wagerRequest.wagerAmount);
-      if(game.playersDeposited < game.requiredPlayers) {
-        _games[escrowHash].playersDeposited++;
-        _players[escrowHash].add(_msgSender());
-        // should emit a playerJoinedEvent
-      } else {
-        _games[escrowHash].state = WegaState.READY; 
-      } 
-    } else if (game.state == WegaState.READY) {
-      _playWega(escrowHash, _players[escrowHash].values(), game.minRounds, game.denom);
-      _games[escrowHash].state = WegaState.PLAYED;
-    }    
+      _games[escrowHash].playersDeposited++;
+      _players[escrowHash].add(_msgSender());
+      
+      if(_games[escrowHash].playersDeposited == game.requiredPlayers) {
+        _playWega(escrowHash, _players[escrowHash].values(), game.minRounds, game.denom);
+        _games[escrowHash].state = WegaState.PLAYED;
+      }
+    } 
   } 
-
 
   function _playWega(
     bytes32 escrowHash, 
-    address[] memory players,
+    address[] memory players_,
     uint256 rounds,
     uint256 denominator
   ) internal {
-    
-    _playChanceGame(escrowHash, players, denominator, 1, rounds);
-    address[] memory winners = _declareWinners(escrowHash, players);
-    erc20Escrow.setWithdrawers(escrowHash, winners);
-    emit WinnerDeclaration(escrowHash, winners);
+    _playChanceGame(escrowHash, players_, denominator, 1, rounds);
+    address[] memory winners_ = _declareWinners(escrowHash, players_);
+    erc20Escrow.setWithdrawers(escrowHash, winners_);
+    emit WinnerDeclaration(escrowHash, winners_);
   }
 
   function _playChanceGame(
     bytes32 escrowHash,
-    address[] memory players,
+    address[] memory players_,
     uint256 denominator,
     uint256 currentRound,
     uint256 minimumRounds
@@ -163,29 +160,31 @@ contract WegaGameController is
     }
     
     // add the results for the round
-    uint256[] memory results = new uint256[](players.length);
-    for (uint256 i = 0; i < players.length; i++) { 
-      uint256 result = _chanceContract.roll(denominator, _nonce.current(), players[i]);
-      _gameResults[escrowHash][players[i]].set(currentRound, result);
+    uint256[] memory results = new uint256[](players_.length);
+    for (uint256 i = 0; i < players_.length; i++) { 
+      uint256 result = _chanceContract.roll(denominator, _nonce.current());
+      results[i] = result;
+      _gameResults[escrowHash][players_[i]].push(result);
       _nonce.increment();
     }
-    _addPoints(escrowHash, players, results);
-    return _playChanceGame(escrowHash, players, denominator, currentRound + 1, minimumRounds);
+    _addPoints(escrowHash, players_, results);
+    return _playChanceGame(escrowHash, players_, denominator, currentRound + 1, minimumRounds);
   }
 
-  function _getHighestScore(bytes32 escrowHash, address[] memory players) internal view returns(uint256) {
-    uint256[] memory playerPoints = new uint256[](players.length);
-    for(uint256 i = 0; i < players.length; i++) { 
-      playerPoints[i] = _playerPoints[escrowHash][players[i]];    
+  function _getHighestScore(bytes32 escrowHash, address[] memory players_) internal view returns(uint256) {
+    uint256[] memory playerPoints = new uint256[](players_.length);
+    for(uint256 i = 0; i < players_.length; i++) { 
+      playerPoints[i] = _playerPoints[escrowHash][players_[i]];    
     }
     return playerPoints.findMax();
   }
   
-  function _declareWinners(bytes32 escrowHash, address[] memory players) internal returns (address[] memory) {
-    uint256 highestScore = _getHighestScore(escrowHash, players);
-    for(uint256 i = 0; i < players.length; i++) {
-      if(_playerPoints[escrowHash][players[i]] == highestScore){
-        _winners[escrowHash].add(players[i]);
+  function _declareWinners(bytes32 escrowHash, address[] memory players_) internal returns (address[] memory) {
+    uint256 highestScore = _getHighestScore(escrowHash, players_);
+
+    for(uint256 i = 0; i < players_.length; i++) {
+      if(_playerPoints[escrowHash][players_[i]] == highestScore) {
+        _winners[escrowHash].add(players_[i]);
       }
     }
     return _winners[escrowHash].values();
@@ -193,15 +192,32 @@ contract WegaGameController is
   
   function _addPoints(
     bytes32 escrowHash, 
-    address[] memory players, 
+    address[] memory players_, 
     uint256[] memory results
   ) internal {
     uint256 max = results.findMax();
-    for(uint256 i = 0; i < players.length; i++) {
-      if(results[i] == max){
-        _playerPoints[escrowHash][players[i]]++;
+    for(uint256 i = 0; i < players_.length; i++) {
+      if(results[i] == max) {
+        _playerPoints[escrowHash][players_[i]] += 1;
       }
     }
   }
+
   function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
+  function winners(bytes32 escrowHash) external view override returns(address[] memory){
+    return _winners[escrowHash].values();
+  }
+  function players(bytes32 escrowHash) external view override returns(address[] memory) {
+    return _players[escrowHash].values();
+  }
+  function getGame(bytes32 escrowHash) external view override returns(Wega memory game_){
+    return _games[escrowHash];
+  }
+  function gameResults(bytes32 escrowHash, address player) external view override returns(uint256[] memory){
+    return _gameResults[escrowHash][player];
+  }
+  function getPlayerPoints(bytes32 escrowHash, address player) external view override returns(uint256){
+    return _playerPoints[escrowHash][player];
+  }
 }

@@ -12,6 +12,7 @@ pragma solidity ^0.8.19;
 */
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 
 
@@ -23,6 +24,7 @@ import "../roles/WegaGameManagerRole.sol";
 contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole, UUPSUpgradeable {
 
   using EnumerableMap for EnumerableMap.UintToUintMap;
+  using Math for uint256;
   EnumerableMap.UintToUintMap private _randomNumbers;
 
 
@@ -46,18 +48,23 @@ contract WegaChanceGame is IWegaChanceGame, WegaGameManagerRole, UUPSUpgradeable
  // roll function
  function roll(
   uint256 denominator, 
-  uint256 nonce, 
-  address player
+  uint256 nonce 
   ) external view override onlyWegaGameManager returns(uint256) {
-    uint256 randomNumber = _retrieveRandomNumber(nonce, player);
+    uint256 randomNumber = _retrieveRandomNumber(nonce);
     uint256 result = (randomNumber % denominator) + 1; 
     return result;
  }
 
- function _retrieveRandomNumber(uint256 nonce, address player) internal view returns (uint256){
+ function _retrieveRandomNumber(uint256 nonce) internal view returns (uint256){
     uint256 count = _randomNumbers.length();
-    uint256 index = (block.prevrandao + uint256(uint160(player)) * (nonce + block.timestamp)) % count;
-    return _randomNumbers.get(index); 
+    uint256 randomIndex = uint256(keccak256(abi.encodePacked(
+      tx.origin,
+      blockhash(block.number - nonce),
+      block.timestamp,
+      block.prevrandao,
+      nonce
+    ))) % count;
+    return _randomNumbers.get(randomIndex); 
  }
 
  function randomNumbersCount() public view override returns (uint256) {

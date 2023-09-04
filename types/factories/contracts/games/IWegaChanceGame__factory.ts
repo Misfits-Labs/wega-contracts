@@ -48,11 +48,6 @@ const _abi = [
         name: "nonce",
         type: "uint256",
       },
-      {
-        internalType: "address",
-        name: "player",
-        type: "address",
-      },
     ],
     name: "roll",
     outputs: [

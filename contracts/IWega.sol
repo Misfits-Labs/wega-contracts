@@ -5,7 +5,7 @@ interface IWega {
  
  enum WegaType { DICE, COINFLIP }
  
- enum WegaState { PENDING, READY, PLAYED }
+ enum WegaState { WAITING, PLAYED }
  
  struct Wega {
   WegaType gameType;

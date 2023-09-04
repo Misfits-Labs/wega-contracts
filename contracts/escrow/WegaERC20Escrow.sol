@@ -7,8 +7,9 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-    import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "hardhat/console.sol";
 
 // protocol imports
 import "./IEscrow.sol";
@@ -239,7 +240,7 @@ contract WegaERC20Escrow is
 
         // update deposits on escrow
         _deposits[escrowHash][account] = wagerAmount;
-
+        
         // transfer tokens to escrow
         _escrowBalances[escrowHash] += wagerAmount;
         IERC20Upgradeable(request.tokenAddress).transferFrom(

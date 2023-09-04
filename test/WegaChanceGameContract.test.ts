@@ -1,11 +1,11 @@
-const { ethers } =  require('hardhat');
+const { ethers, upgrades } =  require('hardhat');
 import { constants, BigNumber, utils } from 'ethers';
 import { expect } from 'chai';
 import { uniq } from 'lodash'
-import drand from '../.random-numbers/random-numbers-dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493.json'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { TwoWayChanceGame } from '../types/contracts/games';
-import { TwoWayChanceGame__factory } from '../types/factories/contracts/games'
+import { WegaChanceGame } from '../types/contracts/games';
+import { WegaChanceGame__factory } from '../types/factories/contracts/games'
+import { getRandomNumbersConfig } from '../src/config';
 
 export type RequestInput = (string | number | BigNumber)[]
 
@@ -13,15 +13,17 @@ export type RequestInput = (string | number | BigNumber)[]
 describe("TwoWayChanceGameContract", () => {
   
   // random numbers 
-  const randomNumbers = drand.drands.map(({ randomness }) => BigNumber.from(randomness)).slice(0, 101);
-
+  const drandChainhash: string = "dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493";
+  const randomNumConfig = getRandomNumbersConfig(drandChainhash);
+  const randomNumbers = randomNumConfig['1337'].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(0, 101);
 
   // contracts
-  let twoChance: TwoWayChanceGame,
-      twoChanceFactory: TwoWayChanceGame__factory;
+  let chanceGame: WegaChanceGame,
+      chanceFactory: WegaChanceGame__factory;
 
   // accounts
-  let signers: SignerWithAddress[],
+  let signers: SignerWithAddress[],      
+      gameManager: SignerWithAddress, 
       coinbase: SignerWithAddress, 
       others: SignerWithAddress[],
       alice: SignerWithAddress, 
@@ -34,21 +36,24 @@ describe("TwoWayChanceGameContract", () => {
   beforeEach(async () => {
     // accounts setup
     signers = await ethers.getSigners();
-    [coinbase, ...others] = signers;
+    [coinbase, gameManager, ...others] = signers;
     [alice, bob, carl, david, ed, fred, ...others] = others;
 
     // factory setup
-    twoChanceFactory = new TwoWayChanceGame__factory(coinbase);
+    chanceFactory = new WegaChanceGame__factory(coinbase);
     
     // deploy contracts
-    twoChance = await twoChanceFactory.deploy(randomNumbers);
+    chanceGame = await upgrades.deployProxy(chanceFactory, [randomNumbers], { kind: 'uups', initializer: 'initialize' });
+    
+    // add appropriate roles
+    chanceGame.connect(coinbase).addWegaGameManager(gameManager.address);
   });
 
   describe('Initialization', () => {
    it('should correctly set the random numbers', async () => {
     let randomNumbersCount = randomNumbers.length
     // random number length should be around 5k
-    expect(await twoChance.randomNumbersCount()).to.equal(randomNumbersCount);
+    expect(await chanceGame.randomNumbersCount()).to.equal(randomNumbersCount);
    })
   })
   describe('Rolling', () => {
@@ -56,8 +61,9 @@ describe("TwoWayChanceGameContract", () => {
     const rolls = [alice.address, alice.address, alice.address, alice.address];
     const denom = 6; // dice
     const randoms = await Promise.all(rolls.map(async (address, index) => {
-     return (await twoChance.roll(denom, index, address)).toNumber();
+     return (await chanceGame.roll(denom, index, address)).toNumber();
     }));
+    console.log(randoms)
     expect(uniq(randoms).length).to.equal(randoms.length);
    });
   })

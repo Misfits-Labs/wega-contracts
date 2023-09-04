@@ -52,7 +52,7 @@ export interface WegaChanceGameInterface extends utils.Interface {
     "renounceRole(bytes32,address)": FunctionFragment;
     "renounceWegaGameManager()": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "roll(uint256,uint256,address)": FunctionFragment;
+    "roll(uint256,uint256)": FunctionFragment;
     "rotateWegaGameManager(address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -179,11 +179,7 @@ export interface WegaChanceGameInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "roll",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>
-    ]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "rotateWegaGameManager",
@@ -530,7 +526,6 @@ export interface WegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -661,7 +656,6 @@ export interface WegaChanceGame extends BaseContract {
   roll(
     denominator: PromiseOrValue<BigNumberish>,
     nonce: PromiseOrValue<BigNumberish>,
-    player: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -788,7 +782,6 @@ export interface WegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -990,7 +983,6 @@ export interface WegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1128,7 +1120,6 @@ export interface WegaChanceGame extends BaseContract {
     roll(
       denominator: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
-      player: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

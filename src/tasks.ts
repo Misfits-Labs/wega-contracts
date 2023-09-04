@@ -61,15 +61,15 @@ const deployWegaGameControllerTask: Task = {
 
     } else {
       gameController = await WegaGameController.connect(owner).deploy();      
-      await gameController.connect(owner)['__WegaGameController_init'](WegaERC20Escrow.implementation, WegaChanceGame.implementation);
+      await gameController.connect(owner).initialize(WegaERC20Escrow.implementation, WegaChanceGame.implementation);
       await ctx.saveContractConfig(ContractName.WegaGameController, gameController);
       await gameController.deployTransaction.wait();
       await verify(ctx, gameController.address, []);
     }
     
     // configure game controller 
-    const erc20Escrow = ctx.artifacts.WegaERC20Escrow.attach(inputs.proxy ? WegaERC20Escrow.address : WegaERC20Escrow.implementation as string);
-    const chanceGame = ctx.artifacts.WegaChanceGame.attach(inputs.proxy ? WegaChanceGame.address: WegaChanceGame.implementation as string);
+    const erc20Escrow = ctx.artifacts.WegaERC20Escrow.attach(WegaERC20Escrow.address);
+    const chanceGame = ctx.artifacts.WegaChanceGame.attach(WegaChanceGame.address);
     
     ctx.log('Configuring settings on dependencies...');
     // add EscrowManagerRole to gameController on escrow

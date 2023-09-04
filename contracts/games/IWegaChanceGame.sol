@@ -7,9 +7,8 @@ interface IWegaChanceGame {
  * @notice this method calculates rollValue
  * @param denominator the posibilities that can be rolled 
  * @param nonce an arbitrary nonce value
- * @param player of the player that is throwing
  */
- function roll(uint256 denominator, uint256 nonce, address player) external returns(uint256);
+ function roll(uint256 denominator, uint256 nonce) external returns(uint256);
 
  /**
  * @notice returns the current length of randomnumbers set

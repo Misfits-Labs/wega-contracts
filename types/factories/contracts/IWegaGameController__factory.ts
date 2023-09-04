@@ -51,6 +51,143 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "gameResults",
+    outputs: [
+      {
+        internalType: "uint256[]",
+        name: "",
+        type: "uint256[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+    ],
+    name: "getGame",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "enum IWega.WegaType",
+            name: "gameType",
+            type: "uint8",
+          },
+          {
+            internalType: "enum IWega.WegaState",
+            name: "state",
+            type: "uint8",
+          },
+          {
+            internalType: "uint256",
+            name: "denom",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "requiredPlayers",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "playersDeposited",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "minRounds",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IWega.Wega",
+        name: "game_",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "address",
+        name: "player",
+        type: "address",
+      },
+    ],
+    name: "getPlayerPoints",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+    ],
+    name: "players",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+    ],
+    name: "winners",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
 export class IWegaGameController__factory {

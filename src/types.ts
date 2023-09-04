@@ -44,6 +44,8 @@ export type DependenciesMap = {
 }
 
 export enum TransactionState { OPEN, PENDING, READY, CLOSED }
+export enum GameState { WAITING, PLAYED }
+export enum GameType { DICE, COINFLIP }
 
 
 // For DRAND
