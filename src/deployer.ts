@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { ethers, network, config } from 'hardhat';
-import { merge, defaultsDeep } from 'lodash';
+import { merge, uniq } from 'lodash';
 import debug from 'debug';
 import { mergeNetworkConfig, getNetworkConfig } from './config'
 import { Contract, ContractFactory } from 'ethers';
@@ -148,7 +148,6 @@ export class Deployer {
 
   getNetworkConfig (): DeployedContractsConfig {
     const config = this.getDeployConfig();
-
     const emptyConfig = {
       address: '0x0000000000000000000000000000000000000000',
       legacyAddresses: [],
@@ -166,6 +165,7 @@ export class Deployer {
           value.transaction &&
           ethers.BigNumber.from(value.transaction.blockNumber).toHexString(),
         forwarder: value.forwarder,
+        legacyAddresses: uniq(value.legacyAddresses)
       };
     }
 
@@ -193,6 +193,7 @@ export class Deployer {
     name: ContractName,
     contract: Contract,
     implAddress?: string,
+    legacyAddresses?: string[], 
   ): Promise<void> {
     const config = this.getDeployConfig();
     const transaction = contract.deployTransaction && (await contract.deployTransaction.wait());
@@ -202,6 +203,7 @@ export class Deployer {
           address: contract.address,
           implementation: implAddress,
           transaction,
+          legacyAddresses
         },
       },
     });

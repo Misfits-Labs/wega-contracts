@@ -194,6 +194,54 @@ const deployERC20EscrowTask: Task = {
 }
 
 /**
+* deploys the wega nft escrow
+*/
+const upgradeGameControllerTask: Task = {
+  tags: ['upgrade_game_controller', 'upgrades_full'],
+  priority: 100,
+  inputOptions: true,
+  run: async (
+    ctx: Deployer, 
+    dependencies: DependenciesMap, 
+    inputs: any
+  ) => {
+    ctx.log('Upgrading Wega Game Controller...');
+    const { owner } = ctx.accounts;
+    const [
+      WegaGameController,
+    ] = unwrapDependencies(
+      dependencies,
+      [
+        ArtifactName.WegaGameController,
+      ],
+      );
+    const { WegaGameController: ContractToUpgradeTo } = ctx.artifacts;
+    let gameController: Contract;
+    let legacyAddress: string = WegaGameController.implementation as string;
+    gameController = await upgrades.upgradeProxy(WegaGameController.address, ContractToUpgradeTo, { 
+        kind: 'uups'
+    });
+    let gameCtlImpl = await upgrades.erc1967.getImplementationAddress(gameController.address);
+    await ctx.saveContractConfig(ContractName.WegaERC20Escrow, gameController, gameCtlImpl, [ legacyAddress, ...WegaGameController.legacyAddresses ]);
+    await verify(ctx, gameCtlImpl, []);
+  },
+  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
+    config = merge(ctx.getDeployConfig(), config);
+
+    const { WegaGameController } = config?.contracts || {};
+
+    const dependencies = { WegaGameController };
+
+    for (const [key, value] of Object.entries(dependencies)) {
+      if (!value || !value.address) {
+        throw new Error(`${key} contract not found for network ${network.config.chainId}`);
+      }
+    }
+    return dependencies;
+  },
+}
+
+/**
 * deploys the wega nft dummies
 */
 const deployERC20DummyTask: Task = {
@@ -239,4 +287,5 @@ export const tasks: Task[] = [
   deployERC20DummyTask,
   deployWegaGameControllerTask,
   deployWegaChanceGameTask,
+  upgradeGameControllerTask
 ];
