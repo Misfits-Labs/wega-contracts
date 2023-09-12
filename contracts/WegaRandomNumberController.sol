@@ -42,10 +42,9 @@ contract WegaRandomNumberController is IWegaRandomNumberController, WegaGameMana
    _nonce.increment();
   } 
 
-  function generate(uint256 denominator) external override returns(uint256) {
-    uint256 randomNumber = _retrieveRandomNumber(_nonce.current());
+  function generate(uint256 denominator, uint256 nonce) public view override returns(uint256) {
+    uint256 randomNumber = _retrieveRandomNumber(nonce);
     uint256 result = (randomNumber % denominator) + 1;
-    _nonce.increment(); 
     return result;
   }
 

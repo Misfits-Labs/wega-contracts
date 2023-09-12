@@ -38,7 +38,7 @@ export interface WegaRandomNumberControllerInterface extends utils.Interface {
     "addWegaGameManager(address)": FunctionFragment;
     "addWegaGameManagers(address[])": FunctionFragment;
     "closeWegaGameManager(address)": FunctionFragment;
-    "generate(uint256)": FunctionFragment;
+    "generate(uint256,uint256)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
@@ -126,7 +126,7 @@ export interface WegaRandomNumberControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "generate",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -462,8 +462,9 @@ export interface WegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      nonce: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
@@ -591,8 +592,9 @@ export interface WegaRandomNumberController extends BaseContract {
 
   generate(
     denominator: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    nonce: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   getRoleAdmin(
     role: PromiseOrValue<BytesLike>,
@@ -720,6 +722,7 @@ export interface WegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
+      nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -916,7 +919,8 @@ export interface WegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      nonce: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getRoleAdmin(
@@ -1050,7 +1054,8 @@ export interface WegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      nonce: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getRoleAdmin(

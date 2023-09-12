@@ -26,7 +26,7 @@ import type {
 export interface IWegaRandomNumberControllerInterface extends utils.Interface {
   functions: {
     "addRandomNumbers(uint256[])": FunctionFragment;
-    "generate(uint256)": FunctionFragment;
+    "generate(uint256,uint256)": FunctionFragment;
     "randomNumbersCount()": FunctionFragment;
   };
 
@@ -43,7 +43,7 @@ export interface IWegaRandomNumberControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "generate",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "randomNumbersCount",
@@ -97,6 +97,7 @@ export interface IWegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
+      nonce: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -110,6 +111,7 @@ export interface IWegaRandomNumberController extends BaseContract {
 
   generate(
     denominator: PromiseOrValue<BigNumberish>,
+    nonce: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -123,6 +125,7 @@ export interface IWegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
+      nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -139,6 +142,7 @@ export interface IWegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
+      nonce: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -153,6 +157,7 @@ export interface IWegaRandomNumberController extends BaseContract {
 
     generate(
       denominator: PromiseOrValue<BigNumberish>,
+      nonce: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

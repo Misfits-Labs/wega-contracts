@@ -4,6 +4,7 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "hardhat/console.sol";
 
 import "./escrow/IWegaERC20Escrow.sol";
 import "./escrow/IEscrow.sol";
@@ -87,7 +88,6 @@ contract WegaGameController is
     }
   }
 
-  // should create wager and deposit wager into contract 
   function createGame(
     string memory name,
     address tokenAddress,
@@ -95,46 +95,54 @@ contract WegaGameController is
   ) public {
     require(_gameNameHashes.contains(name.keyHash()), INVALID_WEGA_GAME);
     GameSettings memory settings = _getGameSettings(name);
-    // create wager
+    
     bytes32 escrowHash = erc20Escrow.createWagerRequest(
       tokenAddress, 
       _msgSender(), 
       settings.requiredPlayers, 
       wagerAmount
     );
-    // create game 
+
     IWega.Wega memory game;
     game.name = name;
     game.state = IWega.WegaState.WAITING;
-    game.currentPlayers[game.currentPlayers.length] = _msgSender(); 
+    address[] memory players_ = new address[](settings.requiredPlayers);
+    game.currentPlayers = players_;
+    game.currentPlayers[0] = _msgSender();
+    game.deposited += 1;
     _games[escrowHash] = game;
     emit GameCreation(escrowHash, _msgSender(), name); 
   }
 
-  // should deposit to contract
   function depositOrPlay(bytes32 escrowHash) public override {
     IWega.Wega memory game =_games[escrowHash];
     GameSettings memory settings = _getGameSettings(game.name); 
-    IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
-    require(game.state != IWega.WegaState.PLAYED, INVALID_GAME_STATE);
-
-    if(game.currentPlayers.length != settings.requiredPlayers) {
-
-      // update escrow
-      erc20Escrow.deposit(escrowHash, _msgSender(), wagerRequest.wagerAmount);
-      
-      // add player to game
-      _games[escrowHash].currentPlayers[game.currentPlayers.length] = _msgSender();
-      
-      // play game 
-      if(game.currentPlayers.length == settings.requiredPlayers) {
-        _playWega(settings.proxy, escrowHash, game.currentPlayers, settings.minRounds, settings.denominator);
-      }
-
+    _deposit(escrowHash);
+    if(_games[escrowHash].deposited == settings.requiredPlayers) {
+      _playDice(settings.proxy, escrowHash, _games[escrowHash].currentPlayers, settings.denominator, settings.minRounds);
     }
-  } 
+  }
 
-  function _playWega(
+  function depositOrPlay(
+    bytes32 escrowHash, 
+    uint256[] memory playerChoices
+  ) public override {
+    IWega.Wega memory game =_games[escrowHash];
+    GameSettings memory settings = _getGameSettings(game.name); 
+    _deposit(escrowHash);
+    if(_games[escrowHash].deposited == settings.requiredPlayers) {
+      _playCoinFlip(
+        settings.proxy, 
+        escrowHash, 
+        _games[escrowHash].currentPlayers,
+        playerChoices, 
+        settings.denominator, 
+        settings.minRounds
+      );
+    }
+  }
+
+  function _playDice(
     address gameAddress,
     bytes32 escrowHash, 
     address[] memory currentPlayers,
@@ -152,10 +160,42 @@ contract WegaGameController is
     emit WinnerDeclaration(escrowHash, gameWinners);
   }
 
+  function _playCoinFlip(
+    address gameAddress,
+    bytes32 escrowHash, 
+    address[] memory currentPlayers,
+    uint256[] memory playerChoices,
+    uint256 rounds,
+    uint256 denominator 
+  ) internal {
+    address[] memory gameWinners = IWega(gameAddress).play(
+      escrowHash, 
+      currentPlayers,
+      playerChoices, 
+      rounds, 
+      denominator
+    );  
+    erc20Escrow.setWithdrawers(escrowHash, gameWinners);
+    _games[escrowHash].state = IWega.WegaState.PLAYED;
+    emit WinnerDeclaration(escrowHash, gameWinners);
+  }
+
+  function _deposit(bytes32 escrowHash) internal {
+    IWega.Wega memory game =_games[escrowHash];
+    GameSettings memory settings = _getGameSettings(game.name); 
+    IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
+    require(game.state != IWega.WegaState.PLAYED, INVALID_GAME_STATE);
+    if(game.deposited != settings.requiredPlayers) {
+      erc20Escrow.deposit(escrowHash, _msgSender(), wagerRequest.wagerAmount);
+      _games[escrowHash].currentPlayers[game.deposited] = _msgSender();
+      _games[escrowHash].deposited +=1; 
+    }
+  }
+
   function winners(
     string memory game, 
     bytes32 escrowHash
-  ) external override returns(address[] memory) {
+  ) external view override returns(address[] memory) {
     GameSettings memory settings = _getGameSettings(game);
     return IWega(settings.proxy).winners(escrowHash);
   }
@@ -174,7 +214,7 @@ contract WegaGameController is
     string memory game,
     bytes32 escrowHash, 
     address player
-  ) external override returns(uint256[] memory) {
+  ) external view override returns(uint256[] memory) {
     return IWega(_getGameSettings(game).proxy).playerResults(escrowHash, player);
   }
 
@@ -182,7 +222,7 @@ contract WegaGameController is
     string memory game,
     bytes32 escrowHash, 
     address player
-  ) external override returns(uint256) {
+  ) external view override returns(uint256) {
     return IWega(_getGameSettings(game).proxy).playerScore(escrowHash, player);
   }
   

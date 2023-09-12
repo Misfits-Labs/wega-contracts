@@ -19,6 +19,7 @@ import "./Wega.sol";
 contract WegaCoinFlipGame is Wega {
 
   using Arrays for uint256[];
+  using CountersUpgradeable for CountersUpgradeable.Counter;
 
   function play( 
     bytes32 escrowHash,
@@ -27,14 +28,14 @@ contract WegaCoinFlipGame is Wega {
     uint256 denominator,
     uint256 minRounds
   ) external override onlyWegaGameManager returns (address[] memory winners) {
-    _play(escrowHash, currentPlayers, playerChoices, denominator, 0, minRounds);
+    _play(escrowHash, currentPlayers, playerChoices, denominator, 1, minRounds);
     winners = _declareWinners(escrowHash, currentPlayers); 
   }
 
   function _play(
     bytes32 escrowHash,
     address[] memory currentPlayers,
-    uint256[] memory playerChoices, 
+    uint256[] memory playerChoices,
     uint256 denominator,
     uint256 currentRound,
     uint256 minRounds
@@ -42,8 +43,10 @@ contract WegaCoinFlipGame is Wega {
    if(currentRound > minRounds) {
      return 1;
    }
+   
    // users have chosen a coin to flip
-   uint256 coinflip = randomNumberGen.generate(denominator);
+   uint256 coinflip = randomNumberGen.generate(denominator, _nonces.current());
+   _nonces.increment();
    for (uint256 i = 0; i < currentPlayers.length; i++) { 
       uint256 result;
      if(playerChoices[i] == coinflip) {

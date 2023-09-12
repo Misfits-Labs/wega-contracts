@@ -26,6 +26,7 @@ async function main() {
   const startIndex = lastStoredIndex == 0 ? lastStoredIndex : lastStoredIndex + 1;
   const stopIndex = lastStoredIndex > 0 ? lastStoredIndex + drandIndexesToAdd + 1 : drandIndexesToAdd
   const drands = randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(startIndex, stopIndex); 
+  
   const deployConfig = await deployer.execute(['wega_game_controller'], config, { drands });
 
   mergeNetworkConfig(deployConfig);

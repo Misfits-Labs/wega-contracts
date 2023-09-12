@@ -26,7 +26,7 @@ export type DeployedContract = {
   forwarder?: string,
   deprecated?: boolean;
   deploymentBlock: string,
-} 
+}
 
 export type DeployedContractList = {
   contracts: DeployedContractMap

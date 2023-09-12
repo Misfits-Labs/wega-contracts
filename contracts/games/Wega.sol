@@ -13,6 +13,7 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -37,6 +38,8 @@ abstract contract Wega is IWega, WegaGameManagerRole, UUPSUpgradeable {
   mapping(bytes32 => mapping(address => uint256[])) private _gameResults;
   mapping(bytes32 => mapping(address => uint256)) private _playerScores;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _winners;
+  CountersUpgradeable.Counter internal _nonces;
+  
 
   function initialize(
     address randomNumberController
@@ -112,7 +115,7 @@ abstract contract Wega is IWega, WegaGameManagerRole, UUPSUpgradeable {
     uint256[] memory playerChoises, 
     uint256 currentRound,
     uint256 minRounds
-  ) external virtual returns (address[] memory winners) {}
+  ) external virtual returns (address[] memory winners_) {}
   
   // dice
   function play(
@@ -120,5 +123,5 @@ abstract contract Wega is IWega, WegaGameManagerRole, UUPSUpgradeable {
     address[] memory currentPlayers, 
     uint256 currentRound,
     uint256 minRounds
-  ) external virtual returns (address[] memory winners) {}
+  ) external virtual returns (address[] memory winners_) {}
 }

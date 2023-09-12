@@ -49,6 +49,24 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "uint256[]",
+        name: "playerChoices",
+        type: "uint256[]",
+      },
+    ],
+    name: "depositOrPlay",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "string",
         name: "game",
         type: "string",
@@ -96,6 +114,11 @@ const _abi = [
             internalType: "address[]",
             name: "currentPlayers",
             type: "address[]",
+          },
+          {
+            internalType: "uint256",
+            name: "deposited",
+            type: "uint256",
           },
           {
             internalType: "enum IWega.WegaState",

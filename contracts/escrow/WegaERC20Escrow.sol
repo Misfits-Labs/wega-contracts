@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeab
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "hardhat/console.sol";
 
 // protocol imports
 import "./IEscrow.sol";
@@ -277,6 +276,7 @@ contract WegaERC20Escrow is
         require(request.state == TransactionState.PENDING, INVALID_REQUEST_STATE);
         uint256 withdrawableAmount = _wagerRequests[escrowHash].totalWager.mulDiv(1, winners_.length);
         for (uint256 i = 0; i < winners_.length; i++) {
+            
             require(containsPlayer(escrowHash, winners_[i]), INVALID_REQUEST_DATA);
             _accountBalances[winners_[i]] = withdrawableAmount;
         }

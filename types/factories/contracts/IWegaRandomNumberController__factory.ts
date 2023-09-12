@@ -30,6 +30,11 @@ const _abi = [
         name: "denominator",
         type: "uint256",
       },
+      {
+        internalType: "uint256",
+        name: "nonce",
+        type: "uint256",
+      },
     ],
     name: "generate",
     outputs: [

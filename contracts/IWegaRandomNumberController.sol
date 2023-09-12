@@ -5,9 +5,10 @@ interface IWegaRandomNumberController {
 
  /**
  * @notice this method calculates rollValue
- * @param denominator the posibilities that can be rolled 
+ * @param denominator the posibilities that can be rolled
+ * @param nonce arbitrary number
  */
- function generate(uint256 denominator) external returns(uint256);
+ function generate(uint256 denominator, uint256 nonce) external returns(uint256);
 
  /**
  * @notice returns the current length of randomnumbers set

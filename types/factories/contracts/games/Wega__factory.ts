@@ -388,7 +388,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address[]",
-        name: "winners",
+        name: "winners_",
         type: "address[]",
       },
     ],
@@ -422,7 +422,7 @@ const _abi = [
     outputs: [
       {
         internalType: "address[]",
-        name: "winners",
+        name: "winners_",
         type: "address[]",
       },
     ],

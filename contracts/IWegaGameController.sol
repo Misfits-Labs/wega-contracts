@@ -12,7 +12,7 @@ interface IWegaGameController {
     address randomNumberController;
   }
   /**
-  * @notice allows a player to trigger a two-way chance game  
+  * @notice allows a player to create a dice or coinflip game  
   * @param name name of the address
   * @param tokenAddress tokenAddress to be used in the game
   * @param wagerAmount the minimum number of rounds in a game
@@ -24,10 +24,17 @@ interface IWegaGameController {
   ) external;
 
   /**
-   * @notice allows a player to trigger a two-way chance game or deploy if the game is not ready  
+   * @notice allows a player to trigger dice game or deploy if the game is not ready  
    * @param escrowHash address of the contract that holds the funds for a game
   */
   function depositOrPlay(bytes32 escrowHash) external;
+
+  /**
+   * @notice allows a player to trigger coinflip game or deploy if the game is not ready  
+   * @param escrowHash address of the contract that holds the funds for a game
+   * @param playerChoices choices for coinflip
+  */
+  function depositOrPlay(bytes32 escrowHash, uint256[] memory playerChoices) external;
 
   /**
    * @notice returns winners of a game

@@ -151,23 +151,21 @@ export interface IWega extends BaseContract {
     playerResults(
       escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
 
     playerScore(
       escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-    randomNumbersContract(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    randomNumbersContract(overrides?: CallOverrides): Promise<[string]>;
 
     winners(
       escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
   };
 
   "play(bytes32,address[],uint256[],uint256,uint256)"(
@@ -190,23 +188,21 @@ export interface IWega extends BaseContract {
   playerResults(
     escrowHash: PromiseOrValue<BytesLike>,
     player: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
 
   playerScore(
     escrowHash: PromiseOrValue<BytesLike>,
     player: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
-  randomNumbersContract(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  randomNumbersContract(overrides?: CallOverrides): Promise<string>;
 
   winners(
     escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string[]>;
 
   callStatic: {
     "play(bytes32,address[],uint256[],uint256,uint256)"(
@@ -269,22 +265,20 @@ export interface IWega extends BaseContract {
     playerResults(
       escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     playerScore(
       escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    randomNumbersContract(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
+    randomNumbersContract(overrides?: CallOverrides): Promise<BigNumber>;
 
     winners(
       escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
@@ -309,22 +303,22 @@ export interface IWega extends BaseContract {
     playerResults(
       escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     playerScore(
       escrowHash: PromiseOrValue<BytesLike>,
       player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     randomNumbersContract(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     winners(
       escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
