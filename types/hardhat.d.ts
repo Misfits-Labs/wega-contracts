@@ -101,17 +101,33 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameControllerEvents__factory>;
     getContractFactory(
+      name: "IWega",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWega__factory>;
+    getContractFactory(
       name: "IWegaChanceGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaChanceGame__factory>;
+    getContractFactory(
+      name: "Wega",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Wega__factory>;
     getContractFactory(
       name: "WegaChanceGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaChanceGame__factory>;
     getContractFactory(
+      name: "WegaDiceGame",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaDiceGame__factory>;
+    getContractFactory(
       name: "IWegaGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameController__factory>;
+    getContractFactory(
+      name: "IWegaRandomNumberController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWegaRandomNumberController__factory>;
     getContractFactory(
       name: "WegaEscrowManagerRole",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -124,6 +140,10 @@ declare module "hardhat/types/runtime" {
       name: "WegaGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaGameController__factory>;
+    getContractFactory(
+      name: "WegaRandomNumberController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaRandomNumberController__factory>;
 
     getContractAt(
       name: "AccessControlUpgradeable",
@@ -236,20 +256,40 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaGameControllerEvents>;
     getContractAt(
+      name: "IWega",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWega>;
+    getContractAt(
       name: "IWegaChanceGame",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaChanceGame>;
+    getContractAt(
+      name: "Wega",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Wega>;
     getContractAt(
       name: "WegaChanceGame",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WegaChanceGame>;
     getContractAt(
+      name: "WegaDiceGame",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaDiceGame>;
+    getContractAt(
       name: "IWegaGameController",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaGameController>;
+    getContractAt(
+      name: "IWegaRandomNumberController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWegaRandomNumberController>;
     getContractAt(
       name: "WegaEscrowManagerRole",
       address: string,
@@ -265,6 +305,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WegaGameController>;
+    getContractAt(
+      name: "WegaRandomNumberController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaRandomNumberController>;
 
     // default types
     getContractFactory(

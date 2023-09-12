@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-interface IWegaChanceGame {
+interface IWegaRandomNumberController {
 
  /**
  * @notice this method calculates rollValue
  * @param denominator the posibilities that can be rolled 
- * @param nonce an arbitrary nonce value
  */
- function roll(uint256 denominator, uint256 nonce) external returns(uint256);
+ function generate(uint256 denominator) external returns(uint256);
 
  /**
  * @notice returns the current length of randomnumbers set

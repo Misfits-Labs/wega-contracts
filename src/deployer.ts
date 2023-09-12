@@ -190,7 +190,7 @@ export class Deployer {
   }
 
   async saveContractConfig (
-    name: ContractName,
+    name: ContractName | ArtifactName,
     contract: Contract,
     implAddress?: string,
     legacyAddresses?: string[], 
@@ -199,7 +199,7 @@ export class Deployer {
     const transaction = contract.deployTransaction && (await contract.deployTransaction.wait());
     const _config = merge(config, {
       contracts: {
-        [name]: {
+        [name as string]: {
           address: contract.address,
           implementation: implAddress,
           transaction,

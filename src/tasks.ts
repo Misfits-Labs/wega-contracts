@@ -219,10 +219,12 @@ const upgradeGameControllerTask: Task = {
     let gameController: Contract;
     let legacyAddress: string = WegaGameController.implementation as string;
     gameController = await upgrades.upgradeProxy(WegaGameController.address, ContractToUpgradeTo, { 
-        kind: 'uups'
+        kind: 'uups',
+        redeployImplementation: 'always'  
     });
+    await gameController.deployTransaction.wait();
     let gameCtlImpl = await upgrades.erc1967.getImplementationAddress(gameController.address);
-    await ctx.saveContractConfig(ContractName.WegaERC20Escrow, gameController, gameCtlImpl, [ legacyAddress, ...WegaGameController.legacyAddresses ]);
+    await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameCtlImpl, [legacyAddress, ...WegaGameController.legacyAddresses]);
     await verify(ctx, gameCtlImpl, []);
   },
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {

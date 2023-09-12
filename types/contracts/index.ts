@@ -12,4 +12,6 @@ export type { games };
 import type * as roles from "./roles";
 export type { roles };
 export type { IWegaGameController } from "./IWegaGameController";
+export type { IWegaRandomNumberController } from "./IWegaRandomNumberController";
 export type { WegaGameController } from "./WegaGameController";
+export type { WegaRandomNumberController } from "./WegaRandomNumberController";

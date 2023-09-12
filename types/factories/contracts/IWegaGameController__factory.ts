@@ -13,27 +13,22 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
         internalType: "address",
         name: "tokenAddress",
         type: "address",
       },
       {
         internalType: "uint256",
-        name: "requiredPlayerNum",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
         name: "wagerAmount",
         type: "uint256",
       },
-      {
-        internalType: "enum IWega.WegaType",
-        name: "gameType",
-        type: "uint8",
-      },
     ],
-    name: "createGameAndDepositInitialWager",
+    name: "createGame",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -53,6 +48,11 @@ const _abi = [
   },
   {
     inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
       {
         internalType: "bytes32",
         name: "escrowHash",
@@ -88,38 +88,23 @@ const _abi = [
       {
         components: [
           {
-            internalType: "enum IWega.WegaType",
-            name: "gameType",
-            type: "uint8",
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "address[]",
+            name: "currentPlayers",
+            type: "address[]",
           },
           {
             internalType: "enum IWega.WegaState",
             name: "state",
             type: "uint8",
           },
-          {
-            internalType: "uint256",
-            name: "denom",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "requiredPlayers",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "playersDeposited",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "minRounds",
-            type: "uint256",
-          },
         ],
         internalType: "struct IWega.Wega",
-        name: "game_",
+        name: "",
         type: "tuple",
       },
     ],
@@ -128,6 +113,11 @@ const _abi = [
   },
   {
     inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
       {
         internalType: "bytes32",
         name: "escrowHash",
@@ -139,7 +129,7 @@ const _abi = [
         type: "address",
       },
     ],
-    name: "getPlayerPoints",
+    name: "playerScore",
     outputs: [
       {
         internalType: "uint256",
@@ -171,6 +161,111 @@ const _abi = [
   },
   {
     inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        internalType: "address",
+        name: "gameAddress",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "denominator",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "minRounds",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "requiredPlayers",
+        type: "uint256",
+      },
+    ],
+    name: "registerGame",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+    ],
+    name: "removeGame",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "denominator",
+        type: "uint256",
+      },
+    ],
+    name: "setDenominator",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "newMinRounds",
+        type: "uint256",
+      },
+    ],
+    name: "setMinRounds",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "requiredPlayers",
+        type: "uint256",
+      },
+    ],
+    name: "setRequiredPlayers",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
       {
         internalType: "bytes32",
         name: "escrowHash",

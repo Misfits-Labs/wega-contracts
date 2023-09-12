@@ -7,4 +7,6 @@ export * as events from "./events";
 export * as games from "./games";
 export * as roles from "./roles";
 export { IWegaGameController__factory } from "./IWegaGameController__factory";
+export { IWegaRandomNumberController__factory } from "./IWegaRandomNumberController__factory";
 export { WegaGameController__factory } from "./WegaGameController__factory";
+export { WegaRandomNumberController__factory } from "./WegaRandomNumberController__factory";

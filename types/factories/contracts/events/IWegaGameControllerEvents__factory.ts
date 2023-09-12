@@ -14,6 +14,31 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "oldDenominator",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newDenominator",
+        type: "uint256",
+      },
+    ],
+    name: "DenominatorSet",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "bytes32",
         name: "escrowHash",
@@ -27,12 +52,81 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "enum IWega.WegaType",
-        name: "gameType",
-        type: "uint8",
+        internalType: "string",
+        name: "name",
+        type: "string",
       },
     ],
     name: "GameCreation",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "gameAddress",
+        type: "address",
+      },
+    ],
+    name: "GameRegistration",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "oldMinRounds",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newMinRounds",
+        type: "uint256",
+      },
+    ],
+    name: "MinRoundsSet",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "requiredPlayersOld",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "requiredPlayersNew",
+        type: "uint256",
+      },
+    ],
+    name: "RequiredPlayersSet",
     type: "event",
   },
   {

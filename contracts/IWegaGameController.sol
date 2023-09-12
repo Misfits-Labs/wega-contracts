@@ -1,19 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
-import "./IWega.sol";
+import "./games/IWega.sol";
 
 interface IWegaGameController {
+
+  struct GameSettings {
+    uint256 denominator;
+    uint256 minRounds;
+    uint256 requiredPlayers;
+    address proxy;
+    address randomNumberController;
+  }
   /**
   * @notice allows a player to trigger a two-way chance game  
+  * @param name name of the address
   * @param tokenAddress tokenAddress to be used in the game
-  * @param requiredPlayerNum the players of the game
   * @param wagerAmount the minimum number of rounds in a game
   */
-  function createGameAndDepositInitialWager(
+  function createGame(
+    string memory name,
     address tokenAddress,  
-    uint256 requiredPlayerNum, 
-    uint256 wagerAmount,
-    IWega.WegaType gameType
+    uint256 wagerAmount
   ) external;
 
   /**
@@ -24,9 +31,10 @@ interface IWegaGameController {
 
   /**
    * @notice returns winners of a game
+   * @param game name of the game
    * @param escrowHash id of the escrow
    */
-  function winners(bytes32 escrowHash) external returns (address[] memory);
+  function winners(string memory game, bytes32 escrowHash) external returns (address[] memory);
 
   /**
    * @notice returns players of a game
@@ -38,19 +46,72 @@ interface IWegaGameController {
    * @notice returns a game
    * @param escrowHash id of the escrow
    */
-  function getGame(bytes32 escrowHash) external returns(IWega.Wega memory game_);
+  function getGame(bytes32 escrowHash) external returns(IWega.Wega memory);
   
   /**
    * @notice returns game result for player of game
+   * @param game name of the game
    * @param escrowHash id of the escrow
    * @param player player to retrieve results of
    */
-  function gameResults(bytes32 escrowHash, address player) external returns(uint256[] memory);
+  function gameResults(
+    string memory game, 
+    bytes32 escrowHash, 
+    address player
+  ) external returns(uint256[] memory);
  
   /**
    * @notice returns player points for a game
+   * @param game name of the game
    * @param escrowHash id of the escrow
    * @param player player to retrieve points of
-   */
-  function getPlayerPoints(bytes32 escrowHash, address player) external returns(uint256);
+  */
+  function playerScore(
+    string memory game, 
+    bytes32 escrowHash, 
+    address player
+  ) external returns(uint256);
+  
+  /**
+   * @notice sets the minimum required playrounds of a wega game
+   * @param game name of the game to register
+   * @param newMinRounds player to retrieve points of
+  */
+  function setMinRounds(string memory game, uint256 newMinRounds) external;
+
+  /**
+   * @notice sets the denominator of a wega game
+   * @param game name of the game to register
+   * @param denominator denominator to set the game to
+  */
+  function setDenominator(string memory game, uint256 denominator) external;
+
+  /**
+   * @notice sets the number of required players of a wega
+   * @param game name of the game to register
+   * @param requiredPlayers denominator to set the game to
+  */
+  function setRequiredPlayers(string memory game, uint256 requiredPlayers) external;
+  
+  /**
+   * @notice returns player points for a game
+   * @param game name of the game to register
+   * @param gameAddress contract address of the game 
+   * @param denominator to be used in randomnum generation
+   * @param minRounds minimum amount of rounds to play
+   * @param requiredPlayers minimum amount of players to play
+  */
+  function registerGame(
+    string memory game,
+    address gameAddress,
+    uint256 denominator, 
+    uint256 minRounds,
+    uint256 requiredPlayers
+  ) external;
+
+  /**
+   * @notice returns player points for a game
+   * @param game name of the game to register
+  */
+  function removeGame(string memory game) external;
 }
