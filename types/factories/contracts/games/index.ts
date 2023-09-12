@@ -2,7 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export { IWega__factory } from "./IWega__factory";
-export { IWegaChanceGame__factory } from "./IWegaChanceGame__factory";
+export { IWegaCoinFlipGame__factory } from "./IWegaCoinFlipGame__factory";
+export { IWegaDiceGame__factory } from "./IWegaDiceGame__factory";
 export { Wega__factory } from "./Wega__factory";
-export { WegaChanceGame__factory } from "./WegaChanceGame__factory";
+export { WegaCoinFlipGame__factory } from "./WegaCoinFlipGame__factory";
 export { WegaDiceGame__factory } from "./WegaDiceGame__factory";

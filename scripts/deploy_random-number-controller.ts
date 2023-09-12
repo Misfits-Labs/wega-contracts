@@ -16,7 +16,7 @@ async function main() {
     throw new Error(`Config not found for network ${chainId}`);
   }
   const deployer = await Deployer.create();
-  const deployConfig = await deployer.execute(['wega_chance_game'], config, { 
+  const deployConfig = await deployer.execute(['wega_random_number_controller'], config, { 
     initialDrands: [ ...randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(0, 101) ] 
    });
   mergeNetworkConfig(deployConfig);
@@ -24,9 +24,6 @@ async function main() {
   console.log('Deployed!');
 }
 
-// curently stores untill lastStoredIndex
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

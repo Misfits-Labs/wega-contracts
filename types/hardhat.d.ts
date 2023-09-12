@@ -105,17 +105,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWega__factory>;
     getContractFactory(
-      name: "IWegaChanceGame",
+      name: "IWegaCoinFlipGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWegaChanceGame__factory>;
+    ): Promise<Contracts.IWegaCoinFlipGame__factory>;
+    getContractFactory(
+      name: "IWegaDiceGame",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWegaDiceGame__factory>;
     getContractFactory(
       name: "Wega",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Wega__factory>;
     getContractFactory(
-      name: "WegaChanceGame",
+      name: "WegaCoinFlipGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WegaChanceGame__factory>;
+    ): Promise<Contracts.WegaCoinFlipGame__factory>;
     getContractFactory(
       name: "WegaDiceGame",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -261,20 +265,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWega>;
     getContractAt(
-      name: "IWegaChanceGame",
+      name: "IWegaCoinFlipGame",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IWegaChanceGame>;
+    ): Promise<Contracts.IWegaCoinFlipGame>;
+    getContractAt(
+      name: "IWegaDiceGame",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWegaDiceGame>;
     getContractAt(
       name: "Wega",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Wega>;
     getContractAt(
-      name: "WegaChanceGame",
+      name: "WegaCoinFlipGame",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.WegaChanceGame>;
+    ): Promise<Contracts.WegaCoinFlipGame>;
     getContractAt(
       name: "WegaDiceGame",
       address: string,

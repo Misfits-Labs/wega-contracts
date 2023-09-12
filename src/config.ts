@@ -33,4 +33,4 @@ export function getRandomNumbersConfig(chainHash: string): RandomNumbersConfig {
   ? fs.readFileSync(drandConfigPath.concat(`/random-numbers-${chainHash}.json`)).toString()
   : '{}';
   return JSON.parse(file.length ? file : '{}');
- }
+}

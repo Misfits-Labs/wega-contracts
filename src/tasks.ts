@@ -19,13 +19,12 @@ export type Task = {
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList) => DependenciesMap;
 };
 
-
 /**
 * deploys the wega game controller
 */
 const deployWegaGameControllerTask: Task = {
   tags: ['wega_game_controller', 'full'],
-  priority: 4,
+  priority: 6,
   inputOptions: true,
   run: async (
     ctx: Deployer, 
@@ -38,18 +37,41 @@ const deployWegaGameControllerTask: Task = {
     let gameController: Contract;
     const [
       WegaERC20Escrow,
-      WegaChanceGame
+      WegaRandomNumberController,
+      WegaDiceGame,
+      WegaCoinFlipGame
     ] = unwrapDependencies(
       dependencies,
       [
         ArtifactName.WegaERC20Escrow,
-        ArtifactName.WegaChanceGame,
+        ArtifactName.WegaRandomNumberController,
+        ArtifactName.WegaDiceGame,
+        ArtifactName.WegaCoinFlipGame
       ],
     );
-    
+    const gameSettings = [
+      {
+        denominator: 6,
+        minRounds: 1,
+        requiredPlayers: 2,
+        proxy: WegaDiceGame.address,
+        randomNumberController: WegaRandomNumberController.address
+      },
+      {
+        denominator: 2,
+        minRounds: 1,
+        requiredPlayers: 2,
+        proxy: WegaCoinFlipGame.address,
+        randomNumberController: WegaRandomNumberController.address
+      }
+    ]
     if(ctx.options.proxy) {
       gameController = await upgrades.deployProxy(
-        ctx.artifacts.WegaGameController.connect(owner), [WegaERC20Escrow.address, WegaChanceGame.address], { 
+        ctx.artifacts.WegaGameController.connect(owner), [
+          WegaERC20Escrow.address, 
+          ["DICE", "COINFLIP"],
+          [...gameSettings],
+        ], { 
           initializer: "initialize",
           kind: 'uups'
         }
@@ -58,10 +80,9 @@ const deployWegaGameControllerTask: Task = {
       let gameControllerImpl = await upgrades.erc1967.getImplementationAddress(gameController.address);
       await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameControllerImpl);
       await verify(ctx, gameControllerImpl, []);
-
     } else {
       gameController = await WegaGameController.connect(owner).deploy();      
-      await gameController.connect(owner).initialize(WegaERC20Escrow.implementation, WegaChanceGame.implementation);
+      await gameController.connect(owner).initialize(WegaERC20Escrow.implementation, ["DICE", "COINFLIP"], [...gameSettings]);
       await ctx.saveContractConfig(ContractName.WegaGameController, gameController);
       await gameController.deployTransaction.wait();
       await verify(ctx, gameController.address, []);
@@ -69,22 +90,31 @@ const deployWegaGameControllerTask: Task = {
     
     // configure game controller 
     const erc20Escrow = ctx.artifacts.WegaERC20Escrow.attach(WegaERC20Escrow.address);
-    const chanceGame = ctx.artifacts.WegaChanceGame.attach(WegaChanceGame.address);
+    const randomNumController = ctx.artifacts.WegaRandomNumberController.attach(WegaRandomNumberController.address);
+    const diceGame = ctx.artifacts.WegaDiceGame.attach(WegaDiceGame.address);
+    const coinflipGame = ctx.artifacts.WegaCoinFlipGame.attach(WegaCoinFlipGame.address);
     
     ctx.log('Configuring settings on dependencies...');
+    ctx.log('Adding game controller as manager on dependencies...')
     // add EscrowManagerRole to gameController on escrow
     await erc20Escrow.connect(owner).addWegaEscrowManager(gameController.address);
-    // add ChanceGameManagerRole to gameController on chanceGame
-    await chanceGame.connect(owner).addWegaGameManager(gameController.address);
+    // add RandomNumControllerManagerRole to gameController on randomNumController
+    await randomNumController.connect(owner).addWegaGameManager(gameController.address);
+    // add gameManager to 
+    await diceGame.connect(owner).addWegaGameManager(gameController.address);
+    // add gameManager to 
+    await coinflipGame.connect(owner).addWegaGameManager(gameController.address);
+    ctx.log('Adding managers done!')
+
     // add more randomNumbers
     if (inputs.drands.length > 0) {
       let chunkSize = 100;
       for (let i = 0, j = inputs.drands.length; i < j; i += chunkSize){
         const array = inputs.drands.slice(i, i + chunkSize);
         ctx.log(`Adding ${array.length} random numbers...`);
-        const tx = await chanceGame.connect(owner).addRandomNumbers(array);
+        const tx = await randomNumController.connect(owner).addRandomNumbers(array);
         await tx.wait();
-        ctx.log(`Successfully added random numbers`);
+        ctx.log(`Successfully added random numbers!`);
       }
     }
     ctx.log('Configuration done!!!');
@@ -92,9 +122,127 @@ const deployWegaGameControllerTask: Task = {
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
     config = merge(ctx.getDeployConfig(), config);
 
-    const { WegaERC20Escrow, WegaChanceGame } = config?.contracts || {};
+    const { WegaERC20Escrow, WegaRandomNumberController, WegaCoinFlipGame, WegaDiceGame } = config?.contracts || {};
 
-    const dependencies = { WegaERC20Escrow, WegaChanceGame };
+    const dependencies = { WegaERC20Escrow, WegaRandomNumberController, WegaCoinFlipGame, WegaDiceGame };
+
+    for (const [key, value] of Object.entries(dependencies)) {
+      if (!value || !value.address) {
+        throw new Error(`${key} contract not found for network ${network.config.chainId}`);
+      }
+    }
+    return dependencies;
+  },
+}
+
+/**
+* deploy the wega dice game
+*/
+const deployDiceGameTask: Task = {
+  tags: ['wega_dice_game', 'full'],
+  priority: 5,
+  inputOptions: true,
+  run: async (
+    ctx: Deployer, 
+    dependencies: DependenciesMap, 
+    inputs: any
+  ) => {
+    ctx.log('Deploying Wega Dice Game');
+    const { owner } = ctx.accounts;
+    const [
+      WegaRandomNumberController
+    ] = unwrapDependencies(
+      dependencies,
+      [
+        ArtifactName.WegaRandomNumberController,
+      ],
+    );
+    const { WegaDiceGame } = ctx.artifacts;
+    let wegaDice: Contract;
+    if(ctx.options.proxy) {      
+      wegaDice = await upgrades.deployProxy(
+        ctx.artifacts.WegaDiceGame.connect(owner), [WegaRandomNumberController.address], { 
+          initializer: 'initialize', 
+          kind: 'uups'
+        }
+      );
+      await wegaDice.deployTransaction.wait();
+      let wegaDiceImpl = await upgrades.erc1967.getImplementationAddress(wegaDice.address);
+      await ctx.saveContractConfig(ContractName.WegaDiceGame, wegaDice, wegaDiceImpl);
+      await verify(ctx, wegaDiceImpl, []);
+    } else {
+      wegaDice = await WegaDiceGame.connect(owner).deploy();
+      await wegaDice.connect(owner).initialize(WegaRandomNumberController.address);
+      await ctx.saveContractConfig(ContractName.WegaDiceGame, wegaDice);
+      await wegaDice.deployTransaction.wait();
+      await verify(ctx, wegaDice.address, []);
+    }
+  },
+  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
+    config = merge(ctx.getDeployConfig(), config);
+
+    const { WegaRandomNumberController } = config?.contracts || {};
+
+    const dependencies = { WegaRandomNumberController };
+
+    for (const [key, value] of Object.entries(dependencies)) {
+      if (!value || !value.address) {
+        throw new Error(`${key} contract not found for network ${network.config.chainId}`);
+      }
+    }
+    return dependencies;
+  },
+}
+
+/**
+* deploy the wega coinflip game
+*/
+const deployCoinFlipGameTask: Task = {
+  tags: ['wega_coinflip_game', 'full'],
+  priority: 4,
+  inputOptions: true,
+  run: async (
+    ctx: Deployer, 
+    dependencies: DependenciesMap, 
+    inputs: any
+  ) => {
+    ctx.log('Deploying Wega Coinflip Game');
+    const { owner } = ctx.accounts;
+    const [
+      WegaRandomNumberController
+    ] = unwrapDependencies(
+      dependencies,
+      [
+        ArtifactName.WegaRandomNumberController,
+      ],
+    );
+    const { WegaCoinFlipGame } = ctx.artifacts;
+    let wegaCoinFlip: Contract;
+    if(ctx.options.proxy) {      
+      wegaCoinFlip = await upgrades.deployProxy(
+        ctx.artifacts.WegaCoinFlipGame.connect(owner), [WegaRandomNumberController.address], { 
+          initializer: 'initialize', 
+          kind: 'uups'
+        }
+      );
+      await wegaCoinFlip.deployTransaction.wait();
+      let wegaCoinFlipImpl = await upgrades.erc1967.getImplementationAddress(wegaCoinFlip.address);
+      await ctx.saveContractConfig(ContractName.WegaCoinFlipGame, wegaCoinFlip, wegaCoinFlipImpl);
+      await verify(ctx, wegaCoinFlipImpl, []);
+    } else {
+      wegaCoinFlip = await WegaCoinFlipGame.connect(owner).deploy();
+      await wegaCoinFlip.connect(owner).initialize(WegaRandomNumberController.address);
+      await ctx.saveContractConfig(ContractName.WegaCoinFlipGame, wegaCoinFlip);
+      await wegaCoinFlip.deployTransaction.wait();
+      await verify(ctx, wegaCoinFlip.address, []);
+    }
+  },
+  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
+    config = merge(ctx.getDeployConfig(), config);
+
+    const { WegaRandomNumberController } = config?.contracts || {};
+
+    const dependencies = { WegaRandomNumberController };
 
     for (const [key, value] of Object.entries(dependencies)) {
       if (!value || !value.address) {
@@ -108,8 +256,8 @@ const deployWegaGameControllerTask: Task = {
 /**
 * deploys the wega game controller
 */
-const deployWegaChanceGameTask: Task = {
-  tags: ['wega_chance_game', 'full'],
+const deployWegaRandomNumberControllerTask: Task = {
+  tags: ['wega_random_number_controller', 'full'],
   priority: 3,
   inputOptions: true,
   run: async (
@@ -117,34 +265,34 @@ const deployWegaChanceGameTask: Task = {
     dependencies: DependenciesMap, 
     inputs: any
   ) => {
-    ctx.log('Deploying Wega Chance Game');
+    ctx.log('Deploying Wega random number controller');
     const { owner } = ctx.accounts;
-    let chanceGame: Contract;
+    let randController: Contract;
     if(ctx.options.proxy) {
-      chanceGame = await upgrades.deployProxy(
-        ctx.artifacts.WegaChanceGame.connect(owner), [inputs.initialDrands], { 
+      randController = await upgrades.deployProxy(
+        ctx.artifacts.WegaRandomNumberController.connect(owner), [inputs.initialDrands], { 
           initializer: "initialize",
           kind: 'uups'
         }
       );
-      await chanceGame.deployTransaction.wait();
-      let chanceGameImpl = await upgrades.erc1967.getImplementationAddress(chanceGame.address);
-      await ctx.saveContractConfig(ContractName.WegaChanceGame, chanceGame, chanceGameImpl);
-      await verify(ctx, chanceGameImpl, []);
+      await randController.deployTransaction.wait();
+      let randControllerImpl = await upgrades.erc1967.getImplementationAddress(randController.address);
+      await ctx.saveContractConfig(ContractName.WegaRandomNumberController, randController, randControllerImpl);
+      await verify(ctx, randControllerImpl, []);
     } else {
-      chanceGame = await ctx.artifacts.WegaChanceGame.connect(owner).deploy();
-      await chanceGame.connect(owner).initialize(inputs.initialDrands);
-      await ctx.saveContractConfig(ContractName.WegaChanceGame, chanceGame);
-      await chanceGame.deployTransaction.wait();
-      await verify(ctx, chanceGame.address, []);
+      randController = await ctx.artifacts.WegaRandomNumberController.connect(owner).deploy();
+      await randController.connect(owner).initialize(inputs.initialDrands);
+      await ctx.saveContractConfig(ContractName.WegaRandomNumberController, randController);
+      await randController.deployTransaction.wait();
+      await verify(ctx, randController.address, []);
     }
   },
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
     config = merge(ctx.getDeployConfig(), config);
 
-    const { WegaERC20Escrow, WegaChanceGame } = config?.contracts || {};
+    const { WegaRandomNumberController } = config?.contracts || {};
 
-    const dependencies = { WegaERC20Escrow, WegaChanceGame };
+    const dependencies = { WegaRandomNumberController };
 
     for (const [key, value] of Object.entries(dependencies)) {
       if (!value || !value.address) {
@@ -154,7 +302,6 @@ const deployWegaChanceGameTask: Task = {
     return dependencies;
   },
 }
-
 /**
 * deploys the wega nft escrow
 */
@@ -189,6 +336,47 @@ const deployERC20EscrowTask: Task = {
       await erc20Escrow.deployTransaction.wait();
       await verify(ctx, erc20Escrow.address, [...inputs.escrow]);
     }
+  },
+  ensureDependencies: () =>({})
+}
+
+/**
+* deploys the wega nft dummies
+*/
+const deployERC20DummyTask: Task = {
+  tags: ['erc20_dummy', 'full'],
+  priority: 1,
+  inputOptions: true,
+  run: async (
+    ctx: Deployer, 
+    dependencies: DependenciesMap, 
+    inputs: any
+  ) => {
+
+    ctx.log('Deploying Wega ERC20 Dummies');
+    const { owner } = ctx.accounts;
+    const { WegaERC20Dummy } = ctx.artifacts
+    const erc20Dummy = await WegaERC20Dummy.connect(owner).deploy(inputs.tokenReceivers);
+    await ctx.saveContractConfig(ContractName.WegaERC20Dummy, erc20Dummy);
+    await erc20Dummy.deployTransaction.wait();
+    await verify(ctx, erc20Dummy.address, []);
+    
+    // // mint Token Ids
+    // if (inputs.tokenReceivers.length > 0) {
+    //   let chunkSize = 2;
+    //   for (let i = 0, j = inputs.tokenReceivers.length; i < j; i += chunkSize){
+    //     const array = inputs.tokenReceivers.slice(i, i + chunkSize);
+    //     await Promise.all(array.map(async (receiver: string) => {
+    //       console.log('minting tokens', array);
+    //       const tokenAmount = 10000;
+    //       const gp = await erc20Dummy.provider.getGasPrice();
+    //       const tenPercent = gp.mul(BigNumber.from(10)).div(100);
+    //       const tx = await erc20Dummy.connect(owner).mint(receiver, utils.parseEther(String(tokenAmount)), { gasPrice: gp.add(tenPercent) });
+    //       await tx.wait();
+    //       console.log(`successfully minted ${tokenAmount} to ${receiver}`);
+    //     }))
+    //   }
+    // }
   },
   ensureDependencies: () =>({})
 }
@@ -243,51 +431,12 @@ const upgradeGameControllerTask: Task = {
   },
 }
 
-/**
-* deploys the wega nft dummies
-*/
-const deployERC20DummyTask: Task = {
-  tags: ['erc20_dummy', 'full'],
-  priority: 1,
-  inputOptions: true,
-  run: async (
-    ctx: Deployer, 
-    dependencies: DependenciesMap, 
-    inputs: any
-  ) => {
-
-    ctx.log('Deploying Wega ERC20 Dummies');
-    const { owner } = ctx.accounts;
-    const { WegaERC20Dummy } = ctx.artifacts
-    const erc20Dummy = await WegaERC20Dummy.connect(owner).deploy(inputs.tokenReceivers);
-    await ctx.saveContractConfig(ContractName.WegaERC20Dummy, erc20Dummy);
-    await erc20Dummy.deployTransaction.wait();
-    await verify(ctx, erc20Dummy.address, []);
-    
-    // // mint Token Ids
-    // if (inputs.tokenReceivers.length > 0) {
-    //   let chunkSize = 2;
-    //   for (let i = 0, j = inputs.tokenReceivers.length; i < j; i += chunkSize){
-    //     const array = inputs.tokenReceivers.slice(i, i + chunkSize);
-    //     await Promise.all(array.map(async (receiver: string) => {
-    //       console.log('minting tokens', array);
-    //       const tokenAmount = 10000;
-    //       const gp = await erc20Dummy.provider.getGasPrice();
-    //       const tenPercent = gp.mul(BigNumber.from(10)).div(100);
-    //       const tx = await erc20Dummy.connect(owner).mint(receiver, utils.parseEther(String(tokenAmount)), { gasPrice: gp.add(tenPercent) });
-    //       await tx.wait();
-    //       console.log(`successfully minted ${tokenAmount} to ${receiver}`);
-    //     }))
-    //   }
-    // }
-  },
-  ensureDependencies: () =>({})
-}
-
 export const tasks: Task[] = [
   deployERC20EscrowTask,
   deployERC20DummyTask,
   deployWegaGameControllerTask,
-  deployWegaChanceGameTask,
-  upgradeGameControllerTask
+  deployWegaRandomNumberControllerTask,
+  upgradeGameControllerTask,
+  deployDiceGameTask,
+  deployCoinFlipGameTask
 ];

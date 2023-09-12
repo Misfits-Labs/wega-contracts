@@ -28,7 +28,7 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export interface WegaDiceGameInterface extends utils.Interface {
+export interface WegaCoinFlipGameInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "WEGA_GAME_MANAGER_ROLE()": FunctionFragment;
@@ -437,12 +437,12 @@ export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
 
 export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
 
-export interface WegaDiceGame extends BaseContract {
+export interface WegaCoinFlipGame extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: WegaDiceGameInterface;
+  interface: WegaCoinFlipGameInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -525,8 +525,8 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      currentRound: PromiseOrValue<BigNumberish>,
+      playerChoices: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -534,7 +534,7 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
+      currentRound: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -678,8 +678,8 @@ export interface WegaDiceGame extends BaseContract {
   "play(bytes32,address[],uint256[],uint256,uint256)"(
     escrowHash: PromiseOrValue<BytesLike>,
     currentPlayers: PromiseOrValue<string>[],
-    playerChoises: PromiseOrValue<BigNumberish>[],
-    currentRound: PromiseOrValue<BigNumberish>,
+    playerChoices: PromiseOrValue<BigNumberish>[],
+    denominator: PromiseOrValue<BigNumberish>,
     minRounds: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -687,7 +687,7 @@ export interface WegaDiceGame extends BaseContract {
   "play(bytes32,address[],uint256,uint256)"(
     escrowHash: PromiseOrValue<BytesLike>,
     currentPlayers: PromiseOrValue<string>[],
-    denominator: PromiseOrValue<BigNumberish>,
+    currentRound: PromiseOrValue<BigNumberish>,
     minRounds: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -831,8 +831,8 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      currentRound: PromiseOrValue<BigNumberish>,
+      playerChoices: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string[]>;
@@ -840,7 +840,7 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
+      currentRound: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string[]>;
@@ -1051,8 +1051,8 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      currentRound: PromiseOrValue<BigNumberish>,
+      playerChoices: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1060,7 +1060,7 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
+      currentRound: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1209,8 +1209,8 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      currentRound: PromiseOrValue<BigNumberish>,
+      playerChoices: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1218,7 +1218,7 @@ export interface WegaDiceGame extends BaseContract {
     "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
+      currentRound: PromiseOrValue<BigNumberish>,
       minRounds: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

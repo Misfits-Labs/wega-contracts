@@ -4,7 +4,9 @@ export enum ArtifactName {
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
   WegaGameController = 'WegaGameController',
-  WegaChanceGame = 'WegaChanceGame',
+  WegaRandomNumberController = 'WegaRandomNumberController',
+  WegaDiceGame = 'WegaDiceGame',
+  WegaCoinFlipGame = 'WegaCoinFlipGame',
 }
 
 export enum ContractName {
@@ -12,7 +14,9 @@ export enum ContractName {
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
   WegaGameController = 'WegaGameController',
-  WegaChanceGame = 'WegaChanceGame',
+  WegaRandomNumberController = 'WegaRandomNumberController',
+  WegaDiceGame = 'WegaDiceGame',
+  WegaCoinFlipGame = 'WegaCoinFlipGame',
 }
 
 export type DeployedContract = {
@@ -24,15 +28,15 @@ export type DeployedContract = {
   deploymentBlock: string,
 } 
 
-export type DeployedContractList = { // hndsNetworkConfig
+export type DeployedContractList = {
   contracts: DeployedContractMap
 }
 
-export type DeployedContractMap = { // hdnsContractConfigMap 
+export type DeployedContractMap = { 
   [k in ContractName]: DeployedContract
 }
 
-export type DeployedContractsConfig = { // hdnsConfig
+export type DeployedContractsConfig = { 
   version?: string;
   networks: {
     [chainId: number]: DeployedContractList

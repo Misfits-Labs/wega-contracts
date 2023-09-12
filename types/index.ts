@@ -52,12 +52,14 @@ export type { IWegaGameControllerEvents } from "./contracts/events/IWegaGameCont
 export { IWegaGameControllerEvents__factory } from "./factories/contracts/events/IWegaGameControllerEvents__factory";
 export type { IWega } from "./contracts/games/IWega";
 export { IWega__factory } from "./factories/contracts/games/IWega__factory";
-export type { IWegaChanceGame } from "./contracts/games/IWegaChanceGame";
-export { IWegaChanceGame__factory } from "./factories/contracts/games/IWegaChanceGame__factory";
+export type { IWegaCoinFlipGame } from "./contracts/games/IWegaCoinFlipGame";
+export { IWegaCoinFlipGame__factory } from "./factories/contracts/games/IWegaCoinFlipGame__factory";
+export type { IWegaDiceGame } from "./contracts/games/IWegaDiceGame";
+export { IWegaDiceGame__factory } from "./factories/contracts/games/IWegaDiceGame__factory";
 export type { Wega } from "./contracts/games/Wega";
 export { Wega__factory } from "./factories/contracts/games/Wega__factory";
-export type { WegaChanceGame } from "./contracts/games/WegaChanceGame";
-export { WegaChanceGame__factory } from "./factories/contracts/games/WegaChanceGame__factory";
+export type { WegaCoinFlipGame } from "./contracts/games/WegaCoinFlipGame";
+export { WegaCoinFlipGame__factory } from "./factories/contracts/games/WegaCoinFlipGame__factory";
 export type { WegaDiceGame } from "./contracts/games/WegaDiceGame";
 export { WegaDiceGame__factory } from "./factories/contracts/games/WegaDiceGame__factory";
 export type { IWegaGameController } from "./contracts/IWegaGameController";

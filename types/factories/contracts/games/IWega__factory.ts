@@ -20,6 +20,45 @@ const _abi = [
         type: "address[]",
       },
       {
+        internalType: "uint256[]",
+        name: "playerChoises",
+        type: "uint256[]",
+      },
+      {
+        internalType: "uint256",
+        name: "denominator",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "minRounds",
+        type: "uint256",
+      },
+    ],
+    name: "play",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "winners",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "address[]",
+        name: "currentPlayers",
+        type: "address[]",
+      },
+      {
         internalType: "uint256",
         name: "denominator",
         type: "uint256",

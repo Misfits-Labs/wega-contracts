@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 /**
-  * @title TwoWayChanceContract (MVP)
+  * @title WegaDiceGame (MVP)
   * @author @RasenGUY @Daosourced.
-  * The contract that handles the business logic for randomness game plays
-  * The contract also takes in a list of random numbers from DRAND, this as a short-term solution 
-  * just for poc but. Which will be replaced in next iterations with a proper implementation of DIA'
-  * oracle implementation for random numbers
+  * @notice a simple decentralized onchain dice game
   * @dev note this is draft contract not meant to be used in production
 */
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
@@ -28,7 +25,7 @@ contract WegaDiceGame is Wega {
     address[] memory currentPlayers,
     uint256 denominator,
     uint256 minRounds
-  ) external onlyGameController returns (address[] memory winners) {
+  ) external override onlyWegaGameManager returns (address[] memory winners) {
     _play(escrowHash, currentPlayers, denominator, 0, minRounds);
     winners = _declareWinners(escrowHash, currentPlayers); 
   }
@@ -59,7 +56,7 @@ contract WegaDiceGame is Wega {
     bytes32 escrowHash,
     address[] memory players, 
     uint256[] memory results
-  ) internal override {
+  ) internal {
     uint256 max = results.findMax();
     for(uint256 i = 0; i < players.length; i++) {
       if(results[i] == max) {

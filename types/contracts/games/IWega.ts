@@ -25,6 +25,7 @@ import type {
 
 export interface IWegaInterface extends utils.Interface {
   functions: {
+    "play(bytes32,address[],uint256[],uint256,uint256)": FunctionFragment;
     "play(bytes32,address[],uint256,uint256)": FunctionFragment;
     "playerResults(bytes32,address)": FunctionFragment;
     "playerScore(bytes32,address)": FunctionFragment;
@@ -34,7 +35,8 @@ export interface IWegaInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "play"
+      | "play(bytes32,address[],uint256[],uint256,uint256)"
+      | "play(bytes32,address[],uint256,uint256)"
       | "playerResults"
       | "playerScore"
       | "randomNumbersContract"
@@ -42,7 +44,17 @@ export interface IWegaInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "play",
+    functionFragment: "play(bytes32,address[],uint256[],uint256,uint256)",
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>[],
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "play(bytes32,address[],uint256,uint256)",
     values: [
       PromiseOrValue<BytesLike>,
       PromiseOrValue<string>[],
@@ -67,7 +79,14 @@ export interface IWegaInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>]
   ): string;
 
-  decodeFunctionResult(functionFragment: "play", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "play(bytes32,address[],uint256[],uint256,uint256)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "play(bytes32,address[],uint256,uint256)",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "playerResults",
     data: BytesLike
@@ -112,7 +131,16 @@ export interface IWega extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    play(
+    "play(bytes32,address[],uint256[],uint256,uint256)"(
+      escrowHash: PromiseOrValue<BytesLike>,
+      currentPlayers: PromiseOrValue<string>[],
+      playerChoises: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
+      minRounds: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
       denominator: PromiseOrValue<BigNumberish>,
@@ -142,7 +170,16 @@ export interface IWega extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  play(
+  "play(bytes32,address[],uint256[],uint256,uint256)"(
+    escrowHash: PromiseOrValue<BytesLike>,
+    currentPlayers: PromiseOrValue<string>[],
+    playerChoises: PromiseOrValue<BigNumberish>[],
+    denominator: PromiseOrValue<BigNumberish>,
+    minRounds: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "play(bytes32,address[],uint256,uint256)"(
     escrowHash: PromiseOrValue<BytesLike>,
     currentPlayers: PromiseOrValue<string>[],
     denominator: PromiseOrValue<BigNumberish>,
@@ -172,7 +209,16 @@ export interface IWega extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    play(
+    "play(bytes32,address[],uint256[],uint256,uint256)"(
+      escrowHash: PromiseOrValue<BytesLike>,
+      currentPlayers: PromiseOrValue<string>[],
+      playerChoises: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
+      minRounds: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
       denominator: PromiseOrValue<BigNumberish>,
@@ -203,7 +249,16 @@ export interface IWega extends BaseContract {
   filters: {};
 
   estimateGas: {
-    play(
+    "play(bytes32,address[],uint256[],uint256,uint256)"(
+      escrowHash: PromiseOrValue<BytesLike>,
+      currentPlayers: PromiseOrValue<string>[],
+      playerChoises: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
+      minRounds: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
       denominator: PromiseOrValue<BigNumberish>,
@@ -234,7 +289,16 @@ export interface IWega extends BaseContract {
   };
 
   populateTransaction: {
-    play(
+    "play(bytes32,address[],uint256[],uint256,uint256)"(
+      escrowHash: PromiseOrValue<BytesLike>,
+      currentPlayers: PromiseOrValue<string>[],
+      playerChoises: PromiseOrValue<BigNumberish>[],
+      denominator: PromiseOrValue<BigNumberish>,
+      minRounds: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "play(bytes32,address[],uint256,uint256)"(
       escrowHash: PromiseOrValue<BytesLike>,
       currentPlayers: PromiseOrValue<string>[],
       denominator: PromiseOrValue<BigNumberish>,

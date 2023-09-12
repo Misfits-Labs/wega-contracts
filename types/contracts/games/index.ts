@@ -2,7 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { IWega } from "./IWega";
-export type { IWegaChanceGame } from "./IWegaChanceGame";
+export type { IWegaCoinFlipGame } from "./IWegaCoinFlipGame";
+export type { IWegaDiceGame } from "./IWegaDiceGame";
 export type { Wega } from "./Wega";
-export type { WegaChanceGame } from "./WegaChanceGame";
+export type { WegaCoinFlipGame } from "./WegaCoinFlipGame";
 export type { WegaDiceGame } from "./WegaDiceGame";

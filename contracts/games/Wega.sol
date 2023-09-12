@@ -24,7 +24,7 @@ import "../utils/Arrays.sol";
 import "./IWega.sol";
 
 
-abstract contract Wega is IWega, AccessControlErrors, OwnableUpgradeable, UUPSUpgradeable {
+abstract contract Wega is IWega, WegaGameManagerRole, UUPSUpgradeable {
 
   using EnumerableMap for EnumerableMap.UintToUintMap;
   using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
@@ -37,41 +37,33 @@ abstract contract Wega is IWega, AccessControlErrors, OwnableUpgradeable, UUPSUp
   mapping(bytes32 => mapping(address => uint256[])) private _gameResults;
   mapping(bytes32 => mapping(address => uint256)) private _playerScores;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _winners;
-  
-  address public controller;
-
-  modifier onlyGameController {
-   require(_msgSender() == controller, CALLER_NOT_ALLOWED);
-   _;
-  }
 
   function initialize(
-    address gameController, 
     address randomNumberController
   ) initializer public {
     __UUPSUpgradeable_init();
-    __Ownable_init();
-    __Wega(gameController, randomNumberController);
+    __WegaGameManagerRole_init();
+    __Wega(randomNumberController);
+    _addWegaGameManager(owner());
   }
 
-  function __Wega(address gameController, address randomNumberController) public onlyInitializing {
-    __Wega_unchained(gameController, randomNumberController);
+  function __Wega(address randomNumberController) public onlyInitializing {
+    __Wega_unchained(randomNumberController);
   } 
 
-  function __Wega_unchained(address gameController, address randomNumberController) public onlyInitializing {
-    controller = gameController;
+  function __Wega_unchained(address randomNumberController) public onlyInitializing {
     randomNumberGen = IWegaRandomNumberController(randomNumberController);
   }
 
-  function winners(bytes32 escrowHash) external view override onlyGameController returns(address[] memory) {
+  function winners(bytes32 escrowHash) external view override returns(address[] memory) {
     return _winners[escrowHash].values();
   }
   
-  function playerResults(bytes32 escrowHash, address player) external view override onlyGameController returns(uint256[] memory) {
+  function playerResults(bytes32 escrowHash, address player) external view override returns(uint256[] memory) {
     return _gameResults[escrowHash][player];
   }
 
-  function playerScore(bytes32 escrowHash, address player) external view override onlyGameController returns(uint256){
+  function playerScore(bytes32 escrowHash, address player) external view override returns(uint256){
     return _playerScores[escrowHash][player];
   }
 
@@ -99,8 +91,6 @@ abstract contract Wega is IWega, AccessControlErrors, OwnableUpgradeable, UUPSUp
     return _winners[escrowHash].values();
   }
 
-  function _tallyResultsIntoScores(bytes32 escrowHash,  address[] memory players_, uint256[] memory results) internal virtual {}
-
   function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 
   function _addResult(bytes32 escrowHash, address player, uint256 result) internal {
@@ -114,4 +104,21 @@ abstract contract Wega is IWega, AccessControlErrors, OwnableUpgradeable, UUPSUp
   function randomNumbersContract() external view returns(address) {
     return address(randomNumberGen);
   }
+  
+  // coinflip
+  function play(
+    bytes32 escrowHash, 
+    address[] memory currentPlayers, 
+    uint256[] memory playerChoises, 
+    uint256 currentRound,
+    uint256 minRounds
+  ) external virtual returns (address[] memory winners) {}
+  
+  // dice
+  function play(
+    bytes32 escrowHash, 
+    address[] memory currentPlayers, 
+    uint256 currentRound,
+    uint256 minRounds
+  ) external virtual returns (address[] memory winners) {}
 }
