@@ -81,7 +81,7 @@ contract WegaERC20Escrow is
         require(token != address(0) && account != address(0) && accountsCount > 1 && wager > 0, INVALID_REQUEST_DATA);
         _;
     }
-
+    
     function initialize(address feeManager) initializer public {
         __UUPSUpgradeable_init();
         __WegaEscrowInit_init_unchained(feeManager);
