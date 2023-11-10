@@ -2,12 +2,16 @@ const { ethers, upgrades } =  require('hardhat');
 import { constants, BigNumber, utils } from 'ethers';
 import { expect } from 'chai';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { WegaERC20Escrow} from '../types/contracts/escrow';
-import { WegaERC20Dummy } from '../types/contracts/dummies';
-import { WegaERC20Escrow__factory } from '../types/factories/contracts/escrow'
-import { WegaERC20Dummy__factory } from '../types/factories/contracts/dummies'
+import { 
+  WegaERC20Escrow,
+  WegaERC20Escrow__factory, 
+  WegaERC20Dummy,
+  WegaERC20Dummy__factory,
+  FeeManager,
+  FeeManager__factory
+} from '../types';
 
-import { TransactionState } from '../src/types'
+import { TransactionState, HexishString, FeeConfig } from '../src/types'
 import { getRandomExpiryDate, randomNumber } from './helpers/utils'
 import { toSolidityShaWithAbiEncoder } from './helpers/eth.utils'
 
@@ -18,52 +22,71 @@ describe("WegaERC20Escrow", () => {
 
   // contracts
   let erc20Escrow: WegaERC20Escrow,
-      erc20Dummy: WegaERC20Dummy;
+      erc20Dummy: WegaERC20Dummy, 
+      feeManager: FeeManager;
       
   // factories
   let erc20EscrowFactory: WegaERC20Escrow__factory,
-      erc20DummyFactory: WegaERC20Dummy__factory;
+      erc20DummyFactory: WegaERC20Dummy__factory,
+      feeManagerFactory: FeeManager__factory;
+
 
   // accounts
   let signers: SignerWithAddress[],
-      escrowManager: SignerWithAddress, 
+      protocolAdmin: SignerWithAddress, 
       coinbase: SignerWithAddress, 
-      others: SignerWithAddress[],
+      gameController: SignerWithAddress,
       alice: SignerWithAddress, 
       bob: SignerWithAddress, 
       carl: SignerWithAddress,
       david: SignerWithAddress,
       ed: SignerWithAddress,
-      fred: SignerWithAddress;
+      feeTaker: SignerWithAddress;
 
   // amounts
   let aliceAmounts: BigNumber[]  = [utils.parseEther(String(1)), utils.parseEther(String(5)), utils.parseEther(String(10))];
   let bobAmounts: BigNumber[] = aliceAmounts;
   let carlAmounts: BigNumber[] = aliceAmounts;
-  
-  beforeEach(async () => {
 
+
+  let feeConfigs: FeeConfig[];
+
+  beforeEach(async () => {
     // accounts setup
     signers = await ethers.getSigners();
-    [coinbase, escrowManager, ...others] = signers;
-    [alice, bob, carl, david, ed, fred, ...others] = others;
+    [coinbase, protocolAdmin, gameController, feeTaker, ...signers] = signers;
+    [alice, bob, carl, david, ed, ...signers] = signers;
 
     // factory setup
     erc20EscrowFactory = new WegaERC20Escrow__factory(coinbase);
     erc20DummyFactory = new WegaERC20Dummy__factory(coinbase);
+    feeManagerFactory = new FeeManager__factory(coinbase);
     
     // deploy contracts
-    erc20Escrow = await upgrades.deployProxy(erc20EscrowFactory, ['WegaERC20Escrow', '0.0.0'], { kind: 'uups'});
-    
+    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'});
+    await feeManager.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
+
+    erc20Escrow = await upgrades.deployProxy(erc20EscrowFactory, [
+      feeManager.address
+    ], { kind: 'uups'});
+
     erc20Dummy = await erc20DummyFactory.deploy([
       alice.address, 
       bob.address, 
       carl.address, 
       david.address, 
-      ed.address, 
-      fred.address
+      ed.address
     ]);
-    await erc20Escrow.connect(coinbase).addWegaEscrowManager(escrowManager.address);
+    await erc20Escrow.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
+
+    feeConfigs = [
+      { 
+       feeTaker: erc20Escrow.address as HexishString,
+       feeShare: 500,
+       shouldApply: true,
+      }
+     ]
+    await feeManager.connect(protocolAdmin).setFeeConfigs([feeTaker.address], feeConfigs);
   });
 
   describe("Function: hash(address,address,uint256,uint256)", () => {

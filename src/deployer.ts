@@ -57,6 +57,7 @@ async function getArtifacts (): Promise<ArtifactsMap> {
     WegaRandomNumberController: await ethers.getContractFactory('WegaRandomNumberController'),
     WegaDiceGame: await ethers.getContractFactory('WegaDiceGame'),
     WegaCoinFlipGame: await ethers.getContractFactory('WegaCoinFlipGame'),
+    FeeManager: await ethers.getContractFactory('FeeManager'),
   };
 }
 
@@ -66,18 +67,20 @@ export class Deployer {
   public accounts: AccountsMap;
   public log: debug.Debugger;
   public minters: string[];
+  public admins: string[];
   public network: HardHatNetworkConfig;
 
   static async create (options?: DeployerOptions): Promise<Deployer> {
-    const [owner] = await ethers.getSigners();
+    const [owner, protocolAdmin] = await ethers.getSigners();
 
     const _config = config.accounts;
 
     return new Deployer(
       options ?? DEFAULT_OPTIONS,
       await getArtifacts(),
-      { owner },
+      { owner, protocolAdmin },
       _config.minters[network.name],
+      _config.admins[network.name]
     );
   }
 
@@ -86,6 +89,7 @@ export class Deployer {
     artifacts: ArtifactsMap,
     accounts: AccountsMap,
     minters: string[],
+    admins: string[],
   ) {
     this.options = {
       ...DEFAULT_OPTIONS,
@@ -94,6 +98,7 @@ export class Deployer {
     this.artifacts = artifacts;
     this.accounts = accounts;
     this.minters = minters;
+    this.admins = admins;
     this.network = network.config;
 
     this.log = log;

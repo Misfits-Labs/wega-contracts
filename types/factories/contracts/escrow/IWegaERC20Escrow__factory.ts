@@ -272,6 +272,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "feeManager",
+        type: "address",
+      },
+    ],
+    name: "setFeeManager",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "bytes32",
         name: "escrowHash",
         type: "bytes32",

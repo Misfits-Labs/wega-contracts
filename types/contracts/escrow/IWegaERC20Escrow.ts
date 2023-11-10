@@ -60,6 +60,7 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     "getWagerRequest(bytes32)": FunctionFragment;
     "getWagerRequests()": FunctionFragment;
     "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
+    "setFeeManager(address)": FunctionFragment;
     "setWithdrawers(bytes32,address[])": FunctionFragment;
     "wagerBalance(bytes32)": FunctionFragment;
   };
@@ -74,6 +75,7 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
       | "getWagerRequest"
       | "getWagerRequests"
       | "hash"
+      | "setFeeManager"
       | "setWithdrawers"
       | "wagerBalance"
   ): FunctionFragment;
@@ -126,6 +128,10 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "setFeeManager",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setWithdrawers",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>[]]
   ): string;
@@ -157,6 +163,10 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "hash", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setFeeManager",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "setWithdrawers",
     data: BytesLike
@@ -246,6 +256,11 @@ export interface IWegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string] & { escrowHash_: string }>;
 
+    setFeeManager(
+      feeManager: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setWithdrawers(
       escrowHash: PromiseOrValue<BytesLike>,
       winners: PromiseOrValue<string>[],
@@ -308,6 +323,11 @@ export interface IWegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  setFeeManager(
+    feeManager: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setWithdrawers(
     escrowHash: PromiseOrValue<BytesLike>,
     winners: PromiseOrValue<string>[],
@@ -369,6 +389,11 @@ export interface IWegaERC20Escrow extends BaseContract {
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    setFeeManager(
+      feeManager: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setWithdrawers(
       escrowHash: PromiseOrValue<BytesLike>,
@@ -433,6 +458,11 @@ export interface IWegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    setFeeManager(
+      feeManager: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setWithdrawers(
       escrowHash: PromiseOrValue<BytesLike>,
       winners: PromiseOrValue<string>[],
@@ -492,6 +522,11 @@ export interface IWegaERC20Escrow extends BaseContract {
       wagerAmount: PromiseOrValue<BigNumberish>,
       nonce: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    setFeeManager(
+      feeManager: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     setWithdrawers(

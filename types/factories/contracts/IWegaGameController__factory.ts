@@ -27,6 +27,11 @@ const _abi = [
         name: "wagerAmount",
         type: "uint256",
       },
+      {
+        internalType: "uint256[]",
+        name: "randomNumbers",
+        type: "uint256[]",
+      },
     ],
     name: "createGame",
     outputs: [],
@@ -39,6 +44,11 @@ const _abi = [
         internalType: "bytes32",
         name: "escrowHash",
         type: "bytes32",
+      },
+      {
+        internalType: "uint256[]",
+        name: "randomNumbers",
+        type: "uint256[]",
       },
     ],
     name: "depositOrPlay",
@@ -58,9 +68,33 @@ const _abi = [
         name: "playerChoices",
         type: "uint256[]",
       },
+      {
+        internalType: "uint256[]",
+        name: "randomNumbers",
+        type: "uint256[]",
+      },
     ],
     name: "depositOrPlay",
     outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "game",
+        type: "string",
+      },
+    ],
+    name: "existsGame",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "exists",
+        type: "bool",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -185,29 +219,41 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "string",
-        name: "game",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "gameAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "denominator",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "minRounds",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "requiredPlayers",
-        type: "uint256",
+        components: [
+          {
+            internalType: "uint256",
+            name: "denominator",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "minRounds",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "requiredPlayers",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "proxy",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "randomNumberController",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+        ],
+        internalType: "struct IWegaGameController.GameSettings",
+        name: "config",
+        type: "tuple",
       },
     ],
     name: "registerGame",
@@ -231,53 +277,44 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "string",
-        name: "game",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "denominator",
-        type: "uint256",
-      },
-    ],
-    name: "setDenominator",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "game",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "newMinRounds",
-        type: "uint256",
-      },
-    ],
-    name: "setMinRounds",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "game",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "requiredPlayers",
-        type: "uint256",
+        components: [
+          {
+            internalType: "uint256",
+            name: "denominator",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "minRounds",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "requiredPlayers",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "proxy",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "randomNumberController",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+        ],
+        internalType: "struct IWegaGameController.GameSettings",
+        name: "config",
+        type: "tuple",
       },
     ],
-    name: "setRequiredPlayers",
+    name: "setGameConfiguration",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

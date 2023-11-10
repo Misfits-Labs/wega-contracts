@@ -26,59 +26,36 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../../common";
+} from "../common";
 
-export declare namespace IEscrow {
-  export type ERC20WagerRequestStruct = {
-    state: PromiseOrValue<BigNumberish>;
-    escrowHash: PromiseOrValue<BytesLike>;
-    wagerAmount: PromiseOrValue<BigNumberish>;
-    tokenAddress: PromiseOrValue<string>;
-    totalWager: PromiseOrValue<BigNumberish>;
-    nonce: PromiseOrValue<BigNumberish>;
+export declare namespace IFeeManager {
+  export type FeeConfigStruct = {
+    feeTaker: PromiseOrValue<string>;
+    feeShare: PromiseOrValue<BigNumberish>;
+    shouldApply: PromiseOrValue<boolean>;
   };
 
-  export type ERC20WagerRequestStructOutput = [
-    number,
-    string,
-    BigNumber,
-    string,
-    BigNumber,
-    BigNumber
-  ] & {
-    state: number;
-    escrowHash: string;
-    wagerAmount: BigNumber;
-    tokenAddress: string;
-    totalWager: BigNumber;
-    nonce: BigNumber;
+  export type FeeConfigStructOutput = [string, BigNumber, boolean] & {
+    feeTaker: string;
+    feeShare: BigNumber;
+    shouldApply: boolean;
   };
 }
 
-export interface WegaERC20EscrowInterface extends utils.Interface {
+export interface FeeManagerInterface extends utils.Interface {
   functions: {
-    "APPLY_FEES()": FunctionFragment;
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "GAME_CONTROLLER_ROLE()": FunctionFragment;
-    "NAME()": FunctionFragment;
-    "TYPE()": FunctionFragment;
-    "VERSION()": FunctionFragment;
     "WEGA_PROTOCOL_ADMIN_ROLE()": FunctionFragment;
+    "_feeRules(address)": FunctionFragment;
     "addWegaProtocolAdmin(address)": FunctionFragment;
     "addWegaProtocolAdmins(address[])": FunctionFragment;
+    "calculateFeesForTransfer(address,uint256)": FunctionFragment;
     "closeWegaProtocolAdmin(address)": FunctionFragment;
-    "containsPlayer(bytes32,address)": FunctionFragment;
-    "createWagerRequest(address,address,uint256,uint256)": FunctionFragment;
-    "currentNonce(address)": FunctionFragment;
-    "deposit(bytes32,address,uint256)": FunctionFragment;
-    "depositOf(bytes32,address)": FunctionFragment;
+    "getFeeRule(address)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
-    "getWagerRequest(bytes32)": FunctionFragment;
-    "getWagerRequests()": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
-    "initialize(address)": FunctionFragment;
+    "initialize()": FunctionFragment;
     "isWegaProtocolAdmin(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
@@ -89,40 +66,27 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     "renounceWegaProtocolAdmin()": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "rotateWegaProtocolAdmin(address)": FunctionFragment;
-    "setFeeManager(address)": FunctionFragment;
-    "setWithdrawers(bytes32,address[])": FunctionFragment;
+    "setFeeConfigs(address[],(address,uint256,bool)[])": FunctionFragment;
+    "shouldApplyFees(address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
-    "toggleFees()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
-    "wagerBalance(bytes32)": FunctionFragment;
-    "withdraw(bytes32)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "APPLY_FEES"
       | "DEFAULT_ADMIN_ROLE"
-      | "GAME_CONTROLLER_ROLE"
-      | "NAME"
-      | "TYPE"
-      | "VERSION"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
+      | "_feeRules"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
+      | "calculateFeesForTransfer"
       | "closeWegaProtocolAdmin"
-      | "containsPlayer"
-      | "createWagerRequest"
-      | "currentNonce"
-      | "deposit"
-      | "depositOf"
+      | "getFeeRule"
       | "getRoleAdmin"
-      | "getWagerRequest"
-      | "getWagerRequests"
       | "grantRole"
       | "hasRole"
-      | "hash"
       | "initialize"
       | "isWegaProtocolAdmin"
       | "owner"
@@ -134,35 +98,25 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
       | "renounceWegaProtocolAdmin"
       | "revokeRole"
       | "rotateWegaProtocolAdmin"
-      | "setFeeManager"
-      | "setWithdrawers"
+      | "setFeeConfigs"
+      | "shouldApplyFees"
       | "supportsInterface"
-      | "toggleFees"
       | "transferOwnership"
       | "upgradeTo"
       | "upgradeToAndCall"
-      | "wagerBalance"
-      | "withdraw"
   ): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "APPLY_FEES",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "GAME_CONTROLLER_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
-  encodeFunctionData(functionFragment: "TYPE", values?: undefined): string;
-  encodeFunctionData(functionFragment: "VERSION", values?: undefined): string;
-  encodeFunctionData(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "_feeRules",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
@@ -173,49 +127,20 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     values: [PromiseOrValue<string>[]]
   ): string;
   encodeFunctionData(
+    functionFragment: "calculateFeesForTransfer",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "closeWegaProtocolAdmin",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "containsPlayer",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "createWagerRequest",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentNonce",
+    functionFragment: "getFeeRule",
     values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "deposit",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "depositOf",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
     values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getWagerRequest",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getWagerRequests",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "grantRole",
@@ -226,18 +151,8 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "hash",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
-  ): string;
-  encodeFunctionData(
     functionFragment: "initialize",
-    values: [PromiseOrValue<string>]
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "isWegaProtocolAdmin",
@@ -277,20 +192,16 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setFeeManager",
-    values: [PromiseOrValue<string>]
+    functionFragment: "setFeeConfigs",
+    values: [PromiseOrValue<string>[], IFeeManager.FeeConfigStruct[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "setWithdrawers",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>[]]
+    functionFragment: "shouldApplyFees",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "toggleFees",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -304,31 +215,16 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "upgradeToAndCall",
     values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "wagerBalance",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdraw",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
 
-  decodeFunctionResult(functionFragment: "APPLY_FEES", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "GAME_CONTROLLER_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "TYPE", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "VERSION", data: BytesLike): Result;
-  decodeFunctionResult(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "_feeRules", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "addWegaProtocolAdmin",
     data: BytesLike
@@ -338,38 +234,20 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "calculateFeesForTransfer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "closeWegaProtocolAdmin",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "containsPlayer",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "createWagerRequest",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "currentNonce",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "depositOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getFeeRule", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getRoleAdmin",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "getWagerRequest",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getWagerRequests",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "hash", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isWegaProtocolAdmin",
@@ -406,18 +284,17 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setFeeManager",
+    functionFragment: "setFeeConfigs",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setWithdrawers",
+    functionFragment: "shouldApplyFees",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "toggleFees", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -427,45 +304,28 @@ export interface WegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "upgradeToAndCall",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "wagerBalance",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
     "AdminChanged(address,address)": EventFragment;
-    "ApplyFees(bool)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
-    "SetFeeManager(address)": EventFragment;
-    "SetGameControler(address)": EventFragment;
-    "SetWithdrawers(bytes32,address[])": EventFragment;
+    "SetFeeRule(address,address,uint256)": EventFragment;
     "Upgraded(address)": EventFragment;
-    "WagerDeposit(bytes32,uint256,address)": EventFragment;
-    "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
-    "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ApplyFees"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetFeeManager"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetWithdrawers"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetFeeRule"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
 }
 
 export interface AdminChangedEventObject {
@@ -478,13 +338,6 @@ export type AdminChangedEvent = TypedEvent<
 >;
 
 export type AdminChangedEventFilter = TypedEventFilter<AdminChangedEvent>;
-
-export interface ApplyFeesEventObject {
-  areFeesApplied: boolean;
-}
-export type ApplyFeesEvent = TypedEvent<[boolean], ApplyFeesEventObject>;
-
-export type ApplyFeesEventFilter = TypedEventFilter<ApplyFeesEvent>;
 
 export interface BeaconUpgradedEventObject {
   beacon: string;
@@ -552,34 +405,17 @@ export type RoleRevokedEvent = TypedEvent<
 
 export type RoleRevokedEventFilter = TypedEventFilter<RoleRevokedEvent>;
 
-export interface SetFeeManagerEventObject {
-  feeManager: string;
+export interface SetFeeRuleEventObject {
+  feeApplier: string;
+  feeTaker: string;
+  feeShare: BigNumber;
 }
-export type SetFeeManagerEvent = TypedEvent<[string], SetFeeManagerEventObject>;
-
-export type SetFeeManagerEventFilter = TypedEventFilter<SetFeeManagerEvent>;
-
-export interface SetGameControlerEventObject {
-  gameController: string;
-}
-export type SetGameControlerEvent = TypedEvent<
-  [string],
-  SetGameControlerEventObject
+export type SetFeeRuleEvent = TypedEvent<
+  [string, string, BigNumber],
+  SetFeeRuleEventObject
 >;
 
-export type SetGameControlerEventFilter =
-  TypedEventFilter<SetGameControlerEvent>;
-
-export interface SetWithdrawersEventObject {
-  escrowId: string;
-  withdrawers: string[];
-}
-export type SetWithdrawersEvent = TypedEvent<
-  [string, string[]],
-  SetWithdrawersEventObject
->;
-
-export type SetWithdrawersEventFilter = TypedEventFilter<SetWithdrawersEvent>;
+export type SetFeeRuleEventFilter = TypedEventFilter<SetFeeRuleEvent>;
 
 export interface UpgradedEventObject {
   implementation: string;
@@ -588,50 +424,12 @@ export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
 
 export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
 
-export interface WagerDepositEventObject {
-  escrowId: string;
-  wager: BigNumber;
-  player: string;
-}
-export type WagerDepositEvent = TypedEvent<
-  [string, BigNumber, string],
-  WagerDepositEventObject
->;
-
-export type WagerDepositEventFilter = TypedEventFilter<WagerDepositEvent>;
-
-export interface WagerRequestCreationEventObject {
-  escrowId: string;
-  token: string;
-  creator: string;
-  wager: BigNumber;
-}
-export type WagerRequestCreationEvent = TypedEvent<
-  [string, string, string, BigNumber],
-  WagerRequestCreationEventObject
->;
-
-export type WagerRequestCreationEventFilter =
-  TypedEventFilter<WagerRequestCreationEvent>;
-
-export interface WagerWithdrawalEventObject {
-  escrowHash: string;
-  transferAmount: BigNumber;
-  winner: string;
-}
-export type WagerWithdrawalEvent = TypedEvent<
-  [string, BigNumber, string],
-  WagerWithdrawalEventObject
->;
-
-export type WagerWithdrawalEventFilter = TypedEventFilter<WagerWithdrawalEvent>;
-
-export interface WegaERC20Escrow extends BaseContract {
+export interface FeeManager extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: WegaERC20EscrowInterface;
+  interface: FeeManagerInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -653,19 +451,20 @@ export interface WegaERC20Escrow extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    APPLY_FEES(overrides?: CallOverrides): Promise<[boolean]>;
-
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    GAME_CONTROLLER_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    NAME(overrides?: CallOverrides): Promise<[string]>;
-
-    TYPE(overrides?: CallOverrides): Promise<[string]>;
-
-    VERSION(overrides?: CallOverrides): Promise<[string]>;
-
     WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    _feeRules(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, boolean] & {
+        feeTaker: string;
+        feeShare: BigNumber;
+        shouldApply: boolean;
+      }
+    >;
 
     addWegaProtocolAdmin(
       account: PromiseOrValue<string>,
@@ -677,56 +476,36 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    calculateFeesForTransfer(
+      applier: PromiseOrValue<string>,
+      transferAmount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber] & {
+        feeTaker: string;
+        feeAmount: BigNumber;
+        sendAmount: BigNumber;
+      }
+    >;
+
     closeWegaProtocolAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
+    getFeeRule(
+      applier: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    createWagerRequest(
-      tokenAddress: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<
+      [IFeeManager.FeeConfigStructOutput] & {
+        feeRule: IFeeManager.FeeConfigStructOutput;
+      }
+    >;
 
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[string]>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[IEscrow.ERC20WagerRequestStructOutput]>;
-
-    getWagerRequests(
-      overrides?: CallOverrides
-    ): Promise<[IEscrow.ERC20WagerRequestStructOutput[]]>;
 
     grantRole(
       role: PromiseOrValue<BytesLike>,
@@ -740,17 +519,7 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string] & { escrowHash_: string }>;
-
     initialize(
-      feeManager: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -798,25 +567,21 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
+    setFeeConfigs(
+      appliers: PromiseOrValue<string>[],
+      configs: IFeeManager.FeeConfigStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    shouldApplyFees(
+      applier: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[boolean] & { shouldApply: boolean }>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
-
-    toggleFees(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
@@ -833,31 +598,22 @@ export interface WegaERC20Escrow extends BaseContract {
       data: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    withdraw(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
   };
-
-  APPLY_FEES(overrides?: CallOverrides): Promise<boolean>;
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  GAME_CONTROLLER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  NAME(overrides?: CallOverrides): Promise<string>;
-
-  TYPE(overrides?: CallOverrides): Promise<string>;
-
-  VERSION(overrides?: CallOverrides): Promise<string>;
-
   WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  _feeRules(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, BigNumber, boolean] & {
+      feeTaker: string;
+      feeShare: BigNumber;
+      shouldApply: boolean;
+    }
+  >;
 
   addWegaProtocolAdmin(
     account: PromiseOrValue<string>,
@@ -869,56 +625,32 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  calculateFeesForTransfer(
+    applier: PromiseOrValue<string>,
+    transferAmount: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, BigNumber, BigNumber] & {
+      feeTaker: string;
+      feeAmount: BigNumber;
+      sendAmount: BigNumber;
+    }
+  >;
+
   closeWegaProtocolAdmin(
     receiver: PromiseOrValue<string>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  containsPlayer(
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
+  getFeeRule(
+    applier: PromiseOrValue<string>,
     overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  createWagerRequest(
-    tokenAddress: PromiseOrValue<string>,
-    account: PromiseOrValue<string>,
-    requiredPlayerNum: PromiseOrValue<BigNumberish>,
-    wagerAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  currentNonce(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  deposit(
-    escrowHash: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    wagerAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  depositOf(
-    escrowHash: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  ): Promise<IFeeManager.FeeConfigStructOutput>;
 
   getRoleAdmin(
     role: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<string>;
-
-  getWagerRequest(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<IEscrow.ERC20WagerRequestStructOutput>;
-
-  getWagerRequests(
-    overrides?: CallOverrides
-  ): Promise<IEscrow.ERC20WagerRequestStructOutput[]>;
 
   grantRole(
     role: PromiseOrValue<BytesLike>,
@@ -932,17 +664,7 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  hash(
-    token: PromiseOrValue<string>,
-    creator: PromiseOrValue<string>,
-    requiredPlayerNum: PromiseOrValue<BigNumberish>,
-    wager: PromiseOrValue<BigNumberish>,
-    nonce: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
   initialize(
-    feeManager: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -990,25 +712,21 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setFeeManager(
-    feeManager: PromiseOrValue<string>,
+  setFeeConfigs(
+    appliers: PromiseOrValue<string>[],
+    configs: IFeeManager.FeeConfigStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setWithdrawers(
-    escrowHash: PromiseOrValue<BytesLike>,
-    winners_: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  shouldApplyFees(
+    applier: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   supportsInterface(
     interfaceId: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<boolean>;
-
-  toggleFees(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   transferOwnership(
     newOwner: PromiseOrValue<string>,
@@ -1026,30 +744,21 @@ export interface WegaERC20Escrow extends BaseContract {
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  wagerBalance(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  withdraw(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
-    APPLY_FEES(overrides?: CallOverrides): Promise<boolean>;
-
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    GAME_CONTROLLER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    NAME(overrides?: CallOverrides): Promise<string>;
-
-    TYPE(overrides?: CallOverrides): Promise<string>;
-
-    VERSION(overrides?: CallOverrides): Promise<string>;
-
     WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    _feeRules(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, boolean] & {
+        feeTaker: string;
+        feeShare: BigNumber;
+        shouldApply: boolean;
+      }
+    >;
 
     addWegaProtocolAdmin(
       account: PromiseOrValue<string>,
@@ -1061,56 +770,32 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    calculateFeesForTransfer(
+      applier: PromiseOrValue<string>,
+      transferAmount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber, BigNumber] & {
+        feeTaker: string;
+        feeAmount: BigNumber;
+        sendAmount: BigNumber;
+      }
+    >;
+
     closeWegaProtocolAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
+    getFeeRule(
+      applier: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    createWagerRequest(
-      tokenAddress: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<IFeeManager.FeeConfigStructOutput>;
 
     getRoleAdmin(
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<IEscrow.ERC20WagerRequestStructOutput>;
-
-    getWagerRequests(
-      overrides?: CallOverrides
-    ): Promise<IEscrow.ERC20WagerRequestStructOutput[]>;
 
     grantRole(
       role: PromiseOrValue<BytesLike>,
@@ -1124,19 +809,7 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    initialize(
-      feeManager: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    initialize(overrides?: CallOverrides): Promise<void>;
 
     isWegaProtocolAdmin(
       account: PromiseOrValue<string>,
@@ -1178,23 +851,21 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
+    setFeeConfigs(
+      appliers: PromiseOrValue<string>[],
+      configs: IFeeManager.FeeConfigStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners_: PromiseOrValue<string>[],
+    shouldApplyFees(
+      applier: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<boolean>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    toggleFees(overrides?: CallOverrides): Promise<void>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
@@ -1211,16 +882,6 @@ export interface WegaERC20Escrow extends BaseContract {
       data: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    withdraw(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
   filters: {
@@ -1232,13 +893,6 @@ export interface WegaERC20Escrow extends BaseContract {
       previousAdmin?: null,
       newAdmin?: null
     ): AdminChangedEventFilter;
-
-    "ApplyFees(bool)"(
-      areFeesApplied?: PromiseOrValue<boolean> | null
-    ): ApplyFeesEventFilter;
-    ApplyFees(
-      areFeesApplied?: PromiseOrValue<boolean> | null
-    ): ApplyFeesEventFilter;
 
     "BeaconUpgraded(address)"(
       beacon?: PromiseOrValue<string> | null
@@ -1292,28 +946,16 @@ export interface WegaERC20Escrow extends BaseContract {
       sender?: PromiseOrValue<string> | null
     ): RoleRevokedEventFilter;
 
-    "SetFeeManager(address)"(
-      feeManager?: PromiseOrValue<string> | null
-    ): SetFeeManagerEventFilter;
-    SetFeeManager(
-      feeManager?: PromiseOrValue<string> | null
-    ): SetFeeManagerEventFilter;
-
-    "SetGameControler(address)"(
-      gameController?: PromiseOrValue<string> | null
-    ): SetGameControlerEventFilter;
-    SetGameControler(
-      gameController?: PromiseOrValue<string> | null
-    ): SetGameControlerEventFilter;
-
-    "SetWithdrawers(bytes32,address[])"(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      withdrawers?: PromiseOrValue<string>[] | null
-    ): SetWithdrawersEventFilter;
-    SetWithdrawers(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      withdrawers?: PromiseOrValue<string>[] | null
-    ): SetWithdrawersEventFilter;
+    "SetFeeRule(address,address,uint256)"(
+      feeApplier?: PromiseOrValue<string> | null,
+      feeTaker?: PromiseOrValue<string> | null,
+      feeShare?: null
+    ): SetFeeRuleEventFilter;
+    SetFeeRule(
+      feeApplier?: PromiseOrValue<string> | null,
+      feeTaker?: PromiseOrValue<string> | null,
+      feeShare?: null
+    ): SetFeeRuleEventFilter;
 
     "Upgraded(address)"(
       implementation?: PromiseOrValue<string> | null
@@ -1321,57 +963,17 @@ export interface WegaERC20Escrow extends BaseContract {
     Upgraded(
       implementation?: PromiseOrValue<string> | null
     ): UpgradedEventFilter;
-
-    "WagerDeposit(bytes32,uint256,address)"(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      wager?: PromiseOrValue<BigNumberish> | null,
-      player?: PromiseOrValue<string> | null
-    ): WagerDepositEventFilter;
-    WagerDeposit(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      wager?: PromiseOrValue<BigNumberish> | null,
-      player?: PromiseOrValue<string> | null
-    ): WagerDepositEventFilter;
-
-    "WagerRequestCreation(bytes32,address,address,uint256)"(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      token?: PromiseOrValue<string> | null,
-      creator?: PromiseOrValue<string> | null,
-      wager?: null
-    ): WagerRequestCreationEventFilter;
-    WagerRequestCreation(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      token?: PromiseOrValue<string> | null,
-      creator?: PromiseOrValue<string> | null,
-      wager?: null
-    ): WagerRequestCreationEventFilter;
-
-    "WagerWithdrawal(bytes32,uint256,address)"(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      transferAmount?: PromiseOrValue<BigNumberish> | null,
-      winner?: PromiseOrValue<string> | null
-    ): WagerWithdrawalEventFilter;
-    WagerWithdrawal(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      transferAmount?: PromiseOrValue<BigNumberish> | null,
-      winner?: PromiseOrValue<string> | null
-    ): WagerWithdrawalEventFilter;
   };
 
   estimateGas: {
-    APPLY_FEES(overrides?: CallOverrides): Promise<BigNumber>;
-
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    GAME_CONTROLLER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    NAME(overrides?: CallOverrides): Promise<BigNumber>;
-
-    TYPE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    VERSION(overrides?: CallOverrides): Promise<BigNumber>;
-
     WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    _feeRules(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     addWegaProtocolAdmin(
       account: PromiseOrValue<string>,
@@ -1383,40 +985,19 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    calculateFeesForTransfer(
+      applier: PromiseOrValue<string>,
+      transferAmount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     closeWegaProtocolAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    createWagerRequest(
-      tokenAddress: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
+    getFeeRule(
+      applier: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1424,13 +1005,6 @@ export interface WegaERC20Escrow extends BaseContract {
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getWagerRequests(overrides?: CallOverrides): Promise<BigNumber>;
 
     grantRole(
       role: PromiseOrValue<BytesLike>,
@@ -1444,17 +1018,7 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     initialize(
-      feeManager: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1502,24 +1066,20 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
+    setFeeConfigs(
+      appliers: PromiseOrValue<string>[],
+      configs: IFeeManager.FeeConfigStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    shouldApplyFees(
+      applier: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    toggleFees(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     transferOwnership(
@@ -1537,36 +1097,19 @@ export interface WegaERC20Escrow extends BaseContract {
       data: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    withdraw(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    APPLY_FEES(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     DEFAULT_ADMIN_ROLE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    GAME_CONTROLLER_ROLE(
+    WEGA_PROTOCOL_ADMIN_ROLE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    NAME(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    TYPE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    VERSION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    WEGA_PROTOCOL_ADMIN_ROLE(
+    _feeRules(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1580,40 +1123,19 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    calculateFeesForTransfer(
+      applier: PromiseOrValue<string>,
+      transferAmount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     closeWegaProtocolAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    createWagerRequest(
-      tokenAddress: PromiseOrValue<string>,
-      account: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
+    getFeeRule(
+      applier: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1621,13 +1143,6 @@ export interface WegaERC20Escrow extends BaseContract {
       role: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getWagerRequests(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     grantRole(
       role: PromiseOrValue<BytesLike>,
@@ -1641,17 +1156,7 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredPlayerNum: PromiseOrValue<BigNumberish>,
-      wager: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     initialize(
-      feeManager: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1699,24 +1204,20 @@ export interface WegaERC20Escrow extends BaseContract {
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
+    setFeeConfigs(
+      appliers: PromiseOrValue<string>[],
+      configs: IFeeManager.FeeConfigStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners_: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    shouldApplyFees(
+      applier: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    toggleFees(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(
@@ -1733,16 +1234,6 @@ export interface WegaERC20Escrow extends BaseContract {
       newImplementation: PromiseOrValue<string>,
       data: PromiseOrValue<BytesLike>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    withdraw(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

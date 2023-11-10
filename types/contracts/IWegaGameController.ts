@@ -39,37 +39,62 @@ export declare namespace IWega {
   };
 }
 
+export declare namespace IWegaGameController {
+  export type GameSettingsStruct = {
+    denominator: PromiseOrValue<BigNumberish>;
+    minRounds: PromiseOrValue<BigNumberish>;
+    requiredPlayers: PromiseOrValue<BigNumberish>;
+    proxy: PromiseOrValue<string>;
+    randomNumberController: PromiseOrValue<string>;
+    name: PromiseOrValue<string>;
+  };
+
+  export type GameSettingsStructOutput = [
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    string,
+    string,
+    string
+  ] & {
+    denominator: BigNumber;
+    minRounds: BigNumber;
+    requiredPlayers: BigNumber;
+    proxy: string;
+    randomNumberController: string;
+    name: string;
+  };
+}
+
 export interface IWegaGameControllerInterface extends utils.Interface {
   functions: {
-    "createGame(string,address,uint256)": FunctionFragment;
-    "depositOrPlay(bytes32)": FunctionFragment;
+    "createGame(string,address,uint256,uint256[])": FunctionFragment;
     "depositOrPlay(bytes32,uint256[])": FunctionFragment;
+    "depositOrPlay(bytes32,uint256[],uint256[])": FunctionFragment;
+    "existsGame(string)": FunctionFragment;
     "gameResults(string,bytes32,address)": FunctionFragment;
     "getGame(bytes32)": FunctionFragment;
     "playerScore(string,bytes32,address)": FunctionFragment;
     "players(bytes32)": FunctionFragment;
-    "registerGame(string,address,uint256,uint256,uint256)": FunctionFragment;
+    "registerGame((uint256,uint256,uint256,address,address,string))": FunctionFragment;
     "removeGame(string)": FunctionFragment;
-    "setDenominator(string,uint256)": FunctionFragment;
-    "setMinRounds(string,uint256)": FunctionFragment;
-    "setRequiredPlayers(string,uint256)": FunctionFragment;
+    "setGameConfiguration((uint256,uint256,uint256,address,address,string))": FunctionFragment;
     "winners(string,bytes32)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "createGame"
-      | "depositOrPlay(bytes32)"
       | "depositOrPlay(bytes32,uint256[])"
+      | "depositOrPlay(bytes32,uint256[],uint256[])"
+      | "existsGame"
       | "gameResults"
       | "getGame"
       | "playerScore"
       | "players"
       | "registerGame"
       | "removeGame"
-      | "setDenominator"
-      | "setMinRounds"
-      | "setRequiredPlayers"
+      | "setGameConfiguration"
       | "winners"
   ): FunctionFragment;
 
@@ -78,16 +103,25 @@ export interface IWegaGameControllerInterface extends utils.Interface {
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>[]
     ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "depositOrPlay(bytes32)",
-    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOrPlay(bytes32,uint256[])",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositOrPlay(bytes32,uint256[],uint256[])",
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "existsGame",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "gameResults",
@@ -115,29 +149,15 @@ export interface IWegaGameControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "registerGame",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [IWegaGameController.GameSettingsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "removeGame",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setDenominator",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setMinRounds",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setRequiredPlayers",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    functionFragment: "setGameConfiguration",
+    values: [IWegaGameController.GameSettingsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "winners",
@@ -146,13 +166,14 @@ export interface IWegaGameControllerInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "depositOrPlay(bytes32)",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "depositOrPlay(bytes32,uint256[])",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositOrPlay(bytes32,uint256[],uint256[])",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "existsGame", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "gameResults",
     data: BytesLike
@@ -169,15 +190,7 @@ export interface IWegaGameControllerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "removeGame", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setDenominator",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setMinRounds",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setRequiredPlayers",
+    functionFragment: "setGameConfiguration",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
@@ -216,17 +229,25 @@ export interface IWegaGameController extends BaseContract {
       name: PromiseOrValue<string>,
       tokenAddress: PromiseOrValue<string>,
       wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    "depositOrPlay(bytes32)"(
-      escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     "depositOrPlay(bytes32,uint256[])"(
       escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "depositOrPlay(bytes32,uint256[],uint256[])"(
+      escrowHash: PromiseOrValue<BytesLike>,
       playerChoices: PromiseOrValue<BigNumberish>[],
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    existsGame(
+      game: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -255,11 +276,7 @@ export interface IWegaGameController extends BaseContract {
     ): Promise<ContractTransaction>;
 
     registerGame(
-      game: PromiseOrValue<string>,
-      gameAddress: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -268,21 +285,8 @@ export interface IWegaGameController extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setDenominator(
-      game: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setMinRounds(
-      game: PromiseOrValue<string>,
-      newMinRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setRequiredPlayers(
-      game: PromiseOrValue<string>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+    setGameConfiguration(
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -297,17 +301,25 @@ export interface IWegaGameController extends BaseContract {
     name: PromiseOrValue<string>,
     tokenAddress: PromiseOrValue<string>,
     wagerAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  "depositOrPlay(bytes32)"(
-    escrowHash: PromiseOrValue<BytesLike>,
+    randomNumbers: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   "depositOrPlay(bytes32,uint256[])"(
     escrowHash: PromiseOrValue<BytesLike>,
+    randomNumbers: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "depositOrPlay(bytes32,uint256[],uint256[])"(
+    escrowHash: PromiseOrValue<BytesLike>,
     playerChoices: PromiseOrValue<BigNumberish>[],
+    randomNumbers: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  existsGame(
+    game: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -336,11 +348,7 @@ export interface IWegaGameController extends BaseContract {
   ): Promise<ContractTransaction>;
 
   registerGame(
-    game: PromiseOrValue<string>,
-    gameAddress: PromiseOrValue<string>,
-    denominator: PromiseOrValue<BigNumberish>,
-    minRounds: PromiseOrValue<BigNumberish>,
-    requiredPlayers: PromiseOrValue<BigNumberish>,
+    config: IWegaGameController.GameSettingsStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -349,21 +357,8 @@ export interface IWegaGameController extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setDenominator(
-    game: PromiseOrValue<string>,
-    denominator: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setMinRounds(
-    game: PromiseOrValue<string>,
-    newMinRounds: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setRequiredPlayers(
-    game: PromiseOrValue<string>,
-    requiredPlayers: PromiseOrValue<BigNumberish>,
+  setGameConfiguration(
+    config: IWegaGameController.GameSettingsStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -378,19 +373,27 @@ export interface IWegaGameController extends BaseContract {
       name: PromiseOrValue<string>,
       tokenAddress: PromiseOrValue<string>,
       wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "depositOrPlay(bytes32)"(
-      escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
     "depositOrPlay(bytes32,uint256[])"(
       escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
+      randomNumbers: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    "depositOrPlay(bytes32,uint256[],uint256[])"(
+      escrowHash: PromiseOrValue<BytesLike>,
+      playerChoices: PromiseOrValue<BigNumberish>[],
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    existsGame(
+      game: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     gameResults(
       game: PromiseOrValue<string>,
@@ -417,11 +420,7 @@ export interface IWegaGameController extends BaseContract {
     ): Promise<string[]>;
 
     registerGame(
-      game: PromiseOrValue<string>,
-      gameAddress: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -430,21 +429,8 @@ export interface IWegaGameController extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setDenominator(
-      game: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setMinRounds(
-      game: PromiseOrValue<string>,
-      newMinRounds: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setRequiredPlayers(
-      game: PromiseOrValue<string>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+    setGameConfiguration(
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -462,17 +448,25 @@ export interface IWegaGameController extends BaseContract {
       name: PromiseOrValue<string>,
       tokenAddress: PromiseOrValue<string>,
       wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "depositOrPlay(bytes32)"(
-      escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     "depositOrPlay(bytes32,uint256[])"(
       escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "depositOrPlay(bytes32,uint256[],uint256[])"(
+      escrowHash: PromiseOrValue<BytesLike>,
       playerChoices: PromiseOrValue<BigNumberish>[],
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    existsGame(
+      game: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -501,11 +495,7 @@ export interface IWegaGameController extends BaseContract {
     ): Promise<BigNumber>;
 
     registerGame(
-      game: PromiseOrValue<string>,
-      gameAddress: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -514,21 +504,8 @@ export interface IWegaGameController extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setDenominator(
-      game: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setMinRounds(
-      game: PromiseOrValue<string>,
-      newMinRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setRequiredPlayers(
-      game: PromiseOrValue<string>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+    setGameConfiguration(
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -544,17 +521,25 @@ export interface IWegaGameController extends BaseContract {
       name: PromiseOrValue<string>,
       tokenAddress: PromiseOrValue<string>,
       wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "depositOrPlay(bytes32)"(
-      escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     "depositOrPlay(bytes32,uint256[])"(
       escrowHash: PromiseOrValue<BytesLike>,
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "depositOrPlay(bytes32,uint256[],uint256[])"(
+      escrowHash: PromiseOrValue<BytesLike>,
       playerChoices: PromiseOrValue<BigNumberish>[],
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    existsGame(
+      game: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -583,11 +568,7 @@ export interface IWegaGameController extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     registerGame(
-      game: PromiseOrValue<string>,
-      gameAddress: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -596,21 +577,8 @@ export interface IWegaGameController extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setDenominator(
-      game: PromiseOrValue<string>,
-      denominator: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setMinRounds(
-      game: PromiseOrValue<string>,
-      newMinRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setRequiredPlayers(
-      game: PromiseOrValue<string>,
-      requiredPlayers: PromiseOrValue<BigNumberish>,
+    setGameConfiguration(
+      config: IWegaGameController.GameSettingsStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

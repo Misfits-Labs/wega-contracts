@@ -14,10 +14,9 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./IEscrow.sol";
 import "./IWegaERC20Escrow.sol";
 import "../events/IERC20EscrowEvents.sol";
-
 import '../errors/WegaEscrowErrors.sol';
-
-import "../roles/WegaEscrowManagerRole.sol";
+import "../roles/WegaProtocolAdminRole.sol";
+import "../IFeeManager.sol";
 
 /**
   * @title WegaERC20Escrow (MVP)
@@ -31,7 +30,7 @@ contract WegaERC20Escrow is
     IEscrow,
     IWegaERC20Escrow,
     IERC20EscrowEvents,
-    WegaEscrowManagerRole,
+    WegaProtocolAdminRole,
     WegaEscrowErrors,
     UUPSUpgradeable
 {
@@ -39,7 +38,9 @@ contract WegaERC20Escrow is
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using Math for uint256;
-
+    
+    bytes32 public GAME_CONTROLLER_ROLE;
+    
     // mapping of requestHash(wagerId) -> escrowRequest
     mapping(bytes32 => ERC20WagerRequest) private _wagerRequests;
 
@@ -58,11 +59,12 @@ contract WegaERC20Escrow is
     // request accountBalances
     mapping(address => uint256) private _accountBalances;
 
-    // game controller
-    address gameController;
-
     // stores all the transfer Ids, will be used enumeration
     EnumerableSetUpgradeable.Bytes32Set private _escrowHashes;
+
+    // fees
+    IFeeManager internal _feeManager;
+    bool public APPLY_FEES;
 
     // escrow details
     string public NAME;
@@ -80,30 +82,29 @@ contract WegaERC20Escrow is
         _;
     }
 
-    function initialize(
-        string memory name,
-        string memory version
-    ) initializer public {
+    function initialize(address feeManager) initializer public {
         __UUPSUpgradeable_init();
-        __WegaEscrow_init(name, version);
-        __WegaEscrowManagerRole_init();
+        __WegaEscrowInit_init_unchained(feeManager);
+        __WegaProtocolAdminRole_init();
     }
 
-
-    function __WegaEscrow_init(
-        string memory name,
-        string memory version
-    ) public onlyInitializing {
-        __WegaEscrowInit_init_unchained(name, version);
+    function __WegaEscrow_init(address feeManager) internal onlyInitializing {
+        __WegaEscrowInit_init_unchained(feeManager);
     }
 
-    function __WegaEscrowInit_init_unchained(
-        string memory name,
-        string memory version
-    ) internal onlyInitializing {
-        NAME = name;
-        VERSION = version;
+    function __WegaEscrowInit_init_unchained(address feeManager) internal onlyInitializing {
+        _feeManager = IFeeManager(feeManager);
+        GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
+        _setRoleAdmin(GAME_CONTROLLER_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
+        NAME = 'Wega ERC20 Escrow Service';
+        VERSION = '0.0.0';
         TYPE = "TOKEN-ERC20";
+        APPLY_FEES = false;
+    }
+
+    function toggleFees() external onlyWegaProtocolAdmin {
+        APPLY_FEES = !APPLY_FEES;
+        emit ApplyFees(APPLY_FEES);
     }
 
     // then functions
@@ -115,7 +116,7 @@ contract WegaERC20Escrow is
     )
         public
         override
-        onlyWegaEscrowManager
+        onlyRole(GAME_CONTROLLER_ROLE)
         onlyValidRequesData(
             tokenAddress,
             account,
@@ -228,7 +229,7 @@ contract WegaERC20Escrow is
         bytes32 escrowHash,
         address account,
         uint256 wagerAmount
-    ) external onlyWegaEscrowManager {
+    ) external onlyRole(GAME_CONTROLLER_ROLE) {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
         require(request.state == TransactionState.OPEN, INVALID_REQUEST_STATE);
         require(wagerAmount == request.wagerAmount, INVALID_WAGER_AMOUNT);
@@ -271,12 +272,11 @@ contract WegaERC20Escrow is
     function setWithdrawers(
         bytes32 escrowHash,
         address[] memory winners_
-    ) external override onlyWegaEscrowManager {
+    ) external override onlyRole(GAME_CONTROLLER_ROLE) {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
         require(request.state == TransactionState.PENDING, INVALID_REQUEST_STATE);
         uint256 withdrawableAmount = _wagerRequests[escrowHash].totalWager.mulDiv(1, winners_.length);
         for (uint256 i = 0; i < winners_.length; i++) {
-            
             require(containsPlayer(escrowHash, winners_[i]), INVALID_REQUEST_DATA);
             _accountBalances[winners_[i]] = withdrawableAmount;
         }
@@ -292,12 +292,32 @@ contract WegaERC20Escrow is
         _escrowBalances[escrowHash] -= transferAmount;
         delete _accountBalances[_msgSender()];
         _wagerRequests[escrowHash].state = TransactionState.CLOSED;
-        IERC20Upgradeable(request.tokenAddress).transfer(
-            _msgSender(),
-            transferAmount
-        );
+        if(APPLY_FEES && _feeManager.shouldApplyFees(address(this))) {
+            (
+                address feeTaker,
+                uint256 feeAmount, 
+                uint256 sendAmount
+            ) = _feeManager.calculateFeesForTransfer(address(this), transferAmount);
+            IERC20Upgradeable(request.tokenAddress).transfer(
+                _msgSender(),
+                sendAmount
+            );
+            IERC20Upgradeable(request.tokenAddress).transfer(
+                feeTaker,
+                feeAmount
+            );
+        } else {
+            IERC20Upgradeable(request.tokenAddress).transfer(
+                _msgSender(),
+                transferAmount
+            );
+        }
         emit WagerWithdrawal(escrowHash, transferAmount, _msgSender());
     }
-
     function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
+    function setFeeManager(address feeManager) external override onlyWegaProtocolAdmin {
+        _feeManager = IFeeManager(feeManager);
+        emit SetFeeManager(feeManager);
+    }
 }

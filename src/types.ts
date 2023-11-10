@@ -7,6 +7,7 @@ export enum ArtifactName {
   WegaRandomNumberController = 'WegaRandomNumberController',
   WegaDiceGame = 'WegaDiceGame',
   WegaCoinFlipGame = 'WegaCoinFlipGame',
+  FeeManager = 'FeeManager'
 }
 
 export enum ContractName {
@@ -17,6 +18,7 @@ export enum ContractName {
   WegaRandomNumberController = 'WegaRandomNumberController',
   WegaDiceGame = 'WegaDiceGame',
   WegaCoinFlipGame = 'WegaCoinFlipGame',
+  FeeManager = 'FeeManager',
 }
 
 export type DeployedContract = {
@@ -51,8 +53,6 @@ export enum TransactionState { OPEN, PENDING, READY, CLOSED }
 export enum GameState { WAITING, PLAYED }
 export enum GameType { DICE, COINFLIP }
 
-
-// For DRAND
 export type RandomNumbersConfig = {
   [chainId: number]: {
     lastParsedRound: number;
@@ -60,4 +60,20 @@ export type RandomNumbersConfig = {
     drands: ({ round: number, randomness: string, signature: string })[];
   }
 }
- 
+
+export type FeeConfig = {
+  feeTaker: HexishString;
+  feeShare: number;
+  shouldApply: boolean;
+}
+
+export type GameSetting = {
+  name: string;
+  proxy: HexishString;
+  requiredPlayers: number;
+  minRounds: number;
+  denominator: number;
+  randomNumberController: HexishString;
+}
+
+export type HexishString = `0x${string}`;

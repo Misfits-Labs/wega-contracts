@@ -42,11 +42,8 @@
                     "deploymentBlock": "0x27",
                     "implementation": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
                 },
-                "WegaChanceGame": {
-                    "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-                    "legacyAddresses": [],
-                    "deploymentBlock": "0x05",
-                    "implementation": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+                "FeeManager": {
+                    "address": "0x0000000000000000000000000000000000000000"
                 }
             }
         },
@@ -66,12 +63,13 @@
                 "WegaGameController": {
                     "address": "0xC69cD908504C554eaD8D24354e018e3a37e7F29b",
                     "legacyAddresses": [
+                        "0x760D87Ce891F301d19F608044D42356De2D50D14",
                         "0x740e1416aE865E2bff8f95aa5776F5Fa0a3706e7",
                         "0x02D7EF0f678BCd9323f2FA88e7197528D113f24a",
                         "0x0000000000000000000000000000000000000000"
                     ],
-                    "deploymentBlock": "0x02631184",
-                    "implementation": "0x760D87Ce891F301d19F608044D42356De2D50D14"
+                    "deploymentBlock": "0x0272c37b",
+                    "implementation": "0xAF0A650F026419776015fF248DFefC2768497C4C"
                 },
                 "WegaRandomNumberController": {
                     "address": "0xaBC8837A5756aF9a915a8cC77b80b06c1997e17e",
@@ -91,11 +89,8 @@
                     "deploymentBlock": "0x02631158",
                     "implementation": "0x1d4A2C0Ce54525f555Bbe772f5b8132ECf2002BD"
                 },
-                "WegaChanceGame": {
-                    "address": "0x85c5165800E4f43489912beEc115a77E312142ca",
-                    "legacyAddresses": [],
-                    "deploymentBlock": "0x025e6a43",
-                    "implementation": "0x945Fbb4138040e2ab766CB59A7Aa6D882AfBCcF4"
+                "FeeManager": {
+                    "address": "0x0000000000000000000000000000000000000000"
                 }
             }
         },
@@ -117,6 +112,9 @@
                     "address": "0x0000000000000000000000000000000000000000"
                 },
                 "WegaCoinFlipGame": {
+                    "address": "0x0000000000000000000000000000000000000000"
+                },
+                "FeeManager": {
                     "address": "0x0000000000000000000000000000000000000000"
                 }
             }

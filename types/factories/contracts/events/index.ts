@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { IERC20EscrowEvents__factory } from "./IERC20EscrowEvents__factory";
+export { IFeeManagerEvents__factory } from "./IFeeManagerEvents__factory";
 export { IWegaGameControllerEvents__factory } from "./IWegaGameControllerEvents__factory";

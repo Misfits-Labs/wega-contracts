@@ -15,6 +15,32 @@ const _abi = [
     inputs: [
       {
         indexed: true,
+        internalType: "bool",
+        name: "areFeesApplied",
+        type: "bool",
+      },
+    ],
+    name: "ApplyFees",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "feeManager",
+        type: "address",
+      },
+    ],
+    name: "SetFeeManager",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: "address",
         name: "gameController",
         type: "address",

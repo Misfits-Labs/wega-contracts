@@ -28,6 +28,7 @@ export interface IWegaRandomNumberControllerInterface extends utils.Interface {
     "addRandomNumbers(uint256[])": FunctionFragment;
     "generate(uint256,uint256)": FunctionFragment;
     "randomNumbersCount()": FunctionFragment;
+    "seedRandomizer(uint256[])": FunctionFragment;
   };
 
   getFunction(
@@ -35,6 +36,7 @@ export interface IWegaRandomNumberControllerInterface extends utils.Interface {
       | "addRandomNumbers"
       | "generate"
       | "randomNumbersCount"
+      | "seedRandomizer"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -49,6 +51,10 @@ export interface IWegaRandomNumberControllerInterface extends utils.Interface {
     functionFragment: "randomNumbersCount",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "seedRandomizer",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "addRandomNumbers",
@@ -57,6 +63,10 @@ export interface IWegaRandomNumberControllerInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "generate", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "randomNumbersCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "seedRandomizer",
     data: BytesLike
   ): Result;
 
@@ -102,6 +112,11 @@ export interface IWegaRandomNumberController extends BaseContract {
     ): Promise<ContractTransaction>;
 
     randomNumbersCount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    seedRandomizer(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   addRandomNumbers(
@@ -117,6 +132,11 @@ export interface IWegaRandomNumberController extends BaseContract {
 
   randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
 
+  seedRandomizer(
+    randomNumbers: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     addRandomNumbers(
       randomNumbers: PromiseOrValue<BigNumberish>[],
@@ -130,6 +150,11 @@ export interface IWegaRandomNumberController extends BaseContract {
     ): Promise<BigNumber>;
 
     randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    seedRandomizer(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {};
@@ -147,6 +172,11 @@ export interface IWegaRandomNumberController extends BaseContract {
     ): Promise<BigNumber>;
 
     randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    seedRandomizer(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -163,6 +193,11 @@ export interface IWegaRandomNumberController extends BaseContract {
 
     randomNumbersCount(
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    seedRandomizer(
+      randomNumbers: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

@@ -15,30 +15,32 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "./IWegaRandomNumberController.sol";
-import "./roles/WegaGameManagerRole.sol";
+import "./roles/WegaProtocolAdminRole.sol";
 
-contract WegaRandomNumberController is IWegaRandomNumberController, WegaGameManagerRole, UUPSUpgradeable {
+contract WegaRandomNumberController is IWegaRandomNumberController, WegaProtocolAdminRole, UUPSUpgradeable {
 
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
   using Math for uint256;
   using CountersUpgradeable for CountersUpgradeable.Counter;
-
+  
+  bytes32 public GAME_CONTROLLER_ROLE;
   CountersUpgradeable.Counter _nonce;
   EnumerableMapUpgradeable.UintToUintMap private _randomNumbers;
 
   function initialize(uint256[] memory randomNumbers) initializer public {
     __UUPSUpgradeable_init();
-    __WegaGameManagerRole_init();
-    addWegaGameManager(owner());
+    __WegaProtocolAdminRole_init();
     __WegaRandomNumberController_init(randomNumbers);
   }
 
-  function __WegaRandomNumberController_init(uint256[] memory randomNumbers) public onlyInitializing {
+  function __WegaRandomNumberController_init(uint256[] memory randomNumbers) internal onlyInitializing {
+    GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
+    _setRoleAdmin(GAME_CONTROLLER_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
     __WegaRandomNumberController_init_unchained(randomNumbers);
   } 
 
-  function __WegaRandomNumberController_init_unchained(uint256[] memory randomNumbers) public onlyInitializing {
-   addRandomNumbers(randomNumbers);
+  function __WegaRandomNumberController_init_unchained(uint256[] memory randomNumbers) internal onlyInitializing {
+   _seedRandomizer(randomNumbers);
    _nonce.increment();
   } 
 
@@ -64,9 +66,19 @@ contract WegaRandomNumberController is IWegaRandomNumberController, WegaGameMana
     return _randomNumbers.length();
   }
 
-  function addRandomNumbers(uint256[] memory randomNumbers) public override onlyWegaGameManager {
+  function addRandomNumbers(uint256[] memory randomNumbers) public override onlyRole(GAME_CONTROLLER_ROLE) {
+    _seedRandomizer(randomNumbers);
+  }
+
+  function seedRandomizer(uint256[] memory randomNumbers) public override onlyWegaProtocolAdmin {
+    _seedRandomizer(randomNumbers);
+  }
+  
+  function _seedRandomizer(uint256[] memory randomNumbers) internal {
     for(uint256 i = _randomNumbers.length(); i < randomNumbers.length;i++) {
-      _randomNumbers.set(i, randomNumbers[i]);
+      if(!_randomNumbers.contains(randomNumbers[i])) {
+        _randomNumbers.set(i, randomNumbers[i]);
+      }
     }
   }
 

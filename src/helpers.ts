@@ -1,8 +1,10 @@
 import { ArtifactName, DependenciesMap, DeployedContract } from './types';
-import { config } from 'hardhat';
+import { config, upgrades } from 'hardhat';
 import { HardhatConfig } from 'hardhat/types';
 import { DeployConfig } from './deployer';
 import path from 'path'
+import { Contract } from 'ethers';
+import { Deployer } from './deployer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function unwrap (object: any, key: string): any {
@@ -16,4 +18,51 @@ export function unwrapDependencies (dependencies: DependenciesMap, keys: Artifac
   return keys.map((key) => unwrap(dependencies, key));
 }
 
+export async function forceImport(
+  address: string, 
+  implFactory: any,
+  opts: any,
+){
+  return await upgrades.forceImport(address, implFactory, opts); 
+}; 
 
+export type UpgradeContractParams = {
+  implementationFactory: any,
+  deployedContractConfig: DeployedContract,
+  forceImport?: {
+    address: string,
+    options: any, 
+  },
+  options?: any
+}
+export async function upgradeContract({
+  implementationFactory,
+  deployedContractConfig, 
+  forceImport,
+  options
+}: UpgradeContractParams) {
+    let legacyAddress: string;
+    let contractInstance: Contract;
+    if (forceImport && forceImport.address) {
+      const forceImportContract = await upgrades.forceImport(
+        forceImport.address,
+        implementationFactory,
+        forceImport.options
+      ) 
+      legacyAddress = forceImportContract.address;  
+      contractInstance = await upgrades.upgradeProxy(forceImportContract, options);
+    } else { 
+      legacyAddress = deployedContractConfig.implementation as string;
+      contractInstance = await upgrades.upgradeProxy(
+        deployedContractConfig.address, 
+        implementationFactory, 
+        options
+      );
+    }
+    if(contractInstance.deployTransAction) await contractInstance.deployTransAction.wait();
+    return {contractInstance, legacyAddress};
+}
+
+// let gameCtlImpl = await upgrades.erc1967.getImplementationAddress(WegaGameController.address);
+//     await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameCtlImpl, [legacyAddress, ...WegaGameController.legacyAddresses]);
+//     await verify(ctx, gameCtlImpl, []);

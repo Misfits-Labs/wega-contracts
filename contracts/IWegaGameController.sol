@@ -10,6 +10,7 @@ interface IWegaGameController {
     uint256 requiredPlayers;
     address proxy;
     address randomNumberController;
+    string name;
   }
   /**
   * @notice allows a player to create a dice or coinflip game  
@@ -20,21 +21,24 @@ interface IWegaGameController {
   function createGame(
     string memory name,
     address tokenAddress,  
-    uint256 wagerAmount
+    uint256 wagerAmount,
+    uint256[] memory randomNumbers
   ) external;
 
   /**
    * @notice allows a player to trigger dice game or deploy if the game is not ready  
    * @param escrowHash address of the contract that holds the funds for a game
+   * @param randomNumbers preseeded randomNumbers
   */
-  function depositOrPlay(bytes32 escrowHash) external;
+  function depositOrPlay(bytes32 escrowHash, uint256[] memory randomNumbers) external;
 
   /**
    * @notice allows a player to trigger coinflip game or deploy if the game is not ready  
    * @param escrowHash address of the contract that holds the funds for a game
    * @param playerChoices choices for coinflip
+   * @param randomNumbers preseeded randomNumbers
   */
-  function depositOrPlay(bytes32 escrowHash, uint256[] memory playerChoices) external;
+  function depositOrPlay(bytes32 escrowHash, uint256[] memory playerChoices, uint256[] memory randomNumbers) external;
 
   /**
    * @notice returns winners of a game
@@ -80,45 +84,26 @@ interface IWegaGameController {
   ) external returns(uint256);
   
   /**
-   * @notice sets the minimum required playrounds of a wega game
-   * @param game name of the game to register
-   * @param newMinRounds player to retrieve points of
+   * @notice configures a registered game
+   * @param config name of the game to register
   */
-  function setMinRounds(string memory game, uint256 newMinRounds) external;
+  function setGameConfiguration(GameSettings memory config) external;
 
   /**
-   * @notice sets the denominator of a wega game
-   * @param game name of the game to register
-   * @param denominator denominator to set the game to
+   * @notice registers a playable game on the wega protocol
+   * @param config name of the game to register
   */
-  function setDenominator(string memory game, uint256 denominator) external;
-
-  /**
-   * @notice sets the number of required players of a wega
-   * @param game name of the game to register
-   * @param requiredPlayers denominator to set the game to
-  */
-  function setRequiredPlayers(string memory game, uint256 requiredPlayers) external;
-  
-  /**
-   * @notice returns player points for a game
-   * @param game name of the game to register
-   * @param gameAddress contract address of the game 
-   * @param denominator to be used in randomnum generation
-   * @param minRounds minimum amount of rounds to play
-   * @param requiredPlayers minimum amount of players to play
-  */
-  function registerGame(
-    string memory game,
-    address gameAddress,
-    uint256 denominator, 
-    uint256 minRounds,
-    uint256 requiredPlayers
-  ) external;
+  function registerGame(GameSettings memory config) external;
 
   /**
    * @notice returns player points for a game
    * @param game name of the game to register
   */
   function removeGame(string memory game) external;
+  
+  /**
+   * @notice returns wether a game is already registered 
+   * @param game name of the game to register
+  */
+  function existsGame(string memory game) external returns (bool exists);
 }

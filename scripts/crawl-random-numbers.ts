@@ -1,8 +1,7 @@
-import { getRandomNumbersConfig, mergeRandomNumConfig } from '../src/config'
+import { getRandomNumbersConfig, mergeRandomNumConfig } from '../src/config';
 import { utils, BigNumber } from 'ethers';
 import { unwrap } from '../src/helpers';
 import { network } from "hardhat";
-
 
 async function main(){  
   const chainId: number = unwrap(network.config, 'chainId');
@@ -10,7 +9,6 @@ async function main(){
   const totalRounds = 5000;
   let current = getRandomNumbersConfig(chainHash);
 
- 
   // for number of rounds - make a fetch call to drand api;
   for(let round = current[chainId].lastParsedRound ?? 1; round <= totalRounds;round++) {
       console.log(`Retrieving...`);

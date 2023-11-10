@@ -97,9 +97,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20EscrowEvents__factory>;
     getContractFactory(
+      name: "IFeeManagerEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IFeeManagerEvents__factory>;
+    getContractFactory(
       name: "IWegaGameControllerEvents",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameControllerEvents__factory>;
+    getContractFactory(
+      name: "FeeManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FeeManager__factory>;
     getContractFactory(
       name: "IWega",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -125,6 +133,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaDiceGame__factory>;
     getContractFactory(
+      name: "IFeeManager",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IFeeManager__factory>;
+    getContractFactory(
       name: "IWegaGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameController__factory>;
@@ -137,9 +149,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaEscrowManagerRole__factory>;
     getContractFactory(
+      name: "WegaFeeAdminRole",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaFeeAdminRole__factory>;
+    getContractFactory(
       name: "WegaGameManagerRole",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaGameManagerRole__factory>;
+    getContractFactory(
+      name: "WegaProtocolAdminRole",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaProtocolAdminRole__factory>;
     getContractFactory(
       name: "WegaGameController",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -255,10 +275,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20EscrowEvents>;
     getContractAt(
+      name: "IFeeManagerEvents",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IFeeManagerEvents>;
+    getContractAt(
       name: "IWegaGameControllerEvents",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaGameControllerEvents>;
+    getContractAt(
+      name: "FeeManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FeeManager>;
     getContractAt(
       name: "IWega",
       address: string,
@@ -290,6 +320,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.WegaDiceGame>;
     getContractAt(
+      name: "IFeeManager",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IFeeManager>;
+    getContractAt(
       name: "IWegaGameController",
       address: string,
       signer?: ethers.Signer
@@ -305,10 +340,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.WegaEscrowManagerRole>;
     getContractAt(
+      name: "WegaFeeAdminRole",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaFeeAdminRole>;
+    getContractAt(
       name: "WegaGameManagerRole",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.WegaGameManagerRole>;
+    getContractAt(
+      name: "WegaProtocolAdminRole",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaProtocolAdminRole>;
     getContractAt(
       name: "WegaGameController",
       address: string,

@@ -8,7 +8,7 @@ import "hardhat/console.sol";
 
 import "./escrow/IWegaERC20Escrow.sol";
 import "./escrow/IEscrow.sol";
-import "./roles/WegaGameManagerRole.sol";
+import "./roles/WegaProtocolAdminRole.sol";
 import "./events/IWegaGameControllerEvents.sol";
 import "./events/IERC20EscrowEvents.sol";
 import "./IWegaGameController.sol";
@@ -17,8 +17,6 @@ import "./utils/Arrays.sol";
 import './errors/WegaGameControllerErrors.sol';
 import "./utils/Strings.sol";
 import "./games/IWega.sol";
-
-import 'hardhat/console.sol';
 
 /**
   * @title GameController (MVP)
@@ -34,7 +32,7 @@ contract WegaGameController is
   IWegaGameController, 
   IWegaGameControllerEvents,
   WegaGameControllerErrors,
-  WegaGameManagerRole,
+  WegaProtocolAdminRole,
   UUPSUpgradeable
   {
 
@@ -44,6 +42,7 @@ contract WegaGameController is
   using Arrays for uint256[];
 
   IWegaERC20Escrow public erc20Escrow;
+  IWegaRandomNumberController public randomizer;
   
   mapping(bytes32 => IWega.Wega) private _games;
   mapping(uint256 => address) _registeredGames;
@@ -53,13 +52,13 @@ contract WegaGameController is
   function initialize(
     address erc20EscrowAddress, 
     string[] memory games,
+    address randomNumberController,
     GameSettings[] memory gameSettings
   ) initializer public {
-    __Ownable_init();
     __WegaGameController_init(erc20EscrowAddress, games, gameSettings);
-    __WegaGameManagerRole_init();
-    _addWegaGameManager(owner());
+    __WegaProtocolAdminRole_init();
     __UUPSUpgradeable_init();
+    randomizer = IWegaRandomNumberController(randomNumberController);
   }
 
   function __WegaGameController_init(
@@ -77,32 +76,27 @@ contract WegaGameController is
   ) public onlyInitializing {
     erc20Escrow = IWegaERC20Escrow(erc20EscrowAddress);
     for(uint256 i = 0; i < games.length; i++) {
-      _registerGame(
-        games[i].keyHash(),
-        gameSettings[i].proxy,
-        gameSettings[i].denominator,
-        gameSettings[i].minRounds,
-        gameSettings[i].requiredPlayers,
-        gameSettings[i].randomNumberController
-      );
+          _registeredGames[gameSettings[i].name.keyHash()] = gameSettings[i].proxy;
+      _gameNameHashes.add(gameSettings[i].name.keyHash());
+      _setGameConfiguration(gameSettings[i]);
     }
   }
 
   function createGame(
     string memory name,
     address tokenAddress,
-    uint256 wagerAmount
-  ) public {
+    uint256 wagerAmount,
+    uint256[] memory randomNumbers
+  ) public override {
     require(_gameNameHashes.contains(name.keyHash()), INVALID_WEGA_GAME);
-    GameSettings memory settings = _getGameSettings(name);
-    
+    GameSettings memory settings = getGameSettings(name);
+    _beforeCreateOrDeposit(randomNumbers);
     bytes32 escrowHash = erc20Escrow.createWagerRequest(
       tokenAddress, 
       _msgSender(), 
       settings.requiredPlayers, 
       wagerAmount
     );
-
     IWega.Wega memory game;
     game.name = name;
     game.state = IWega.WegaState.WAITING;
@@ -111,25 +105,28 @@ contract WegaGameController is
     game.currentPlayers[0] = _msgSender();
     game.deposited += 1;
     _games[escrowHash] = game;
-    emit GameCreation(escrowHash, _msgSender(), name); 
+    emit GameCreation(escrowHash, erc20Escrow.getWagerRequest(escrowHash).nonce, _msgSender(), name); 
   }
 
-  function depositOrPlay(bytes32 escrowHash) public override {
+  function depositOrPlay(bytes32 escrowHash, uint256[] memory randomNumbers) public override {
     IWega.Wega memory game =_games[escrowHash];
-    GameSettings memory settings = _getGameSettings(game.name); 
+    GameSettings memory settings = getGameSettings(game.name); 
     _deposit(escrowHash);
+    _beforeCreateOrDeposit(randomNumbers);
     if(_games[escrowHash].deposited == settings.requiredPlayers) {
       _playDice(settings.proxy, escrowHash, _games[escrowHash].currentPlayers, settings.denominator, settings.minRounds);
     }
   }
 
   function depositOrPlay(
-    bytes32 escrowHash, 
-    uint256[] memory playerChoices
+    bytes32 escrowHash,
+    uint256[] memory playerChoices, 
+    uint256[] memory randomNumbers
   ) public override {
     IWega.Wega memory game =_games[escrowHash];
-    GameSettings memory settings = _getGameSettings(game.name); 
+    GameSettings memory settings = getGameSettings(game.name); 
     _deposit(escrowHash);
+    _beforeCreateOrDeposit(randomNumbers);
     if(_games[escrowHash].deposited == settings.requiredPlayers) {
       _playCoinFlip(
         settings.proxy, 
@@ -182,7 +179,7 @@ contract WegaGameController is
 
   function _deposit(bytes32 escrowHash) internal {
     IWega.Wega memory game =_games[escrowHash];
-    GameSettings memory settings = _getGameSettings(game.name); 
+    GameSettings memory settings = getGameSettings(game.name); 
     IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
     require(game.state != IWega.WegaState.PLAYED, INVALID_GAME_STATE);
     if(game.deposited != settings.requiredPlayers) {
@@ -196,7 +193,7 @@ contract WegaGameController is
     string memory game, 
     bytes32 escrowHash
   ) external view override returns(address[] memory) {
-    GameSettings memory settings = _getGameSettings(game);
+    GameSettings memory settings = getGameSettings(game);
     return IWega(settings.proxy).winners(escrowHash);
   }
   
@@ -215,7 +212,7 @@ contract WegaGameController is
     bytes32 escrowHash, 
     address player
   ) external view override returns(uint256[] memory) {
-    return IWega(_getGameSettings(game).proxy).playerResults(escrowHash, player);
+    return IWega(getGameSettings(game).proxy).playerResults(escrowHash, player);
   }
 
   function playerScore(
@@ -223,74 +220,53 @@ contract WegaGameController is
     bytes32 escrowHash, 
     address player
   ) external view override returns(uint256) {
-    return IWega(_getGameSettings(game).proxy).playerScore(escrowHash, player);
-  }
-  
-  function setMinRounds(string memory game, uint256 newMinRounds) external override {
-    GameSettings memory settings = _getGameSettings(game);
-    _gameSettings[game.keyHash()].minRounds = newMinRounds;
-    emit MinRoundsSet(game, settings.minRounds, newMinRounds);
-  }
-  
-  function setDenominator(string memory game, uint256 denominator) external override {
-    GameSettings memory settings = _getGameSettings(game);
-    _gameSettings[game.keyHash()].denominator = denominator;
-    emit MinRoundsSet(game, settings.denominator, denominator);
+    return IWega(getGameSettings(game).proxy).playerScore(escrowHash, player);
   }
 
-  function setRequiredPlayers(string memory game, uint256 requiredPlayers) external override {
-    GameSettings memory settings = _getGameSettings(game);
-    _gameSettings[game.keyHash()].requiredPlayers = requiredPlayers;
-    emit RequiredPlayersSet(game, settings.requiredPlayers, requiredPlayers);
+  function setGameConfiguration(GameSettings memory config) external onlyWegaProtocolAdmin {
+    require(existsGame(config.name), INVALID_WEGA_GAME);
+    _setGameConfiguration(config);
   }
 
-  function registerGame(
-    string memory game,
-    address gameAddress,
-    uint256 minRounds,
-    uint256 denominator, 
-    uint256 requiredPlayers
-  ) external override {
-    _registerGame(
-      game.keyHash(), 
-      gameAddress, 
-      denominator, 
-      minRounds, 
-      requiredPlayers, 
-      IWega(gameAddress).randomNumbersContract()
+  function registerGame(GameSettings memory config) external override onlyWegaProtocolAdmin {
+    require(!existsGame(config.name), INVALID_WEGA_GAME);
+    _registeredGames[config.name.keyHash()] = config.proxy;
+    _gameNameHashes.add(config.name.keyHash());
+    _setGameConfiguration(config);
+    emit GameRegistration(config.name, config.proxy);
+  }
+
+  function _setGameConfiguration(GameSettings memory config) internal {
+    _gameSettings[config.name.keyHash()] = config;
+    emit SetGame(
+      config.name, 
+      config.denominator, 
+      config.minRounds, 
+      config.requiredPlayers, 
+      config.proxy, 
+      config.randomNumberController
     );
-    emit GameRegistration(game, gameAddress);
   }
 
-  function _registerGame(
-    uint256 gameNameHash,
-    address gameAddress,
-    uint256 denominator, 
-    uint256 minRounds,
-    uint256 requiredPlayers,
-    address randomNumberController
-  ) internal {
-    _registeredGames[gameNameHash] = gameAddress;
-    GameSettings memory settings = GameSettings({
-      proxy: gameAddress,
-      denominator: denominator,
-      minRounds: minRounds,
-      requiredPlayers: requiredPlayers,
-      randomNumberController: randomNumberController
-    });
-    _gameSettings[gameNameHash] = settings;
-    _gameNameHashes.add(gameNameHash);
-  }
-
-  function _getGameSettings(string memory game) internal view returns (GameSettings memory settings) {
+  function getGameSettings(
+    string memory game
+  ) public view returns (GameSettings memory settings) {
     settings = _gameSettings[game.keyHash()];
   }
 
   function removeGame(string memory game) external override {
-    require(_registeredGames[game.keyHash()] != address(0), INVALID_WEGA_GAME);
+    require(existsGame(game), INVALID_WEGA_GAME);
     delete _gameSettings[game.keyHash()];
     delete _registeredGames[game.keyHash()];
   }
 
+  function existsGame(string memory game) public view override returns (bool exists) {
+    exists = _registeredGames[game.keyHash()] != address(0);
+  }
+
   function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
+  function _beforeCreateOrDeposit(uint256[] memory randomNumbers) internal {
+    randomizer.addRandomNumbers(randomNumbers);
+  }
 }

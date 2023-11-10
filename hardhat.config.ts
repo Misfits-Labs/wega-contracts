@@ -11,6 +11,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 type MintersMap = Record<string, string[]>;
+type AdminsMap = Record<string, string[]>;
 type ProtocolAdminsMap = Record<string, string[]>;
 type TokenManagersMap = Record<string, string[]>;
 export type Treasury = { address: string; name: string; };
@@ -23,12 +24,14 @@ declare module 'hardhat/types/config' {
   interface HardhatUserConfig {
     accounts?: {
       minters: MintersMap;
+      admins: AdminsMap;
     };
   }
   
   interface HardhatConfig {
     accounts: {
       minters: MintersMap;
+      admins: AdminsMap;
     };
   }
 
@@ -194,32 +197,38 @@ const config: HardhatUserConfig = {
     goerli: {
      url: process.env.GOERLI_RPC_URL,
      chainId: 5,
-     accounts: process.env.GOERLI_HDNS_PRIVATE_KEY ? [process.env.GOERLI_HDNS_PRIVATE_KEY as string] : undefined,
+     accounts: process.env.GOERLI_DEPLOYER_PRIVATE_KEY ? [process.env.GOERLI_DEPLOYER_PRIVATE_KEY as string] : undefined,
     },
     mainnet: {
      url: process.env.MAINNET_RPC_URL,
      chainId: 1,
-     accounts: process.env.MAINNET_HDNS_PRIVATE_KEY ? [process.env.MAINNET_HDNS_PRIVATE_KEY as string] : undefined,
+     accounts: process.env.MAINNET_DEPLOYER_PRIVATE_KEY ? [process.env.MAINNET_DEPLOYER_PRIVATE_KEY as string] : undefined,
      loggingEnabled: true,
     },
     mumbai: {
      url: process.env.MUMBAI_RPC_URL,
      chainId: 80001,
-     accounts: [process.env.MUMBAI_HDNS_PRIVATE_KEY as string],
+     accounts: [
+      process.env.MUMBAI_DEPLOYER_PRIVATE_KEY as string,
+      process.env.MUMBAI_PROTOCOL_ADMIN_PRIVATE_KEY as string
+      ],
      loggingEnabled: true,
      blockGasLimit: 20000000,
     },
     polygon: {
       url: process.env.POLYGON_RPC_URL,
       chainId: 134,
-      accounts: process.env.POLYGON_HDNS_PRIVATE_KEY ? [process.env.POLYGON_HDNS_PRIVATE_KEY as string] : undefined,
+      accounts: process.env.POLYGON_DEPLOYER_PRIVATE_KEY ? [
+        process.env.POLYGON_DEPLOYER_PRIVATE_KEY as string,
+        process.env.POLYGON_PROTOCOL_ADMIN_PRIVATE_KEY as string
+      ] : undefined,
       loggingEnabled: true,
       blockGasLimit: 268435455,
     },
     skaleCalypsoTestnet: {
       url: process.env.SKALE_CALYPSO_RPC_URL,
       chainId: 344106930,
-      accounts: process.env.SKALE_HDNS_PRIVATE_KEY ? [process.env.SKALE_HDNS_PRIVATE_KEY as string] : undefined,
+      accounts: process.env.SKALE_DEPLOYER_PRIVATE_KEY ? [process.env.SKALE_DEPLOYER_PRIVATE_KEY as string] : undefined,
       loggingEnabled: true,
     },
   },
@@ -237,7 +246,7 @@ const config: HardhatUserConfig = {
     alphaSort: true,
     runOnCompile: argv.enableContractSizer,
     disambiguatePaths: false,
-    only: ['HDNSRegistry.sol', 'ProxyReader.sol', 'MintingManager.sol', 'MainController.sol', 'MainControllerBase.sol', 'PaymentSettings.sol'],
+    only: ['DEPLOYERRegistry.sol', 'ProxyReader.sol', 'MintingManager.sol', 'MainController.sol', 'MainControllerBase.sol', 'PaymentSettings.sol'],
   },
   mocha: {
     timeout: 100000,
@@ -262,9 +271,15 @@ const config: HardhatUserConfig = {
     minters: {
       hardhat: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
       localhost: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
-      polygon: ['0xB0e5b7BEE7Bc550d89ABE63ea24c7aD9762ACa55'],
-      mumbai: [process.env.PROTOCOL_ADMIN_ADDRESS as string],
+      polygon: [process.env.POLYGON_PROTOCOL_ADMIN_ADDRESS as string],
+      mumbai: [process.env.MUMBAI_PROTOCOL_ADMIN_ADDRESS as string],
     },
+    admins: {
+      hardhat: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+      localhost: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
+      polygon: [process.env.POLYGON_PROTOCOL_ADMIN_ADDRESS as string],
+      mumbai: [process.env.MUMBAI_PROTOCOL_ADMIN_ADDRESS as string],
+    }
   },
 };
 export default config;

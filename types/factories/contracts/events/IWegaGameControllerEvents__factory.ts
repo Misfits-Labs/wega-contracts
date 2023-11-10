@@ -14,35 +14,16 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "string",
-        name: "game",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "oldDenominator",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "newDenominator",
-        type: "uint256",
-      },
-    ],
-    name: "DenominatorSet",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
         indexed: true,
         internalType: "bytes32",
         name: "escrowHash",
         type: "bytes32",
+      },
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "nonce",
+        type: "uint256",
       },
       {
         indexed: false,
@@ -85,48 +66,41 @@ const _abi = [
       {
         indexed: false,
         internalType: "string",
-        name: "game",
+        name: "name",
         type: "string",
       },
       {
         indexed: false,
         internalType: "uint256",
-        name: "oldMinRounds",
+        name: "denominator",
         type: "uint256",
       },
       {
         indexed: false,
         internalType: "uint256",
-        name: "newMinRounds",
+        name: "minRounds",
         type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "requiredPlayers",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "proxy",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "randomNumberController",
+        type: "address",
       },
     ],
-    name: "MinRoundsSet",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "game",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "requiredPlayersOld",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "requiredPlayersNew",
-        type: "uint256",
-      },
-    ],
-    name: "RequiredPlayersSet",
+    name: "SetGame",
     type: "event",
   },
   {

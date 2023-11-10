@@ -23,6 +23,8 @@ export interface IERC20EscrowEventsInterface extends utils.Interface {
   functions: {};
 
   events: {
+    "ApplyFees(bool)": EventFragment;
+    "SetFeeManager(address)": EventFragment;
     "SetGameControler(address)": EventFragment;
     "SetWithdrawers(bytes32,address[])": EventFragment;
     "WagerDeposit(bytes32,uint256,address)": EventFragment;
@@ -30,12 +32,28 @@ export interface IERC20EscrowEventsInterface extends utils.Interface {
     "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ApplyFees"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SetFeeManager"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetWithdrawers"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
 }
+
+export interface ApplyFeesEventObject {
+  areFeesApplied: boolean;
+}
+export type ApplyFeesEvent = TypedEvent<[boolean], ApplyFeesEventObject>;
+
+export type ApplyFeesEventFilter = TypedEventFilter<ApplyFeesEvent>;
+
+export interface SetFeeManagerEventObject {
+  feeManager: string;
+}
+export type SetFeeManagerEvent = TypedEvent<[string], SetFeeManagerEventObject>;
+
+export type SetFeeManagerEventFilter = TypedEventFilter<SetFeeManagerEvent>;
 
 export interface SetGameControlerEventObject {
   gameController: string;
@@ -128,6 +146,20 @@ export interface IERC20EscrowEvents extends BaseContract {
   callStatic: {};
 
   filters: {
+    "ApplyFees(bool)"(
+      areFeesApplied?: PromiseOrValue<boolean> | null
+    ): ApplyFeesEventFilter;
+    ApplyFees(
+      areFeesApplied?: PromiseOrValue<boolean> | null
+    ): ApplyFeesEventFilter;
+
+    "SetFeeManager(address)"(
+      feeManager?: PromiseOrValue<string> | null
+    ): SetFeeManagerEventFilter;
+    SetFeeManager(
+      feeManager?: PromiseOrValue<string> | null
+    ): SetFeeManagerEventFilter;
+
     "SetGameControler(address)"(
       gameController?: PromiseOrValue<string> | null
     ): SetGameControlerEventFilter;

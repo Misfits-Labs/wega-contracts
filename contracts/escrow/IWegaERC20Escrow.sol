@@ -93,4 +93,10 @@ interface IWegaERC20Escrow {
  * @param winners addresses of the winner
  */
  function setWithdrawers(bytes32 escrowHash, address[] memory winners) external;
+
+ /**
+ * @notice set fee manager
+ * @param feeManager address of the fee manager
+ */
+ function setFeeManager(address feeManager) external;
 }

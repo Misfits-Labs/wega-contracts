@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -28,68 +27,50 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export interface WegaChanceGameInterface extends utils.Interface {
+export interface WegaFeeAdminRoleInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "WEGA_GAME_MANAGER_ROLE()": FunctionFragment;
-    "__WegaChanceGame_init(uint256[])": FunctionFragment;
-    "__WegaChanceGame_init_unchained(uint256[])": FunctionFragment;
-    "addRandomNumbers(uint256[])": FunctionFragment;
-    "addWegaGameManager(address)": FunctionFragment;
-    "addWegaGameManagers(address[])": FunctionFragment;
-    "closeWegaGameManager(address)": FunctionFragment;
+    "WEGA_FEE_MANAGER_ROLE()": FunctionFragment;
+    "addWegaFeeAdmin(address)": FunctionFragment;
+    "addWegaFeeAdmins(address[])": FunctionFragment;
+    "closeWegaFeeAdmin(address)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "initialize(uint256[])": FunctionFragment;
-    "isWegaGameManager(address)": FunctionFragment;
+    "isWegaFeeAdmin(address)": FunctionFragment;
     "owner()": FunctionFragment;
-    "proxiableUUID()": FunctionFragment;
-    "randomNumbersCount()": FunctionFragment;
-    "removeWegaGameManager(address)": FunctionFragment;
-    "removeWegaGameManagers(address[])": FunctionFragment;
+    "removeWegaFeeAdmin(address)": FunctionFragment;
+    "removeWegaFeeAdmins(address[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
-    "renounceWegaGameManager()": FunctionFragment;
+    "renounceWegaFeeAdmin()": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "roll(uint256,uint256)": FunctionFragment;
-    "rotateWegaGameManager(address)": FunctionFragment;
+    "rotateWegaFeeAdmin(address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "upgradeTo(address)": FunctionFragment;
-    "upgradeToAndCall(address,bytes)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
-      | "WEGA_GAME_MANAGER_ROLE"
-      | "__WegaChanceGame_init"
-      | "__WegaChanceGame_init_unchained"
-      | "addRandomNumbers"
-      | "addWegaGameManager"
-      | "addWegaGameManagers"
-      | "closeWegaGameManager"
+      | "WEGA_FEE_MANAGER_ROLE"
+      | "addWegaFeeAdmin"
+      | "addWegaFeeAdmins"
+      | "closeWegaFeeAdmin"
       | "getRoleAdmin"
       | "grantRole"
       | "hasRole"
-      | "initialize"
-      | "isWegaGameManager"
+      | "isWegaFeeAdmin"
       | "owner"
-      | "proxiableUUID"
-      | "randomNumbersCount"
-      | "removeWegaGameManager"
-      | "removeWegaGameManagers"
+      | "removeWegaFeeAdmin"
+      | "removeWegaFeeAdmins"
       | "renounceOwnership"
       | "renounceRole"
-      | "renounceWegaGameManager"
+      | "renounceWegaFeeAdmin"
       | "revokeRole"
-      | "roll"
-      | "rotateWegaGameManager"
+      | "rotateWegaFeeAdmin"
       | "supportsInterface"
       | "transferOwnership"
-      | "upgradeTo"
-      | "upgradeToAndCall"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -97,31 +78,19 @@ export interface WegaChanceGameInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "WEGA_GAME_MANAGER_ROLE",
+    functionFragment: "WEGA_FEE_MANAGER_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "__WegaChanceGame_init",
-    values: [PromiseOrValue<BigNumberish>[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "__WegaChanceGame_init_unchained",
-    values: [PromiseOrValue<BigNumberish>[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addRandomNumbers",
-    values: [PromiseOrValue<BigNumberish>[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addWegaGameManager",
+    functionFragment: "addWegaFeeAdmin",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "addWegaGameManagers",
+    functionFragment: "addWegaFeeAdmins",
     values: [PromiseOrValue<string>[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "closeWegaGameManager",
+    functionFragment: "closeWegaFeeAdmin",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -137,28 +106,16 @@ export interface WegaChanceGameInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "initialize",
-    values: [PromiseOrValue<BigNumberish>[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "isWegaGameManager",
+    functionFragment: "isWegaFeeAdmin",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "proxiableUUID",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "randomNumbersCount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "removeWegaGameManager",
+    functionFragment: "removeWegaFeeAdmin",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeWegaGameManagers",
+    functionFragment: "removeWegaFeeAdmins",
     values: [PromiseOrValue<string>[]]
   ): string;
   encodeFunctionData(
@@ -170,7 +127,7 @@ export interface WegaChanceGameInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "renounceWegaGameManager",
+    functionFragment: "renounceWegaFeeAdmin",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -178,11 +135,7 @@ export interface WegaChanceGameInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "roll",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "rotateWegaGameManager",
+    functionFragment: "rotateWegaFeeAdmin",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -193,45 +146,25 @@ export interface WegaChanceGameInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(
-    functionFragment: "upgradeTo",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "upgradeToAndCall",
-    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "WEGA_GAME_MANAGER_ROLE",
+    functionFragment: "WEGA_FEE_MANAGER_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "__WegaChanceGame_init",
+    functionFragment: "addWegaFeeAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "__WegaChanceGame_init_unchained",
+    functionFragment: "addWegaFeeAdmins",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addRandomNumbers",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addWegaGameManager",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addWegaGameManagers",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "closeWegaGameManager",
+    functionFragment: "closeWegaFeeAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -240,26 +173,17 @@ export interface WegaChanceGameInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "isWegaGameManager",
+    functionFragment: "isWegaFeeAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "proxiableUUID",
+    functionFragment: "removeWegaFeeAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "randomNumbersCount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "removeWegaGameManager",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "removeWegaGameManagers",
+    functionFragment: "removeWegaFeeAdmins",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -271,13 +195,12 @@ export interface WegaChanceGameInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "renounceWegaGameManager",
+    functionFragment: "renounceWegaFeeAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "roll", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "rotateWegaGameManager",
+    functionFragment: "rotateWegaFeeAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -288,53 +211,21 @@ export interface WegaChanceGameInterface extends utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "upgradeToAndCall",
-    data: BytesLike
-  ): Result;
 
   events: {
-    "AdminChanged(address,address)": EventFragment;
-    "BeaconUpgraded(address)": EventFragment;
     "Initialized(uint8)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
-    "Upgraded(address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
-
-export interface AdminChangedEventObject {
-  previousAdmin: string;
-  newAdmin: string;
-}
-export type AdminChangedEvent = TypedEvent<
-  [string, string],
-  AdminChangedEventObject
->;
-
-export type AdminChangedEventFilter = TypedEventFilter<AdminChangedEvent>;
-
-export interface BeaconUpgradedEventObject {
-  beacon: string;
-}
-export type BeaconUpgradedEvent = TypedEvent<
-  [string],
-  BeaconUpgradedEventObject
->;
-
-export type BeaconUpgradedEventFilter = TypedEventFilter<BeaconUpgradedEvent>;
 
 export interface InitializedEventObject {
   version: number;
@@ -392,19 +283,12 @@ export type RoleRevokedEvent = TypedEvent<
 
 export type RoleRevokedEventFilter = TypedEventFilter<RoleRevokedEvent>;
 
-export interface UpgradedEventObject {
-  implementation: string;
-}
-export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
-
-export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
-
-export interface WegaChanceGame extends BaseContract {
+export interface WegaFeeAdminRole extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: WegaChanceGameInterface;
+  interface: WegaFeeAdminRoleInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -428,34 +312,19 @@ export interface WegaChanceGame extends BaseContract {
   functions: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    WEGA_GAME_MANAGER_ROLE(overrides?: CallOverrides): Promise<[string]>;
+    WEGA_FEE_MANAGER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    __WegaChanceGame_init(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    __WegaChanceGame_init_unchained(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    addRandomNumbers(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    addWegaGameManager(
+    addWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    addWegaGameManagers(
+    addWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    closeWegaGameManager(
+    closeWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -477,28 +346,19 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    initialize(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    isWegaGameManager(
+    isWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
-
-    randomNumbersCount(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    removeWegaGameManager(
+    removeWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    removeWegaGameManagers(
+    removeWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -513,7 +373,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    renounceWegaGameManager(
+    renounceWegaFeeAdmin(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -523,13 +383,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    roll(
-      denominator: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    rotateWegaGameManager(
+    rotateWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -543,49 +397,23 @@ export interface WegaChanceGame extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
   };
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  WEGA_GAME_MANAGER_ROLE(overrides?: CallOverrides): Promise<string>;
+  WEGA_FEE_MANAGER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  __WegaChanceGame_init(
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  __WegaChanceGame_init_unchained(
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  addRandomNumbers(
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  addWegaGameManager(
+  addWegaFeeAdmin(
     account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  addWegaGameManagers(
+  addWegaFeeAdmins(
     accounts: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  closeWegaGameManager(
+  closeWegaFeeAdmin(
     receiver: PromiseOrValue<string>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -607,28 +435,19 @@ export interface WegaChanceGame extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  initialize(
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  isWegaGameManager(
+  isWegaFeeAdmin(
     account: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-  randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-  removeWegaGameManager(
+  removeWegaFeeAdmin(
     account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  removeWegaGameManagers(
+  removeWegaFeeAdmins(
     accounts: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -643,7 +462,7 @@ export interface WegaChanceGame extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  renounceWegaGameManager(
+  renounceWegaFeeAdmin(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -653,13 +472,7 @@ export interface WegaChanceGame extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  roll(
-    denominator: PromiseOrValue<BigNumberish>,
-    nonce: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  rotateWegaGameManager(
+  rotateWegaFeeAdmin(
     receiver: PromiseOrValue<string>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -674,48 +487,22 @@ export interface WegaChanceGame extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  upgradeTo(
-    newImplementation: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  upgradeToAndCall(
-    newImplementation: PromiseOrValue<string>,
-    data: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    WEGA_GAME_MANAGER_ROLE(overrides?: CallOverrides): Promise<string>;
+    WEGA_FEE_MANAGER_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    __WegaChanceGame_init(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    __WegaChanceGame_init_unchained(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    addRandomNumbers(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    addWegaGameManager(
+    addWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    addWegaGameManagers(
+    addWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    closeWegaGameManager(
+    closeWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -737,28 +524,19 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    initialize(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    isWegaGameManager(
+    isWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-    randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    removeWegaGameManager(
+    removeWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    removeWegaGameManagers(
+    removeWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -771,7 +549,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    renounceWegaGameManager(overrides?: CallOverrides): Promise<void>;
+    renounceWegaFeeAdmin(overrides?: CallOverrides): Promise<void>;
 
     revokeRole(
       role: PromiseOrValue<BytesLike>,
@@ -779,13 +557,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    roll(
-      denominator: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    rotateWegaGameManager(
+    rotateWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -799,36 +571,9 @@ export interface WegaChanceGame extends BaseContract {
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
   filters: {
-    "AdminChanged(address,address)"(
-      previousAdmin?: null,
-      newAdmin?: null
-    ): AdminChangedEventFilter;
-    AdminChanged(
-      previousAdmin?: null,
-      newAdmin?: null
-    ): AdminChangedEventFilter;
-
-    "BeaconUpgraded(address)"(
-      beacon?: PromiseOrValue<string> | null
-    ): BeaconUpgradedEventFilter;
-    BeaconUpgraded(
-      beacon?: PromiseOrValue<string> | null
-    ): BeaconUpgradedEventFilter;
-
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
@@ -873,46 +618,24 @@ export interface WegaChanceGame extends BaseContract {
       account?: PromiseOrValue<string> | null,
       sender?: PromiseOrValue<string> | null
     ): RoleRevokedEventFilter;
-
-    "Upgraded(address)"(
-      implementation?: PromiseOrValue<string> | null
-    ): UpgradedEventFilter;
-    Upgraded(
-      implementation?: PromiseOrValue<string> | null
-    ): UpgradedEventFilter;
   };
 
   estimateGas: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    WEGA_GAME_MANAGER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+    WEGA_FEE_MANAGER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    __WegaChanceGame_init(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    __WegaChanceGame_init_unchained(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    addRandomNumbers(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    addWegaGameManager(
+    addWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    addWegaGameManagers(
+    addWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    closeWegaGameManager(
+    closeWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -934,28 +657,19 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    initialize(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    isWegaGameManager(
+    isWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
-
-    randomNumbersCount(overrides?: CallOverrides): Promise<BigNumber>;
-
-    removeWegaGameManager(
+    removeWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    removeWegaGameManagers(
+    removeWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -970,7 +684,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    renounceWegaGameManager(
+    renounceWegaFeeAdmin(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -980,13 +694,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    roll(
-      denominator: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    rotateWegaGameManager(
+    rotateWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -999,17 +707,6 @@ export interface WegaChanceGame extends BaseContract {
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
 
@@ -1018,36 +715,21 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    WEGA_GAME_MANAGER_ROLE(
+    WEGA_FEE_MANAGER_ROLE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    __WegaChanceGame_init(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    __WegaChanceGame_init_unchained(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    addRandomNumbers(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    addWegaGameManager(
+    addWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    addWegaGameManagers(
+    addWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    closeWegaGameManager(
+    closeWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1069,30 +751,19 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    initialize(
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    isWegaGameManager(
+    isWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    randomNumbersCount(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    removeWegaGameManager(
+    removeWegaFeeAdmin(
       account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    removeWegaGameManagers(
+    removeWegaFeeAdmins(
       accounts: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1107,7 +778,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    renounceWegaGameManager(
+    renounceWegaFeeAdmin(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1117,13 +788,7 @@ export interface WegaChanceGame extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    roll(
-      denominator: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    rotateWegaGameManager(
+    rotateWegaFeeAdmin(
       receiver: PromiseOrValue<string>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1136,17 +801,6 @@ export interface WegaChanceGame extends BaseContract {
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

@@ -20,4 +20,9 @@ interface IWegaRandomNumberController {
   * @param randomNumbers the randomnumber that should be added
  */
  function addRandomNumbers(uint256[] memory randomNumbers) external;
+ /**
+  * @notice adds random numbers from a source to the random number set
+  * @param randomNumbers the randomnumber that should be added
+ */
+ function seedRandomizer(uint256[] memory randomNumbers) external;
 }

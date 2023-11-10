@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { IERC20EscrowEvents } from "./IERC20EscrowEvents";
+export type { IFeeManagerEvents } from "./IFeeManagerEvents";
 export type { IWegaGameControllerEvents } from "./IWegaGameControllerEvents";

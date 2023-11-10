@@ -2,4 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export { WegaEscrowManagerRole__factory } from "./WegaEscrowManagerRole__factory";
+export { WegaFeeAdminRole__factory } from "./WegaFeeAdminRole__factory";
 export { WegaGameManagerRole__factory } from "./WegaGameManagerRole__factory";
+export { WegaProtocolAdminRole__factory } from "./WegaProtocolAdminRole__factory";
