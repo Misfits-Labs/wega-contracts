@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
@@ -51,8 +51,8 @@ contract WegaGameController is
   
   function initialize(
     address erc20EscrowAddress, 
-    string[] memory games,
     address randomNumberController,
+    string[] memory games,
     GameSettings[] memory gameSettings
   ) initializer public {
     __WegaGameController_init(erc20EscrowAddress, games, gameSettings);
@@ -76,7 +76,7 @@ contract WegaGameController is
   ) public onlyInitializing {
     erc20Escrow = IWegaERC20Escrow(erc20EscrowAddress);
     for(uint256 i = 0; i < games.length; i++) {
-          _registeredGames[gameSettings[i].name.keyHash()] = gameSettings[i].proxy;
+      _registeredGames[gameSettings[i].name.keyHash()] = gameSettings[i].proxy;
       _gameNameHashes.add(gameSettings[i].name.keyHash());
       _setGameConfiguration(gameSettings[i]);
     }

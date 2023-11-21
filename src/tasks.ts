@@ -203,8 +203,9 @@ const deployWegaGameControllerTask: Task = {
       gameController = await upgrades.deployProxy(
         ctx.artifacts.WegaGameController.connect(owner), [
           WegaERC20Escrow.address, 
+          WegaRandomNumberController.address,
           ["DICE", "COINFLIP"],
-          [...gameSettings],
+          gameSettings,
         ], { 
           initializer: "initialize",
           kind: 'uups'
@@ -450,7 +451,20 @@ const deployERC20EscrowTask: Task = {
     ctx.log('Adding protocol admins')
     await erc20Escrow.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
   },
-  ensureDependencies: () =>({})
+  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
+    config = merge(ctx.getDeployConfig(), config);
+
+    const { FeeManager } = config?.contracts || {};
+
+    const dependencies = { FeeManager };
+
+    for (const [key, value] of Object.entries(dependencies)) {
+      if (!value || !value.address) {
+        throw new Error(`${key} contract not found for network ${network.config.chainId}`);
+      }
+    }
+    return dependencies;
+  }
 }
 
 /**
@@ -467,27 +481,19 @@ const deployFeeManagerTask: Task = {
   ) => {
     ctx.log('Deploying Wega FeeManager');
     const { owner, protocolAdmin } = ctx.accounts;
-    const [
-      WegaERC20Escrow
-    ] = unwrapDependencies(
-      dependencies,
-      [
-        ArtifactName.WegaERC20Escrow,
-      ],
-    );
+    // const [
+    //   WegaERC20Escrow
+    // ] = unwrapDependencies(
+    //   dependencies,
+    //   [
+    //     ArtifactName.WegaERC20Escrow,
+    //   ],
+    // );
     // const { WegaCoinFlipGame } = ctx.artifacts;
     let feeManager: Contract;
     if(ctx.options.proxy) {      
       feeManager = await upgrades.deployProxy(
-        ctx.artifacts.FeeManager.connect(owner), [
-          [
-            WegaERC20Escrow.address // deploy - without fee manager, then deploy fee manager and then set fee manager
-          ],
-          {
-            feeTaker: inputs.feeTaker, // 0x25A9D31Dfe52AaE21526318010f7F4AA4198c353,
-            feeShare: 500  
-          }
-        ], { 
+        ctx.artifacts.FeeManager.connect(owner), [], { 
           initializer: 'initialize', 
           kind: 'uups'
         }
@@ -499,11 +505,7 @@ const deployFeeManagerTask: Task = {
     } else {
       const { FeeManager } = ctx.artifacts;
       feeManager = await FeeManager.connect(owner).deploy();
-      await feeManager.connect(owner).initialize([ WegaERC20Escrow.address ], {
-          feeTaker: inputs.feeTaker,
-          feeShare: 500
-        }
-      );
+      await feeManager.connect(owner).initialize();
       await ctx.saveContractConfig(ContractName.FeeManager, feeManager);
       await feeManager.deployTransaction.wait();  
       await verify(ctx, feeManager.address, []);
@@ -511,20 +513,20 @@ const deployFeeManagerTask: Task = {
     ctx.log('Adding protocol admins')
     await feeManager.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
   },
-  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
-    config = merge(ctx.getDeployConfig(), config);
+  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => ({
+    // config = merge(ctx.getDeployConfig(), config);
 
-    const { WegaERC20Escrow } = config?.contracts || {};
+    // const { WegaERC20Escrow } = config?.contracts || {};
 
-    const dependencies = { WegaERC20Escrow };
+    // const dependencies = { WegaERC20Escrow };
 
-    for (const [key, value] of Object.entries(dependencies)) {
-      if (!value || !value.address) {
-        throw new Error(`${key} contract not found for network ${network.config.chainId}`);
-      }
-    }
-    return dependencies;
-  },
+    // for (const [key, value] of Object.entries(dependencies)) {
+    //   if (!value || !value.address) {
+    //     throw new Error(`${key} contract not found for network ${network.config.chainId}`);
+    //   }
+    // }
+    // return dependencies;
+  }),
 }
 
 /**
@@ -685,9 +687,9 @@ export const tasks: Task[] = [
   deployFeeManagerTask, // 2
   deployERC20EscrowTask, // 3 
   deployWegaRandomNumberControllerTask, // 4
-  deployWegaGameControllerTask, // 5
+  deployCoinFlipGameTask, // 5
   deployDiceGameTask, // 6
-  deployCoinFlipGameTask, // 7
+  deployWegaGameControllerTask, // 7
   configureProtocolTask, // 8
   setFeeRulesTask, // 9
   upgradeContractTask,

@@ -1,4 +1,6 @@
 require("@nomicfoundation/hardhat-chai-matchers");
+require('@openzeppelin/hardhat-upgrades');
+
 import path from 'path';
 import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types/config';

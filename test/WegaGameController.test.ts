@@ -1,5 +1,5 @@
-const { ethers, upgrades } =  require('hardhat');
 import { constants, BigNumber, utils } from 'ethers';
+const { ethers, upgrades } =  require('hardhat');
 import { expect } from 'chai';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { getRandomNumbersConfig } from '../src/config';
@@ -19,10 +19,13 @@ import {
  WegaDiceGame__factory,
  WegaRandomNumberController__factory,
  WegaCoinFlipGame__factory,
- WegaERC20Dummy__factory 
+ WegaERC20Dummy__factory,
+ FeeManager,
+ FeeManager__factory,
 } from '../types';
 
-import { TransactionState } from '../src/types'
+import { TransactionState, FeeConfig, HexishString } from '../src/types'
+import { PROTOCOL_ROLES } from '../src/constants'
 import { getRandomExpiryDate, randomNumber } from './helpers/utils'
 import { toSolidityShaWithAbiEncoder } from './helpers/eth.utils'
 
@@ -42,6 +45,7 @@ describe("WegaGameController", () => {
       randomNumController: WegaRandomNumberController,
       gameController: WegaGameController,
       diceGame: WegaDiceGame,
+      feeManager: FeeManager,
       coinflipGame: WegaCoinFlipGame;
       
       // factories
@@ -50,12 +54,14 @@ describe("WegaGameController", () => {
       erc20DummyFactory: WegaERC20Dummy__factory,
       gameControllerFactory: WegaGameController__factory,
       diceGameFactory: WegaDiceGame__factory,
+      feeManagerFactory: FeeManager__factory,
       coinflipGameFactory: WegaCoinFlipGame__factory;
 
  
   // accounts
   let signers: SignerWithAddress[],
       coinbase: SignerWithAddress, 
+      protocolAdmin: SignerWithAddress,
       others: SignerWithAddress[],
       alice: SignerWithAddress, 
       bob: SignerWithAddress, 
@@ -70,13 +76,15 @@ describe("WegaGameController", () => {
       token: string,
       players: SignerWithAddress[];
   
-  const depositOrPlayDice = 'depositOrPlay(bytes32)';
-  const depositOrPlayCoinFlip = 'depositOrPlay(bytes32,uint256[])';
+  const depositOrPlayDice = 'depositOrPlay(bytes32,uint256[])';
+  const depositOrPlayCoinFlip = 'depositOrPlay(bytes32,uint256[],uint256[])';
+  let feeConfigs: FeeConfig[];
+
 
   beforeEach(async () => {
     // accounts setup
     signers = await ethers.getSigners();
-    [coinbase, ...others] = signers;
+    [coinbase, protocolAdmin, ...others] = signers;
     [alice, bob, carl, david, ed, fred, ...others] = others;
 
     // factory setup
@@ -85,12 +93,35 @@ describe("WegaGameController", () => {
     randomNumControllerFactory = new WegaRandomNumberController__factory(coinbase);
     gameControllerFactory = new WegaGameController__factory(coinbase);
     diceGameFactory = new WegaDiceGame__factory(coinbase);
+    feeManagerFactory = new FeeManager__factory(coinbase);
     coinflipGameFactory = new WegaCoinFlipGame__factory(coinbase);
 
     // deploy contracts
-    erc20Escrow = await upgrades.deployProxy(erc20EscrowFactory, ['WegaEscrow', '0.0.0'], { kind: 'uups', initializer: 'initialize' });
-    randomNumController = await upgrades.deployProxy(randomNumControllerFactory, [randomNumbers], { kind: 'uups', initializer: 'initialize' });    
-    erc20Dummy = await erc20DummyFactory.deploy([
+    feeManager = await upgrades.deployProxy(
+      feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'}
+      );
+    await feeManager.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
+
+    erc20Escrow = await upgrades.deployProxy(erc20EscrowFactory, [feeManager.address], { 
+        kind: 'uups', 
+        initializer: 'initialize' 
+      }
+    );
+    await erc20Escrow.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
+
+    feeConfigs = [
+      { 
+       feeTaker: erc20Escrow.address as HexishString,
+       feeShare: 500,
+       shouldApply: true,
+      }
+    ]
+
+    await feeManager.connect(protocolAdmin).setFeeConfigs([erc20Escrow.address], feeConfigs);
+    randomNumController = await upgrades.deployProxy(
+      randomNumControllerFactory, [randomNumbers], { kind: 'uups', initializer: 'initialize' });    
+    
+      erc20Dummy = await erc20DummyFactory.deploy([
      alice.address, 
      bob.address, 
      carl.address, 
@@ -114,9 +145,8 @@ describe("WegaGameController", () => {
     );
 
     // deploy gameControllerContract
-    gameController = await upgrades.deployProxy(gameControllerFactory, [
-      erc20Escrow.address, 
-      ["DICE", "COINFLIP"],
+    console.log(
+      [ erc20Escrow.address, ["DICE", "COINFLIP"], randomNumController.address,
       [
         {
           denominator: 6,
@@ -132,14 +162,42 @@ describe("WegaGameController", () => {
           proxy: coinflipGame.address,
           randomNumberController: randomNumController.address
         }
-      ]
-    ], { kind: 'uups', initializer: 'initialize' });
+      ]]
+    );
+    gameController = await upgrades.deployProxy(
+      gameControllerFactory, 
+      [ 
+        erc20Escrow.address,
+        randomNumController.address,
+        ["DICE", "COINFLIP"], 
+        [
+          {
+            denominator: 6,
+            minRounds: 1,
+            requiredPlayers: 2,
+            proxy: diceGame.address,
+            randomNumberController: randomNumController.address
+          },
+          {
+            denominator: 2,
+            minRounds: 1,
+            requiredPlayers: 2,
+            proxy: coinflipGame.address,
+            randomNumberController: randomNumController.address
+          }
+        ]
+      ], 
+      { kind: 'uups', initializer: 'initialize' }
+    );
+    await gameController.deployTransaction.wait();
 
     // add roles
-    await erc20Escrow.addWegaEscrowManager(gameController.address);
-    await randomNumController.addWegaGameManager(gameController.address);
+    await erc20Escrow.grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
+    await randomNumController.addWegaProtocolAdmin(protocolAdmin.address);
+    await randomNumController.grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
     await diceGame.addWegaGameManager(gameController.address);
     await coinflipGame.addWegaGameManager(gameController.address);
+    await erc20Escrow.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
 
     // create escrow for the game
     token = erc20Dummy.address;
@@ -159,36 +217,38 @@ describe("WegaGameController", () => {
   // })
   describe("Function: createGame(string,address,uint256)", () => {
     it("should throw if the game is not supported", async () => {
-      await expect(gameController.connect(players[0]).createGame("NONEXISTENT", token, wager)).to.be.revertedWith('WegaGameController: InvalidGame')
+      await expect(gameController.connect(players[0]).createGame(
+        "NONEXISTENT", token, wager, [utils.parseEther('78409832094')],
+      )).to.be.revertedWith('WegaGameController: InvalidGame')
     })
     it('should create a game and emit correct event', async () => {
-      await expect(gameController.connect(players[0]).createGame("DICE", token, wager)).to.emit(gameController, 'GameCreation').withArgs(escrowId, players[0].address, "DICE");
+      await expect(gameController.connect(players[0]).createGame("DICE", token, wager, [utils.parseEther('78409832094')])).to.emit(gameController, 'GameCreation').withArgs(escrowId, players[0].address, "DICE");
       const coinflipId = await erc20Escrow.hash(token, players[0].address, 2, wager, await erc20Escrow.currentNonce(players[0].address))
-      await expect(gameController.connect(players[0]).createGame("COINFLIP", token, wager)).to.emit(gameController, 'GameCreation').withArgs(coinflipId, players[0].address, "COINFLIP");
+      await expect(gameController.connect(players[0]).createGame("COINFLIP", token, wager, [utils.parseEther('78409832094')])).to.emit(gameController, 'GameCreation').withArgs(coinflipId, players[0].address, "COINFLIP");
     });
   })
   describe("Function: depositOrPlay(bytes32)", () => {
     it('should deposit if game is waiting', async () => {
-      await gameController.connect(players[0]).createGame("DICE", token, wager);
-      await expect(gameController.connect(players[1])[depositOrPlayDice](escrowId)).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, players[1].address);
+      await gameController.connect(players[0]).createGame("DICE", token, wager, [utils.parseEther('78409832094')]);
+      await expect(gameController.connect(players[1])[depositOrPlayDice](escrowId,[utils.parseEther('78409832094')])).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, players[1].address);
     });
     it('should play DICE if game is ready', async () => {
-      await gameController.connect(players[0]).createGame("DICE", token, wager);
-      await gameController.connect(players[1])[depositOrPlayDice](escrowId);
+      await gameController.connect(players[0]).createGame("DICE", token, wager,[utils.parseEther('78409832094')]);
+      await gameController.connect(players[1])[depositOrPlayDice](escrowId,[utils.parseEther('78409832094')]);
       expect((await gameController.getGame(escrowId)).state).to.equal(GameState.PLAYED);
     })
     it('should play COINFLIP if game is ready', async () => {
       const cfn = await erc20Escrow.currentNonce(players[2].address); 
       const cfeid = await erc20Escrow.hash(token, players[2].address, 2, wager, cfn);
       const playerChoices = [1, 2];
-      await gameController.connect(players[2]).createGame("COINFLIP", token, wager);
-      await gameController.connect(players[3])[depositOrPlayCoinFlip](cfeid, playerChoices);
+      await gameController.connect(players[2]).createGame("COINFLIP", token, wager,[utils.parseEther('78409832094')]);
+      await gameController.connect(players[3])[depositOrPlayCoinFlip](cfeid, playerChoices,[utils.parseEther('78409832094')]);
       expect((await gameController.getGame(cfeid)).state).to.equal(GameState.PLAYED);
     })
     it('should throw if game is played', async () => {
-      await gameController.connect(players[0]).createGame("DICE", token, wager)
-      await gameController.connect(players[1])[depositOrPlayDice](escrowId);
-      await expect(gameController.connect(players[2])[depositOrPlayDice](escrowId)).to.be.revertedWith("WegaGameController: InvalidGameState");  
+      await gameController.connect(players[0]).createGame("DICE", token, wager,[utils.parseEther('78409832094')])
+      await gameController.connect(players[1])[depositOrPlayDice](escrowId,[utils.parseEther('78409832094')]);
+      await expect(gameController.connect(players[2])[depositOrPlayDice](escrowId,[utils.parseEther('78409832094')])).to.be.revertedWith("WegaGameController: InvalidGameState");  
     });
   })
 

@@ -68,7 +68,7 @@
     "drand": "ts-node ./scripts/crawl-random-numbers.ts",
     "gas-report": "env ENABLE_GAS_REPORT=true yarn test:sol",
     "analyze": "slither . --hardhat-artifacts-directory ./.artifacts --sarif slither.sarif --config-file .slither.json",
-    "test": "hardhat test ./test/WegaERC20Escrow.test.ts ./test/WegaFeeManager.test.ts"
+    "test": "hardhat test ./test/WegaGameController.test.ts ./test/WegaRandomNumberController.test.ts ./test/WegaERC20Escrow.test.ts ./test/WegaFeeManager.test.ts"
   },
   "dependencies": {
     "@ethereumjs/block": "^4.1.0",

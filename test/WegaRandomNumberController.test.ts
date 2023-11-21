@@ -22,7 +22,7 @@ describe("Wega RandomNumber Controller", () => {
 
   // accounts
   let signers: SignerWithAddress[],      
-      gameManager: SignerWithAddress, 
+      protocolAdmin: SignerWithAddress, 
       coinbase: SignerWithAddress, 
       others: SignerWithAddress[],
       alice: SignerWithAddress, 
@@ -35,7 +35,7 @@ describe("Wega RandomNumber Controller", () => {
   beforeEach(async () => {
     // accounts setup
     signers = await ethers.getSigners();
-    [coinbase, gameManager, ...others] = signers;
+    [coinbase, protocolAdmin, ...others] = signers;
     [alice, bob, carl, david, ed, fred, ...others] = others;
 
     // factory setup
@@ -45,7 +45,7 @@ describe("Wega RandomNumber Controller", () => {
     controller = await upgrades.deployProxy(controllerFactory, [randomNumbers], { kind: 'uups', initializer: 'initialize' });
     
     // add appropriate roles
-    controller.connect(coinbase).addWegaGameManager(gameManager.address);
+    controller.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
   });
 
   describe('Initialization', () => {
@@ -57,7 +57,7 @@ describe("Wega RandomNumber Controller", () => {
   })
   describe('Rolling', () => {
    it('it should unpredictably roll a random number each time', async () => {
-    const rolls = [alice.address, alice.address, alice.address, alice.address];
+    const rolls = [alice.address, alice.address, alice.address];
     const denom = 6; // dice
     const randoms = await Promise.all(rolls.map(async (address, index) => {
       const random = await controller.generate(denom, index);

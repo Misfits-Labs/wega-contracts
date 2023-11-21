@@ -91,7 +91,7 @@ export interface WegaGameControllerInterface extends utils.Interface {
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "initialize(address,string[],address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
+    "initialize(address,address,string[],(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
     "isWegaProtocolAdmin(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "playerScore(string,bytes32,address)": FunctionFragment;
@@ -256,8 +256,8 @@ export interface WegaGameControllerInterface extends utils.Interface {
     functionFragment: "initialize",
     values: [
       PromiseOrValue<string>,
-      PromiseOrValue<string>[],
       PromiseOrValue<string>,
+      PromiseOrValue<string>[],
       IWegaGameController.GameSettingsStruct[]
     ]
   ): string;
@@ -762,8 +762,8 @@ export interface WegaGameController extends BaseContract {
 
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       randomNumberController: PromiseOrValue<string>,
+      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -966,8 +966,8 @@ export interface WegaGameController extends BaseContract {
 
   initialize(
     erc20EscrowAddress: PromiseOrValue<string>,
-    games: PromiseOrValue<string>[],
     randomNumberController: PromiseOrValue<string>,
+    games: PromiseOrValue<string>[],
     gameSettings: IWegaGameController.GameSettingsStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -1170,8 +1170,8 @@ export interface WegaGameController extends BaseContract {
 
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       randomNumberController: PromiseOrValue<string>,
+      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1489,8 +1489,8 @@ export interface WegaGameController extends BaseContract {
 
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       randomNumberController: PromiseOrValue<string>,
+      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1698,8 +1698,8 @@ export interface WegaGameController extends BaseContract {
 
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       randomNumberController: PromiseOrValue<string>,
+      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
