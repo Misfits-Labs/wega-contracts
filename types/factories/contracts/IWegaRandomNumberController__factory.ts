@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IWegaRandomNumberController,
   IWegaRandomNumberControllerInterface,
@@ -78,16 +77,16 @@ const _abi = [
 export class IWegaRandomNumberController__factory {
   static readonly abi = _abi;
   static createInterface(): IWegaRandomNumberControllerInterface {
-    return new utils.Interface(_abi) as IWegaRandomNumberControllerInterface;
+    return new Interface(_abi) as IWegaRandomNumberControllerInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): IWegaRandomNumberController {
     return new Contract(
       address,
       _abi,
-      signerOrProvider
-    ) as IWegaRandomNumberController;
+      runner
+    ) as unknown as IWegaRandomNumberController;
   }
 }

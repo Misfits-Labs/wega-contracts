@@ -9,6 +9,8 @@ import type * as events from "./events";
 export type { events };
 import type * as games from "./games";
 export type { games };
+import type * as randomizer from "./randomizer";
+export type { randomizer };
 import type * as roles from "./roles";
 export type { roles };
 export type { FeeManager } from "./FeeManager";

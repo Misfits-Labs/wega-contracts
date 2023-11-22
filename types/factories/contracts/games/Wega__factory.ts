@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type { Wega, WegaInterface } from "../../../contracts/games/Wega";
 
 const _abi = [
@@ -692,9 +691,9 @@ const _abi = [
 export class Wega__factory {
   static readonly abi = _abi;
   static createInterface(): WegaInterface {
-    return new utils.Interface(_abi) as WegaInterface;
+    return new Interface(_abi) as WegaInterface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): Wega {
-    return new Contract(address, _abi, signerOrProvider) as Wega;
+  static connect(address: string, runner?: ContractRunner | null): Wega {
+    return new Contract(address, _abi, runner) as unknown as Wega;
   }
 }

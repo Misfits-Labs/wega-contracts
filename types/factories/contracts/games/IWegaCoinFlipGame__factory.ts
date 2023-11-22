@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IWegaCoinFlipGame,
   IWegaCoinFlipGameInterface,
@@ -54,12 +53,12 @@ const _abi = [
 export class IWegaCoinFlipGame__factory {
   static readonly abi = _abi;
   static createInterface(): IWegaCoinFlipGameInterface {
-    return new utils.Interface(_abi) as IWegaCoinFlipGameInterface;
+    return new Interface(_abi) as IWegaCoinFlipGameInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): IWegaCoinFlipGame {
-    return new Contract(address, _abi, signerOrProvider) as IWegaCoinFlipGame;
+    return new Contract(address, _abi, runner) as unknown as IWegaCoinFlipGame;
   }
 }

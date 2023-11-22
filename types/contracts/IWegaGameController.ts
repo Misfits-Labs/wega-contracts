@@ -3,87 +3,75 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../common";
 
 export declare namespace IWega {
   export type WegaStruct = {
-    name: PromiseOrValue<string>;
-    currentPlayers: PromiseOrValue<string>[];
-    deposited: PromiseOrValue<BigNumberish>;
-    state: PromiseOrValue<BigNumberish>;
+    name: string;
+    currentPlayers: AddressLike[];
+    deposited: BigNumberish;
+    state: BigNumberish;
   };
 
-  export type WegaStructOutput = [string, string[], BigNumber, number] & {
+  export type WegaStructOutput = [
+    name: string,
+    currentPlayers: string[],
+    deposited: bigint,
+    state: bigint
+  ] & {
     name: string;
     currentPlayers: string[];
-    deposited: BigNumber;
-    state: number;
+    deposited: bigint;
+    state: bigint;
   };
 }
 
 export declare namespace IWegaGameController {
   export type GameSettingsStruct = {
-    denominator: PromiseOrValue<BigNumberish>;
-    minRounds: PromiseOrValue<BigNumberish>;
-    requiredPlayers: PromiseOrValue<BigNumberish>;
-    proxy: PromiseOrValue<string>;
-    randomNumberController: PromiseOrValue<string>;
-    name: PromiseOrValue<string>;
+    denominator: BigNumberish;
+    minRounds: BigNumberish;
+    requiredPlayers: BigNumberish;
+    proxy: AddressLike;
+    randomNumberController: AddressLike;
+    name: string;
   };
 
   export type GameSettingsStructOutput = [
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string,
-    string,
-    string
+    denominator: bigint,
+    minRounds: bigint,
+    requiredPlayers: bigint,
+    proxy: string,
+    randomNumberController: string,
+    name: string
   ] & {
-    denominator: BigNumber;
-    minRounds: BigNumber;
-    requiredPlayers: BigNumber;
+    denominator: bigint;
+    minRounds: bigint;
+    requiredPlayers: bigint;
     proxy: string;
     randomNumberController: string;
     name: string;
   };
 }
 
-export interface IWegaGameControllerInterface extends utils.Interface {
-  functions: {
-    "createGame(string,address,uint256,uint256[])": FunctionFragment;
-    "depositOrPlay(bytes32,uint256[])": FunctionFragment;
-    "depositOrPlay(bytes32,uint256[],uint256[])": FunctionFragment;
-    "existsGame(string)": FunctionFragment;
-    "gameResults(string,bytes32,address)": FunctionFragment;
-    "getGame(bytes32)": FunctionFragment;
-    "playerScore(string,bytes32,address)": FunctionFragment;
-    "players(bytes32)": FunctionFragment;
-    "registerGame((uint256,uint256,uint256,address,address,string))": FunctionFragment;
-    "removeGame(string)": FunctionFragment;
-    "setGameConfiguration((uint256,uint256,uint256,address,address,string))": FunctionFragment;
-    "winners(string,bytes32)": FunctionFragment;
-  };
-
+export interface IWegaGameControllerInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "createGame"
       | "depositOrPlay(bytes32,uint256[])"
       | "depositOrPlay(bytes32,uint256[],uint256[])"
@@ -100,68 +88,39 @@ export interface IWegaGameControllerInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createGame",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>[]
-    ]
+    values: [string, AddressLike, BigNumberish, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOrPlay(bytes32,uint256[])",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>[]]
+    values: [BytesLike, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOrPlay(bytes32,uint256[],uint256[])",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<BigNumberish>[]
-    ]
+    values: [BytesLike, BigNumberish[], BigNumberish[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "existsGame",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "existsGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "gameResults",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>
-    ]
+    values: [string, BytesLike, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "getGame",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
+  encodeFunctionData(functionFragment: "getGame", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "playerScore",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>
-    ]
+    values: [string, BytesLike, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "players",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
+  encodeFunctionData(functionFragment: "players", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "registerGame",
     values: [IWegaGameController.GameSettingsStruct]
   ): string;
-  encodeFunctionData(
-    functionFragment: "removeGame",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "removeGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "setGameConfiguration",
     values: [IWegaGameController.GameSettingsStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "winners",
-    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
+    values: [string, BytesLike]
   ): string;
 
   decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
@@ -194,398 +153,209 @@ export interface IWegaGameControllerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
-
-  events: {};
 }
 
 export interface IWegaGameController extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IWegaGameController;
+  waitForDeployment(): Promise<this>;
 
   interface: IWegaGameControllerInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  createGame: TypedContractMethod<
+    [
+      name: string,
+      tokenAddress: AddressLike,
+      wagerAmount: BigNumberish,
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
 
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  "depositOrPlay(bytes32,uint256[])": TypedContractMethod<
+    [escrowHash: BytesLike, randomNumbers: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
 
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  "depositOrPlay(bytes32,uint256[],uint256[])": TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      playerChoices: BigNumberish[],
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
 
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  existsGame: TypedContractMethod<[game: string], [boolean], "nonpayable">;
 
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  gameResults: TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint[]],
+    "nonpayable"
+  >;
 
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  getGame: TypedContractMethod<
+    [escrowHash: BytesLike],
+    [IWega.WegaStructOutput],
+    "nonpayable"
+  >;
 
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  playerScore: TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint],
+    "nonpayable"
+  >;
 
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  players: TypedContractMethod<
+    [escrowHash: BytesLike],
+    [string[]],
+    "nonpayable"
+  >;
 
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  registerGame: TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
 
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-  };
+  removeGame: TypedContractMethod<[game: string], [void], "nonpayable">;
 
-  createGame(
-    name: PromiseOrValue<string>,
-    tokenAddress: PromiseOrValue<string>,
-    wagerAmount: PromiseOrValue<BigNumberish>,
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  setGameConfiguration: TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
 
-  "depositOrPlay(bytes32,uint256[])"(
-    escrowHash: PromiseOrValue<BytesLike>,
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  winners: TypedContractMethod<
+    [game: string, escrowHash: BytesLike],
+    [string[]],
+    "nonpayable"
+  >;
 
-  "depositOrPlay(bytes32,uint256[],uint256[])"(
-    escrowHash: PromiseOrValue<BytesLike>,
-    playerChoices: PromiseOrValue<BigNumberish>[],
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
 
-  existsGame(
-    game: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  gameResults(
-    game: PromiseOrValue<string>,
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  getGame(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  playerScore(
-    game: PromiseOrValue<string>,
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  players(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  registerGame(
-    config: IWegaGameController.GameSettingsStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  removeGame(
-    game: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setGameConfiguration(
-    config: IWegaGameController.GameSettingsStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  winners(
-    game: PromiseOrValue<string>,
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  callStatic: {
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<IWega.WegaStructOutput>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-  };
+  getFunction(
+    nameOrSignature: "createGame"
+  ): TypedContractMethod<
+    [
+      name: string,
+      tokenAddress: AddressLike,
+      wagerAmount: BigNumberish,
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositOrPlay(bytes32,uint256[])"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, randomNumbers: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositOrPlay(bytes32,uint256[],uint256[])"
+  ): TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      playerChoices: BigNumberish[],
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "existsGame"
+  ): TypedContractMethod<[game: string], [boolean], "nonpayable">;
+  getFunction(
+    nameOrSignature: "gameResults"
+  ): TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint[]],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getGame"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike],
+    [IWega.WegaStructOutput],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "playerScore"
+  ): TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "players"
+  ): TypedContractMethod<[escrowHash: BytesLike], [string[]], "nonpayable">;
+  getFunction(
+    nameOrSignature: "registerGame"
+  ): TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "removeGame"
+  ): TypedContractMethod<[game: string], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setGameConfiguration"
+  ): TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "winners"
+  ): TypedContractMethod<
+    [game: string, escrowHash: BytesLike],
+    [string[]],
+    "nonpayable"
+  >;
 
   filters: {};
-
-  estimateGas: {
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-  };
 }

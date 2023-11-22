@@ -3,70 +3,54 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../../common";
 
 export declare namespace IEscrow {
   export type ERC20WagerRequestStruct = {
-    state: PromiseOrValue<BigNumberish>;
-    escrowHash: PromiseOrValue<BytesLike>;
-    wagerAmount: PromiseOrValue<BigNumberish>;
-    tokenAddress: PromiseOrValue<string>;
-    totalWager: PromiseOrValue<BigNumberish>;
-    nonce: PromiseOrValue<BigNumberish>;
+    state: BigNumberish;
+    escrowHash: BytesLike;
+    wagerAmount: BigNumberish;
+    tokenAddress: AddressLike;
+    totalWager: BigNumberish;
+    nonce: BigNumberish;
   };
 
   export type ERC20WagerRequestStructOutput = [
-    number,
-    string,
-    BigNumber,
-    string,
-    BigNumber,
-    BigNumber
+    state: bigint,
+    escrowHash: string,
+    wagerAmount: bigint,
+    tokenAddress: string,
+    totalWager: bigint,
+    nonce: bigint
   ] & {
-    state: number;
+    state: bigint;
     escrowHash: string;
-    wagerAmount: BigNumber;
+    wagerAmount: bigint;
     tokenAddress: string;
-    totalWager: BigNumber;
-    nonce: BigNumber;
+    totalWager: bigint;
+    nonce: bigint;
   };
 }
 
-export interface IWegaERC20EscrowInterface extends utils.Interface {
-  functions: {
-    "containsPlayer(bytes32,address)": FunctionFragment;
-    "createWagerRequest(address,address,uint256,uint256)": FunctionFragment;
-    "currentNonce(address)": FunctionFragment;
-    "deposit(bytes32,address,uint256)": FunctionFragment;
-    "depositOf(bytes32,address)": FunctionFragment;
-    "getWagerRequest(bytes32)": FunctionFragment;
-    "getWagerRequests()": FunctionFragment;
-    "hash(address,address,uint256,uint256,uint256)": FunctionFragment;
-    "setFeeManager(address)": FunctionFragment;
-    "setWithdrawers(bytes32,address[])": FunctionFragment;
-    "wagerBalance(bytes32)": FunctionFragment;
-  };
-
+export interface IWegaERC20EscrowInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "containsPlayer"
       | "createWagerRequest"
       | "currentNonce"
@@ -82,36 +66,27 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "containsPlayer",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "createWagerRequest",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "currentNonce",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [BytesLike, AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOf",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getWagerRequest",
-    values: [PromiseOrValue<BytesLike>]
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getWagerRequests",
@@ -119,25 +94,19 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "hash",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeManager",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setWithdrawers",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>[]]
+    values: [BytesLike, AddressLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "wagerBalance",
-    values: [PromiseOrValue<BytesLike>]
+    values: [BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -175,369 +144,196 @@ export interface IWegaERC20EscrowInterface extends utils.Interface {
     functionFragment: "wagerBalance",
     data: BytesLike
   ): Result;
-
-  events: {};
 }
 
 export interface IWegaERC20Escrow extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IWegaERC20Escrow;
+  waitForDeployment(): Promise<this>;
 
   interface: IWegaERC20EscrowInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    createWagerRequest(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+  containsPlayer: TypedContractMethod<
+    [escrowHash: BytesLike, player: AddressLike],
+    [boolean],
+    "view"
+  >;
 
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  createWagerRequest: TypedContractMethod<
+    [
+      token: AddressLike,
+      creator: AddressLike,
+      requiredAccountNum: BigNumberish,
+      wagerAmount: BigNumberish
+    ],
+    [string],
+    "nonpayable"
+  >;
 
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  currentNonce: TypedContractMethod<[account: AddressLike], [bigint], "view">;
 
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[IEscrow.ERC20WagerRequestStructOutput]>;
+  deposit: TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
-    getWagerRequests(
-      overrides?: CallOverrides
-    ): Promise<[IEscrow.ERC20WagerRequestStructOutput[]]>;
+  depositOf: TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike],
+    [bigint],
+    "nonpayable"
+  >;
 
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string] & { escrowHash_: string }>;
+  getWagerRequest: TypedContractMethod<
+    [escrowHash: BytesLike],
+    [IEscrow.ERC20WagerRequestStructOutput],
+    "view"
+  >;
 
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  getWagerRequests: TypedContractMethod<
+    [],
+    [IEscrow.ERC20WagerRequestStructOutput[]],
+    "view"
+  >;
 
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  hash: TypedContractMethod<
+    [
+      token: AddressLike,
+      creator: AddressLike,
+      requiredAccountNum: BigNumberish,
+      wagerAmount: BigNumberish,
+      nonce: BigNumberish
+    ],
+    [string],
+    "view"
+  >;
 
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-  };
+  setFeeManager: TypedContractMethod<
+    [feeManager: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
-  containsPlayer(
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
+  setWithdrawers: TypedContractMethod<
+    [escrowHash: BytesLike, winners: AddressLike[]],
+    [void],
+    "nonpayable"
+  >;
 
-  createWagerRequest(
-    token: PromiseOrValue<string>,
-    creator: PromiseOrValue<string>,
-    requiredAccountNum: PromiseOrValue<BigNumberish>,
-    wagerAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  wagerBalance: TypedContractMethod<[escrowHash: BytesLike], [bigint], "view">;
 
-  currentNonce(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
 
-  deposit(
-    escrowHash: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  depositOf(
-    escrowHash: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  getWagerRequest(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<IEscrow.ERC20WagerRequestStructOutput>;
-
-  getWagerRequests(
-    overrides?: CallOverrides
-  ): Promise<IEscrow.ERC20WagerRequestStructOutput[]>;
-
-  hash(
-    token: PromiseOrValue<string>,
-    creator: PromiseOrValue<string>,
-    requiredAccountNum: PromiseOrValue<BigNumberish>,
-    wagerAmount: PromiseOrValue<BigNumberish>,
-    nonce: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  setFeeManager(
-    feeManager: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setWithdrawers(
-    escrowHash: PromiseOrValue<BytesLike>,
-    winners: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  wagerBalance(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  callStatic: {
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    createWagerRequest(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<IEscrow.ERC20WagerRequestStructOutput>;
-
-    getWagerRequests(
-      overrides?: CallOverrides
-    ): Promise<IEscrow.ERC20WagerRequestStructOutput[]>;
-
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners: PromiseOrValue<string>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
+  getFunction(
+    nameOrSignature: "containsPlayer"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, player: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "createWagerRequest"
+  ): TypedContractMethod<
+    [
+      token: AddressLike,
+      creator: AddressLike,
+      requiredAccountNum: BigNumberish,
+      wagerAmount: BigNumberish
+    ],
+    [string],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "currentNonce"
+  ): TypedContractMethod<[account: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "deposit"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositOf"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike],
+    [bigint],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getWagerRequest"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike],
+    [IEscrow.ERC20WagerRequestStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getWagerRequests"
+  ): TypedContractMethod<[], [IEscrow.ERC20WagerRequestStructOutput[]], "view">;
+  getFunction(
+    nameOrSignature: "hash"
+  ): TypedContractMethod<
+    [
+      token: AddressLike,
+      creator: AddressLike,
+      requiredAccountNum: BigNumberish,
+      wagerAmount: BigNumberish,
+      nonce: BigNumberish
+    ],
+    [string],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "setFeeManager"
+  ): TypedContractMethod<[feeManager: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setWithdrawers"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, winners: AddressLike[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "wagerBalance"
+  ): TypedContractMethod<[escrowHash: BytesLike], [bigint], "view">;
 
   filters: {};
-
-  estimateGas: {
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    createWagerRequest(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getWagerRequests(overrides?: CallOverrides): Promise<BigNumber>;
-
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    containsPlayer(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    createWagerRequest(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    currentNonce(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    deposit(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    depositOf(
-      escrowHash: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getWagerRequest(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getWagerRequests(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    hash(
-      token: PromiseOrValue<string>,
-      creator: PromiseOrValue<string>,
-      requiredAccountNum: PromiseOrValue<BigNumberish>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      nonce: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    setFeeManager(
-      feeManager: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setWithdrawers(
-      escrowHash: PromiseOrValue<BytesLike>,
-      winners: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    wagerBalance(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-  };
 }

@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IWegaERC20Escrow,
   IWegaERC20EscrowInterface,
@@ -324,12 +323,12 @@ const _abi = [
 export class IWegaERC20Escrow__factory {
   static readonly abi = _abi;
   static createInterface(): IWegaERC20EscrowInterface {
-    return new utils.Interface(_abi) as IWegaERC20EscrowInterface;
+    return new Interface(_abi) as IWegaERC20EscrowInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): IWegaERC20Escrow {
-    return new Contract(address, _abi, signerOrProvider) as IWegaERC20Escrow;
+    return new Contract(address, _abi, runner) as unknown as IWegaERC20Escrow;
   }
 }

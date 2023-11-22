@@ -3,171 +3,235 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  Signer,
-  utils,
+  FunctionFragment,
+  Interface,
+  EventFragment,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { EventFragment } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
-export interface IWegaGameControllerEventsInterface extends utils.Interface {
-  functions: {};
-
-  events: {
-    "GameCreation(bytes32,uint256,address,string)": EventFragment;
-    "GameRegistration(string,address)": EventFragment;
-    "SetGame(string,uint256,uint256,uint256,address,address)": EventFragment;
-    "WinnerDeclaration(bytes32,address[])": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "GameCreation"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "GameRegistration"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetGame"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WinnerDeclaration"): EventFragment;
+export interface IWegaGameControllerEventsInterface extends Interface {
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "GameCreation"
+      | "GameRegistration"
+      | "SetGame"
+      | "WinnerDeclaration"
+  ): EventFragment;
 }
 
-export interface GameCreationEventObject {
-  escrowHash: string;
-  nonce: BigNumber;
-  creator: string;
-  name: string;
+export namespace GameCreationEvent {
+  export type InputTuple = [
+    escrowHash: BytesLike,
+    nonce: BigNumberish,
+    creator: AddressLike,
+    name: string
+  ];
+  export type OutputTuple = [
+    escrowHash: string,
+    nonce: bigint,
+    creator: string,
+    name: string
+  ];
+  export interface OutputObject {
+    escrowHash: string;
+    nonce: bigint;
+    creator: string;
+    name: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type GameCreationEvent = TypedEvent<
-  [string, BigNumber, string, string],
-  GameCreationEventObject
->;
 
-export type GameCreationEventFilter = TypedEventFilter<GameCreationEvent>;
-
-export interface GameRegistrationEventObject {
-  name: string;
-  gameAddress: string;
+export namespace GameRegistrationEvent {
+  export type InputTuple = [name: string, gameAddress: AddressLike];
+  export type OutputTuple = [name: string, gameAddress: string];
+  export interface OutputObject {
+    name: string;
+    gameAddress: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type GameRegistrationEvent = TypedEvent<
-  [string, string],
-  GameRegistrationEventObject
->;
 
-export type GameRegistrationEventFilter =
-  TypedEventFilter<GameRegistrationEvent>;
-
-export interface SetGameEventObject {
-  name: string;
-  denominator: BigNumber;
-  minRounds: BigNumber;
-  requiredPlayers: BigNumber;
-  proxy: string;
-  randomNumberController: string;
+export namespace SetGameEvent {
+  export type InputTuple = [
+    name: string,
+    denominator: BigNumberish,
+    minRounds: BigNumberish,
+    requiredPlayers: BigNumberish,
+    proxy: AddressLike,
+    randomNumberController: AddressLike
+  ];
+  export type OutputTuple = [
+    name: string,
+    denominator: bigint,
+    minRounds: bigint,
+    requiredPlayers: bigint,
+    proxy: string,
+    randomNumberController: string
+  ];
+  export interface OutputObject {
+    name: string;
+    denominator: bigint;
+    minRounds: bigint;
+    requiredPlayers: bigint;
+    proxy: string;
+    randomNumberController: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SetGameEvent = TypedEvent<
-  [string, BigNumber, BigNumber, BigNumber, string, string],
-  SetGameEventObject
->;
 
-export type SetGameEventFilter = TypedEventFilter<SetGameEvent>;
-
-export interface WinnerDeclarationEventObject {
-  escrowHash: string;
-  winners: string[];
+export namespace WinnerDeclarationEvent {
+  export type InputTuple = [escrowHash: BytesLike, winners: AddressLike[]];
+  export type OutputTuple = [escrowHash: string, winners: string[]];
+  export interface OutputObject {
+    escrowHash: string;
+    winners: string[];
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WinnerDeclarationEvent = TypedEvent<
-  [string, string[]],
-  WinnerDeclarationEventObject
->;
-
-export type WinnerDeclarationEventFilter =
-  TypedEventFilter<WinnerDeclarationEvent>;
 
 export interface IWegaGameControllerEvents extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IWegaGameControllerEvents;
+  waitForDeployment(): Promise<this>;
 
   interface: IWegaGameControllerEventsInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {};
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  callStatic: {};
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getEvent(
+    key: "GameCreation"
+  ): TypedContractEvent<
+    GameCreationEvent.InputTuple,
+    GameCreationEvent.OutputTuple,
+    GameCreationEvent.OutputObject
+  >;
+  getEvent(
+    key: "GameRegistration"
+  ): TypedContractEvent<
+    GameRegistrationEvent.InputTuple,
+    GameRegistrationEvent.OutputTuple,
+    GameRegistrationEvent.OutputObject
+  >;
+  getEvent(
+    key: "SetGame"
+  ): TypedContractEvent<
+    SetGameEvent.InputTuple,
+    SetGameEvent.OutputTuple,
+    SetGameEvent.OutputObject
+  >;
+  getEvent(
+    key: "WinnerDeclaration"
+  ): TypedContractEvent<
+    WinnerDeclarationEvent.InputTuple,
+    WinnerDeclarationEvent.OutputTuple,
+    WinnerDeclarationEvent.OutputObject
+  >;
 
   filters: {
-    "GameCreation(bytes32,uint256,address,string)"(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      nonce?: PromiseOrValue<BigNumberish> | null,
-      creator?: null,
-      name?: null
-    ): GameCreationEventFilter;
-    GameCreation(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      nonce?: PromiseOrValue<BigNumberish> | null,
-      creator?: null,
-      name?: null
-    ): GameCreationEventFilter;
+    "GameCreation(bytes32,uint256,address,string)": TypedContractEvent<
+      GameCreationEvent.InputTuple,
+      GameCreationEvent.OutputTuple,
+      GameCreationEvent.OutputObject
+    >;
+    GameCreation: TypedContractEvent<
+      GameCreationEvent.InputTuple,
+      GameCreationEvent.OutputTuple,
+      GameCreationEvent.OutputObject
+    >;
 
-    "GameRegistration(string,address)"(
-      name?: null,
-      gameAddress?: null
-    ): GameRegistrationEventFilter;
-    GameRegistration(
-      name?: null,
-      gameAddress?: null
-    ): GameRegistrationEventFilter;
+    "GameRegistration(string,address)": TypedContractEvent<
+      GameRegistrationEvent.InputTuple,
+      GameRegistrationEvent.OutputTuple,
+      GameRegistrationEvent.OutputObject
+    >;
+    GameRegistration: TypedContractEvent<
+      GameRegistrationEvent.InputTuple,
+      GameRegistrationEvent.OutputTuple,
+      GameRegistrationEvent.OutputObject
+    >;
 
-    "SetGame(string,uint256,uint256,uint256,address,address)"(
-      name?: null,
-      denominator?: null,
-      minRounds?: null,
-      requiredPlayers?: null,
-      proxy?: null,
-      randomNumberController?: null
-    ): SetGameEventFilter;
-    SetGame(
-      name?: null,
-      denominator?: null,
-      minRounds?: null,
-      requiredPlayers?: null,
-      proxy?: null,
-      randomNumberController?: null
-    ): SetGameEventFilter;
+    "SetGame(string,uint256,uint256,uint256,address,address)": TypedContractEvent<
+      SetGameEvent.InputTuple,
+      SetGameEvent.OutputTuple,
+      SetGameEvent.OutputObject
+    >;
+    SetGame: TypedContractEvent<
+      SetGameEvent.InputTuple,
+      SetGameEvent.OutputTuple,
+      SetGameEvent.OutputObject
+    >;
 
-    "WinnerDeclaration(bytes32,address[])"(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      winners?: PromiseOrValue<string>[] | null
-    ): WinnerDeclarationEventFilter;
-    WinnerDeclaration(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      winners?: PromiseOrValue<string>[] | null
-    ): WinnerDeclarationEventFilter;
+    "WinnerDeclaration(bytes32,address[])": TypedContractEvent<
+      WinnerDeclarationEvent.InputTuple,
+      WinnerDeclarationEvent.OutputTuple,
+      WinnerDeclarationEvent.OutputObject
+    >;
+    WinnerDeclaration: TypedContractEvent<
+      WinnerDeclarationEvent.InputTuple,
+      WinnerDeclarationEvent.OutputTuple,
+      WinnerDeclarationEvent.OutputObject
+    >;
   };
-
-  estimateGas: {};
-
-  populateTransaction: {};
 }

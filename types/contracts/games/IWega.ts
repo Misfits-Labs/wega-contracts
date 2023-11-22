@@ -3,38 +3,27 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../../common";
 
-export interface IWegaInterface extends utils.Interface {
-  functions: {
-    "play(bytes32,address[],uint256[],uint256,uint256)": FunctionFragment;
-    "play(bytes32,address[],uint256,uint256)": FunctionFragment;
-    "playerResults(bytes32,address)": FunctionFragment;
-    "playerScore(bytes32,address)": FunctionFragment;
-    "randomNumbersContract()": FunctionFragment;
-    "winners(bytes32)": FunctionFragment;
-  };
-
+export interface IWegaInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "play(bytes32,address[],uint256[],uint256,uint256)"
       | "play(bytes32,address[],uint256,uint256)"
       | "playerResults"
@@ -46,38 +35,30 @@ export interface IWegaInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "play(bytes32,address[],uint256[],uint256,uint256)",
     values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>[],
-      PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
+      BytesLike,
+      AddressLike[],
+      BigNumberish[],
+      BigNumberish,
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(
     functionFragment: "play(bytes32,address[],uint256,uint256)",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>[],
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [BytesLike, AddressLike[], BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "playerResults",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "playerScore",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "randomNumbersContract",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "winners",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
+  encodeFunctionData(functionFragment: "winners", values: [BytesLike]): string;
 
   decodeFunctionResult(
     functionFragment: "play(bytes32,address[],uint256[],uint256,uint256)",
@@ -100,225 +81,139 @@ export interface IWegaInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
-
-  events: {};
 }
 
 export interface IWega extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IWega;
+  waitForDeployment(): Promise<this>;
 
   interface: IWegaInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    "play(bytes32,address[],uint256[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    "play(bytes32,address[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    playerResults(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
+  "play(bytes32,address[],uint256[],uint256,uint256)": TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      currentPlayers: AddressLike[],
+      playerChoises: BigNumberish[],
+      denominator: BigNumberish,
+      minRounds: BigNumberish
+    ],
+    [string[]],
+    "nonpayable"
+  >;
 
-    playerScore(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+  "play(bytes32,address[],uint256,uint256)": TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      currentPlayers: AddressLike[],
+      denominator: BigNumberish,
+      minRounds: BigNumberish
+    ],
+    [string[]],
+    "nonpayable"
+  >;
 
-    randomNumbersContract(overrides?: CallOverrides): Promise<[string]>;
+  playerResults: TypedContractMethod<
+    [escrowHash: BytesLike, player: AddressLike],
+    [bigint[]],
+    "view"
+  >;
 
-    winners(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string[]]>;
-  };
+  playerScore: TypedContractMethod<
+    [escrowHash: BytesLike, player: AddressLike],
+    [bigint],
+    "view"
+  >;
 
-  "play(bytes32,address[],uint256[],uint256,uint256)"(
-    escrowHash: PromiseOrValue<BytesLike>,
-    currentPlayers: PromiseOrValue<string>[],
-    playerChoises: PromiseOrValue<BigNumberish>[],
-    denominator: PromiseOrValue<BigNumberish>,
-    minRounds: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  randomNumbersContract: TypedContractMethod<[], [string], "view">;
 
-  "play(bytes32,address[],uint256,uint256)"(
-    escrowHash: PromiseOrValue<BytesLike>,
-    currentPlayers: PromiseOrValue<string>[],
-    denominator: PromiseOrValue<BigNumberish>,
-    minRounds: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  winners: TypedContractMethod<[escrowHash: BytesLike], [string[]], "view">;
 
-  playerResults(
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
 
-  playerScore(
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  randomNumbersContract(overrides?: CallOverrides): Promise<string>;
-
-  winners(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string[]>;
-
-  callStatic: {
-    "play(bytes32,address[],uint256[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-
-    "play(bytes32,address[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-
-    playerResults(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    playerScore(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    randomNumbersContract(overrides?: CallOverrides): Promise<string>;
-
-    winners(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-  };
+  getFunction(
+    nameOrSignature: "play(bytes32,address[],uint256[],uint256,uint256)"
+  ): TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      currentPlayers: AddressLike[],
+      playerChoises: BigNumberish[],
+      denominator: BigNumberish,
+      minRounds: BigNumberish
+    ],
+    [string[]],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "play(bytes32,address[],uint256,uint256)"
+  ): TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      currentPlayers: AddressLike[],
+      denominator: BigNumberish,
+      minRounds: BigNumberish
+    ],
+    [string[]],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "playerResults"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, player: AddressLike],
+    [bigint[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "playerScore"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, player: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "randomNumbersContract"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "winners"
+  ): TypedContractMethod<[escrowHash: BytesLike], [string[]], "view">;
 
   filters: {};
-
-  estimateGas: {
-    "play(bytes32,address[],uint256[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "play(bytes32,address[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    playerResults(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    playerScore(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    randomNumbersContract(overrides?: CallOverrides): Promise<BigNumber>;
-
-    winners(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    "play(bytes32,address[],uint256[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      playerChoises: PromiseOrValue<BigNumberish>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "play(bytes32,address[],uint256,uint256)"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      currentPlayers: PromiseOrValue<string>[],
-      denominator: PromiseOrValue<BigNumberish>,
-      minRounds: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    playerResults(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    playerScore(
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    randomNumbersContract(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    winners(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-  };
 }

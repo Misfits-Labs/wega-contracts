@@ -3,52 +3,47 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PayableOverrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
-} from "ethers";
-import type {
   FunctionFragment,
   Result,
+  Interface,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
+} from "ethers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../common";
 
 export declare namespace IWegaGameController {
   export type GameSettingsStruct = {
-    denominator: PromiseOrValue<BigNumberish>;
-    minRounds: PromiseOrValue<BigNumberish>;
-    requiredPlayers: PromiseOrValue<BigNumberish>;
-    proxy: PromiseOrValue<string>;
-    randomNumberController: PromiseOrValue<string>;
-    name: PromiseOrValue<string>;
+    denominator: BigNumberish;
+    minRounds: BigNumberish;
+    requiredPlayers: BigNumberish;
+    proxy: AddressLike;
+    randomNumberController: AddressLike;
+    name: string;
   };
 
   export type GameSettingsStructOutput = [
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string,
-    string,
-    string
+    denominator: bigint,
+    minRounds: bigint,
+    requiredPlayers: bigint,
+    proxy: string,
+    randomNumberController: string,
+    name: string
   ] & {
-    denominator: BigNumber;
-    minRounds: BigNumber;
-    requiredPlayers: BigNumber;
+    denominator: bigint;
+    minRounds: bigint;
+    requiredPlayers: bigint;
     proxy: string;
     randomNumberController: string;
     name: string;
@@ -57,66 +52,28 @@ export declare namespace IWegaGameController {
 
 export declare namespace IWega {
   export type WegaStruct = {
-    name: PromiseOrValue<string>;
-    currentPlayers: PromiseOrValue<string>[];
-    deposited: PromiseOrValue<BigNumberish>;
-    state: PromiseOrValue<BigNumberish>;
+    name: string;
+    currentPlayers: AddressLike[];
+    deposited: BigNumberish;
+    state: BigNumberish;
   };
 
-  export type WegaStructOutput = [string, string[], BigNumber, number] & {
+  export type WegaStructOutput = [
+    name: string,
+    currentPlayers: string[],
+    deposited: bigint,
+    state: bigint
+  ] & {
     name: string;
     currentPlayers: string[];
-    deposited: BigNumber;
-    state: number;
+    deposited: bigint;
+    state: bigint;
   };
 }
 
-export interface WegaGameControllerInterface extends utils.Interface {
-  functions: {
-    "DEFAULT_ADMIN_ROLE()": FunctionFragment;
-    "WEGA_PROTOCOL_ADMIN_ROLE()": FunctionFragment;
-    "__WegaController_init(address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
-    "__WegaController_init_unchained(address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
-    "addWegaProtocolAdmin(address)": FunctionFragment;
-    "addWegaProtocolAdmins(address[])": FunctionFragment;
-    "closeWegaProtocolAdmin(address)": FunctionFragment;
-    "createGame(string,address,uint256,uint256[])": FunctionFragment;
-    "depositOrPlay(bytes32,uint256[])": FunctionFragment;
-    "depositOrPlay(bytes32,uint256[],uint256[])": FunctionFragment;
-    "erc20Escrow()": FunctionFragment;
-    "existsGame(string)": FunctionFragment;
-    "gameResults(string,bytes32,address)": FunctionFragment;
-    "getGame(bytes32)": FunctionFragment;
-    "getGameSettings(string)": FunctionFragment;
-    "getRoleAdmin(bytes32)": FunctionFragment;
-    "grantRole(bytes32,address)": FunctionFragment;
-    "hasRole(bytes32,address)": FunctionFragment;
-    "initialize(address,address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
-    "isWegaProtocolAdmin(address)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "playerScore(string,bytes32,address)": FunctionFragment;
-    "players(bytes32)": FunctionFragment;
-    "proxiableUUID()": FunctionFragment;
-    "randomizer()": FunctionFragment;
-    "registerGame((uint256,uint256,uint256,address,address,string))": FunctionFragment;
-    "removeGame(string)": FunctionFragment;
-    "removeWegaProtocolAdmin(address)": FunctionFragment;
-    "removeWegaProtocolAdmins(address[])": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "renounceRole(bytes32,address)": FunctionFragment;
-    "renounceWegaProtocolAdmin()": FunctionFragment;
-    "revokeRole(bytes32,address)": FunctionFragment;
-    "rotateWegaProtocolAdmin(address)": FunctionFragment;
-    "setGameConfiguration((uint256,uint256,uint256,address,address,string))": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "upgradeTo(address)": FunctionFragment;
-    "upgradeToAndCall(address,bytes)": FunctionFragment;
-    "winners(string,bytes32)": FunctionFragment;
-  };
-
+export interface WegaGameControllerInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "DEFAULT_ADMIN_ROLE"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
       | "__WegaController_init"
@@ -159,6 +116,22 @@ export interface WegaGameControllerInterface extends utils.Interface {
       | "winners"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "AdminChanged"
+      | "BeaconUpgraded"
+      | "GameCreation"
+      | "GameRegistration"
+      | "Initialized"
+      | "OwnershipTransferred"
+      | "RoleAdminChanged"
+      | "RoleGranted"
+      | "RoleRevoked"
+      | "SetGame"
+      | "Upgraded"
+      | "WinnerDeclaration"
+  ): EventFragment;
+
   encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     values?: undefined
@@ -169,106 +142,76 @@ export interface WegaGameControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "__WegaController_init",
-    values: [PromiseOrValue<string>, IWegaGameController.GameSettingsStruct[]]
+    values: [AddressLike, IWegaGameController.GameSettingsStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "__WegaController_init_unchained",
-    values: [PromiseOrValue<string>, IWegaGameController.GameSettingsStruct[]]
+    values: [AddressLike, IWegaGameController.GameSettingsStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmins",
-    values: [PromiseOrValue<string>[]]
+    values: [AddressLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "closeWegaProtocolAdmin",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "createGame",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>[]
-    ]
+    values: [string, AddressLike, BigNumberish, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOrPlay(bytes32,uint256[])",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>[]]
+    values: [BytesLike, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "depositOrPlay(bytes32,uint256[],uint256[])",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<BigNumberish>[]
-    ]
+    values: [BytesLike, BigNumberish[], BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "erc20Escrow",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "existsGame",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "existsGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "gameResults",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>
-    ]
+    values: [string, BytesLike, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "getGame",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
+  encodeFunctionData(functionFragment: "getGame", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "getGameSettings",
-    values: [PromiseOrValue<string>]
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
-    values: [PromiseOrValue<BytesLike>]
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "grantRole",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "hasRole",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      IWegaGameController.GameSettingsStruct[]
-    ]
+    values: [AddressLike, AddressLike, IWegaGameController.GameSettingsStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "isWegaProtocolAdmin",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "playerScore",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>
-    ]
+    values: [string, BytesLike, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "players",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
+  encodeFunctionData(functionFragment: "players", values: [BytesLike]): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
     values?: undefined
@@ -281,17 +224,14 @@ export interface WegaGameControllerInterface extends utils.Interface {
     functionFragment: "registerGame",
     values: [IWegaGameController.GameSettingsStruct]
   ): string;
-  encodeFunctionData(
-    functionFragment: "removeGame",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "removeGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "removeWegaProtocolAdmin",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "removeWegaProtocolAdmins",
-    values: [PromiseOrValue<string>[]]
+    values: [AddressLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -299,7 +239,7 @@ export interface WegaGameControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "renounceRole",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceWegaProtocolAdmin",
@@ -307,11 +247,11 @@ export interface WegaGameControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "revokeRole",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
+    values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "rotateWegaProtocolAdmin",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setGameConfiguration",
@@ -319,23 +259,23 @@ export interface WegaGameControllerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
-    values: [PromiseOrValue<BytesLike>]
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeTo",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "upgradeToAndCall",
-    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
+    values: [AddressLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "winners",
-    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
+    values: [string, BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -459,1325 +399,900 @@ export interface WegaGameControllerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
-
-  events: {
-    "AdminChanged(address,address)": EventFragment;
-    "BeaconUpgraded(address)": EventFragment;
-    "GameCreation(bytes32,uint256,address,string)": EventFragment;
-    "GameRegistration(string,address)": EventFragment;
-    "Initialized(uint8)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
-    "RoleGranted(bytes32,address,address)": EventFragment;
-    "RoleRevoked(bytes32,address,address)": EventFragment;
-    "SetGame(string,uint256,uint256,uint256,address,address)": EventFragment;
-    "Upgraded(address)": EventFragment;
-    "WinnerDeclaration(bytes32,address[])": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "GameCreation"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "GameRegistration"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleAdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleGranted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RoleRevoked"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetGame"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WinnerDeclaration"): EventFragment;
 }
 
-export interface AdminChangedEventObject {
-  previousAdmin: string;
-  newAdmin: string;
+export namespace AdminChangedEvent {
+  export type InputTuple = [previousAdmin: AddressLike, newAdmin: AddressLike];
+  export type OutputTuple = [previousAdmin: string, newAdmin: string];
+  export interface OutputObject {
+    previousAdmin: string;
+    newAdmin: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type AdminChangedEvent = TypedEvent<
-  [string, string],
-  AdminChangedEventObject
->;
 
-export type AdminChangedEventFilter = TypedEventFilter<AdminChangedEvent>;
-
-export interface BeaconUpgradedEventObject {
-  beacon: string;
+export namespace BeaconUpgradedEvent {
+  export type InputTuple = [beacon: AddressLike];
+  export type OutputTuple = [beacon: string];
+  export interface OutputObject {
+    beacon: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type BeaconUpgradedEvent = TypedEvent<
-  [string],
-  BeaconUpgradedEventObject
->;
 
-export type BeaconUpgradedEventFilter = TypedEventFilter<BeaconUpgradedEvent>;
-
-export interface GameCreationEventObject {
-  escrowHash: string;
-  nonce: BigNumber;
-  creator: string;
-  name: string;
+export namespace GameCreationEvent {
+  export type InputTuple = [
+    escrowHash: BytesLike,
+    nonce: BigNumberish,
+    creator: AddressLike,
+    name: string
+  ];
+  export type OutputTuple = [
+    escrowHash: string,
+    nonce: bigint,
+    creator: string,
+    name: string
+  ];
+  export interface OutputObject {
+    escrowHash: string;
+    nonce: bigint;
+    creator: string;
+    name: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type GameCreationEvent = TypedEvent<
-  [string, BigNumber, string, string],
-  GameCreationEventObject
->;
 
-export type GameCreationEventFilter = TypedEventFilter<GameCreationEvent>;
-
-export interface GameRegistrationEventObject {
-  name: string;
-  gameAddress: string;
+export namespace GameRegistrationEvent {
+  export type InputTuple = [name: string, gameAddress: AddressLike];
+  export type OutputTuple = [name: string, gameAddress: string];
+  export interface OutputObject {
+    name: string;
+    gameAddress: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type GameRegistrationEvent = TypedEvent<
-  [string, string],
-  GameRegistrationEventObject
->;
 
-export type GameRegistrationEventFilter =
-  TypedEventFilter<GameRegistrationEvent>;
-
-export interface InitializedEventObject {
-  version: number;
+export namespace InitializedEvent {
+  export type InputTuple = [version: BigNumberish];
+  export type OutputTuple = [version: bigint];
+  export interface OutputObject {
+    version: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
 
-export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
-
-export interface OwnershipTransferredEventObject {
-  previousOwner: string;
-  newOwner: string;
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferredEventObject
->;
 
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
-
-export interface RoleAdminChangedEventObject {
-  role: string;
-  previousAdminRole: string;
-  newAdminRole: string;
+export namespace RoleAdminChangedEvent {
+  export type InputTuple = [
+    role: BytesLike,
+    previousAdminRole: BytesLike,
+    newAdminRole: BytesLike
+  ];
+  export type OutputTuple = [
+    role: string,
+    previousAdminRole: string,
+    newAdminRole: string
+  ];
+  export interface OutputObject {
+    role: string;
+    previousAdminRole: string;
+    newAdminRole: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type RoleAdminChangedEvent = TypedEvent<
-  [string, string, string],
-  RoleAdminChangedEventObject
->;
 
-export type RoleAdminChangedEventFilter =
-  TypedEventFilter<RoleAdminChangedEvent>;
-
-export interface RoleGrantedEventObject {
-  role: string;
-  account: string;
-  sender: string;
+export namespace RoleGrantedEvent {
+  export type InputTuple = [
+    role: BytesLike,
+    account: AddressLike,
+    sender: AddressLike
+  ];
+  export type OutputTuple = [role: string, account: string, sender: string];
+  export interface OutputObject {
+    role: string;
+    account: string;
+    sender: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type RoleGrantedEvent = TypedEvent<
-  [string, string, string],
-  RoleGrantedEventObject
->;
 
-export type RoleGrantedEventFilter = TypedEventFilter<RoleGrantedEvent>;
-
-export interface RoleRevokedEventObject {
-  role: string;
-  account: string;
-  sender: string;
+export namespace RoleRevokedEvent {
+  export type InputTuple = [
+    role: BytesLike,
+    account: AddressLike,
+    sender: AddressLike
+  ];
+  export type OutputTuple = [role: string, account: string, sender: string];
+  export interface OutputObject {
+    role: string;
+    account: string;
+    sender: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type RoleRevokedEvent = TypedEvent<
-  [string, string, string],
-  RoleRevokedEventObject
->;
 
-export type RoleRevokedEventFilter = TypedEventFilter<RoleRevokedEvent>;
-
-export interface SetGameEventObject {
-  name: string;
-  denominator: BigNumber;
-  minRounds: BigNumber;
-  requiredPlayers: BigNumber;
-  proxy: string;
-  randomNumberController: string;
+export namespace SetGameEvent {
+  export type InputTuple = [
+    name: string,
+    denominator: BigNumberish,
+    minRounds: BigNumberish,
+    requiredPlayers: BigNumberish,
+    proxy: AddressLike,
+    randomNumberController: AddressLike
+  ];
+  export type OutputTuple = [
+    name: string,
+    denominator: bigint,
+    minRounds: bigint,
+    requiredPlayers: bigint,
+    proxy: string,
+    randomNumberController: string
+  ];
+  export interface OutputObject {
+    name: string;
+    denominator: bigint;
+    minRounds: bigint;
+    requiredPlayers: bigint;
+    proxy: string;
+    randomNumberController: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SetGameEvent = TypedEvent<
-  [string, BigNumber, BigNumber, BigNumber, string, string],
-  SetGameEventObject
->;
 
-export type SetGameEventFilter = TypedEventFilter<SetGameEvent>;
-
-export interface UpgradedEventObject {
-  implementation: string;
+export namespace UpgradedEvent {
+  export type InputTuple = [implementation: AddressLike];
+  export type OutputTuple = [implementation: string];
+  export interface OutputObject {
+    implementation: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type UpgradedEvent = TypedEvent<[string], UpgradedEventObject>;
 
-export type UpgradedEventFilter = TypedEventFilter<UpgradedEvent>;
-
-export interface WinnerDeclarationEventObject {
-  escrowHash: string;
-  winners: string[];
+export namespace WinnerDeclarationEvent {
+  export type InputTuple = [escrowHash: BytesLike, winners: AddressLike[]];
+  export type OutputTuple = [escrowHash: string, winners: string[]];
+  export interface OutputObject {
+    escrowHash: string;
+    winners: string[];
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WinnerDeclarationEvent = TypedEvent<
-  [string, string[]],
-  WinnerDeclarationEventObject
->;
-
-export type WinnerDeclarationEventFilter =
-  TypedEventFilter<WinnerDeclarationEvent>;
 
 export interface WegaGameController extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): WegaGameController;
+  waitForDeployment(): Promise<this>;
 
   interface: WegaGameControllerInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
-
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
-
-  functions: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    __WegaController_init(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    __WegaController_init_unchained(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    addWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    addWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    closeWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    erc20Escrow(overrides?: CallOverrides): Promise<[string]>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean] & { exists: boolean }>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[IWega.WegaStructOutput]>;
-
-    getGameSettings(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [IWegaGameController.GameSettingsStructOutput] & {
-        settings: IWegaGameController.GameSettingsStructOutput;
-      }
-    >;
-
-    getRoleAdmin(
-      role: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    grantRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    hasRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    initialize(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      randomNumberController: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    isWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string[]]>;
-
-    proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
-
-    randomizer(overrides?: CallOverrides): Promise<[string]>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    removeWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    removeWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    renounceRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    renounceWegaProtocolAdmin(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    revokeRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    rotateWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string[]]>;
-  };
-
-  DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  __WegaController_init(
-    erc20EscrowAddress: PromiseOrValue<string>,
-    gameSettings: IWegaGameController.GameSettingsStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  __WegaController_init_unchained(
-    erc20EscrowAddress: PromiseOrValue<string>,
-    gameSettings: IWegaGameController.GameSettingsStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  addWegaProtocolAdmin(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  addWegaProtocolAdmins(
-    accounts: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  closeWegaProtocolAdmin(
-    receiver: PromiseOrValue<string>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  createGame(
-    name: PromiseOrValue<string>,
-    tokenAddress: PromiseOrValue<string>,
-    wagerAmount: PromiseOrValue<BigNumberish>,
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  "depositOrPlay(bytes32,uint256[])"(
-    escrowHash: PromiseOrValue<BytesLike>,
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  "depositOrPlay(bytes32,uint256[],uint256[])"(
-    escrowHash: PromiseOrValue<BytesLike>,
-    playerChoices: PromiseOrValue<BigNumberish>[],
-    randomNumbers: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  erc20Escrow(overrides?: CallOverrides): Promise<string>;
-
-  existsGame(
-    game: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  gameResults(
-    game: PromiseOrValue<string>,
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
-
-  getGame(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<IWega.WegaStructOutput>;
-
-  getGameSettings(
-    game: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<IWegaGameController.GameSettingsStructOutput>;
-
-  getRoleAdmin(
-    role: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  grantRole(
-    role: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  hasRole(
-    role: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  initialize(
-    erc20EscrowAddress: PromiseOrValue<string>,
-    randomNumberController: PromiseOrValue<string>,
-    gameSettings: IWegaGameController.GameSettingsStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  isWegaProtocolAdmin(
-    account: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  playerScore(
-    game: PromiseOrValue<string>,
-    escrowHash: PromiseOrValue<BytesLike>,
-    player: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  players(
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string[]>;
-
-  proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-  randomizer(overrides?: CallOverrides): Promise<string>;
-
-  registerGame(
-    config: IWegaGameController.GameSettingsStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  removeGame(
-    game: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  removeWegaProtocolAdmin(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  removeWegaProtocolAdmins(
-    accounts: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  renounceOwnership(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  renounceRole(
-    role: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  renounceWegaProtocolAdmin(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  revokeRole(
-    role: PromiseOrValue<BytesLike>,
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  rotateWegaProtocolAdmin(
-    receiver: PromiseOrValue<string>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setGameConfiguration(
-    config: IWegaGameController.GameSettingsStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  supportsInterface(
-    interfaceId: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  transferOwnership(
-    newOwner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  upgradeTo(
-    newImplementation: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  upgradeToAndCall(
-    newImplementation: PromiseOrValue<string>,
-    data: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  winners(
-    game: PromiseOrValue<string>,
-    escrowHash: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string[]>;
-
-  callStatic: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    __WegaController_init(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    __WegaController_init_unchained(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    addWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    addWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    closeWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    erc20Escrow(overrides?: CallOverrides): Promise<string>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<IWega.WegaStructOutput>;
-
-    getGameSettings(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<IWegaGameController.GameSettingsStructOutput>;
-
-    getRoleAdmin(
-      role: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    grantRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    hasRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    initialize(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      randomNumberController: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    isWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-
-    proxiableUUID(overrides?: CallOverrides): Promise<string>;
-
-    randomizer(overrides?: CallOverrides): Promise<string>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    removeWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    removeWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    renounceRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    renounceWegaProtocolAdmin(overrides?: CallOverrides): Promise<void>;
-
-    revokeRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    rotateWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<string[]>;
-  };
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
+
+  DEFAULT_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
+
+  WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
+
+  __WegaController_init: TypedContractMethod<
+    [
+      erc20EscrowAddress: AddressLike,
+      gameSettings: IWegaGameController.GameSettingsStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  __WegaController_init_unchained: TypedContractMethod<
+    [
+      erc20EscrowAddress: AddressLike,
+      gameSettings: IWegaGameController.GameSettingsStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  addWegaProtocolAdmin: TypedContractMethod<
+    [account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  addWegaProtocolAdmins: TypedContractMethod<
+    [accounts: AddressLike[]],
+    [void],
+    "nonpayable"
+  >;
+
+  closeWegaProtocolAdmin: TypedContractMethod<
+    [receiver: AddressLike],
+    [void],
+    "payable"
+  >;
+
+  createGame: TypedContractMethod<
+    [
+      name: string,
+      tokenAddress: AddressLike,
+      wagerAmount: BigNumberish,
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  "depositOrPlay(bytes32,uint256[])": TypedContractMethod<
+    [escrowHash: BytesLike, randomNumbers: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+
+  "depositOrPlay(bytes32,uint256[],uint256[])": TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      playerChoices: BigNumberish[],
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  erc20Escrow: TypedContractMethod<[], [string], "view">;
+
+  existsGame: TypedContractMethod<[game: string], [boolean], "view">;
+
+  gameResults: TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint[]],
+    "view"
+  >;
+
+  getGame: TypedContractMethod<
+    [escrowHash: BytesLike],
+    [IWega.WegaStructOutput],
+    "view"
+  >;
+
+  getGameSettings: TypedContractMethod<
+    [game: string],
+    [IWegaGameController.GameSettingsStructOutput],
+    "view"
+  >;
+
+  getRoleAdmin: TypedContractMethod<[role: BytesLike], [string], "view">;
+
+  grantRole: TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  hasRole: TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  initialize: TypedContractMethod<
+    [
+      erc20EscrowAddress: AddressLike,
+      randomNumberController: AddressLike,
+      gameSettings: IWegaGameController.GameSettingsStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  isWegaProtocolAdmin: TypedContractMethod<
+    [account: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  owner: TypedContractMethod<[], [string], "view">;
+
+  playerScore: TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint],
+    "view"
+  >;
+
+  players: TypedContractMethod<[escrowHash: BytesLike], [string[]], "view">;
+
+  proxiableUUID: TypedContractMethod<[], [string], "view">;
+
+  randomizer: TypedContractMethod<[], [string], "view">;
+
+  registerGame: TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
+
+  removeGame: TypedContractMethod<[game: string], [void], "nonpayable">;
+
+  removeWegaProtocolAdmin: TypedContractMethod<
+    [account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  removeWegaProtocolAdmins: TypedContractMethod<
+    [accounts: AddressLike[]],
+    [void],
+    "nonpayable"
+  >;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  renounceRole: TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  renounceWegaProtocolAdmin: TypedContractMethod<[], [void], "nonpayable">;
+
+  revokeRole: TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  rotateWegaProtocolAdmin: TypedContractMethod<
+    [receiver: AddressLike],
+    [void],
+    "payable"
+  >;
+
+  setGameConfiguration: TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
+
+  supportsInterface: TypedContractMethod<
+    [interfaceId: BytesLike],
+    [boolean],
+    "view"
+  >;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  upgradeTo: TypedContractMethod<
+    [newImplementation: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  upgradeToAndCall: TypedContractMethod<
+    [newImplementation: AddressLike, data: BytesLike],
+    [void],
+    "payable"
+  >;
+
+  winners: TypedContractMethod<
+    [game: string, escrowHash: BytesLike],
+    [string[]],
+    "view"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "DEFAULT_ADMIN_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "__WegaController_init"
+  ): TypedContractMethod<
+    [
+      erc20EscrowAddress: AddressLike,
+      gameSettings: IWegaGameController.GameSettingsStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "__WegaController_init_unchained"
+  ): TypedContractMethod<
+    [
+      erc20EscrowAddress: AddressLike,
+      gameSettings: IWegaGameController.GameSettingsStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "addWegaProtocolAdmin"
+  ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "addWegaProtocolAdmins"
+  ): TypedContractMethod<[accounts: AddressLike[]], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "closeWegaProtocolAdmin"
+  ): TypedContractMethod<[receiver: AddressLike], [void], "payable">;
+  getFunction(
+    nameOrSignature: "createGame"
+  ): TypedContractMethod<
+    [
+      name: string,
+      tokenAddress: AddressLike,
+      wagerAmount: BigNumberish,
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositOrPlay(bytes32,uint256[])"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, randomNumbers: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositOrPlay(bytes32,uint256[],uint256[])"
+  ): TypedContractMethod<
+    [
+      escrowHash: BytesLike,
+      playerChoices: BigNumberish[],
+      randomNumbers: BigNumberish[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "erc20Escrow"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "existsGame"
+  ): TypedContractMethod<[game: string], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "gameResults"
+  ): TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getGame"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike],
+    [IWega.WegaStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getGameSettings"
+  ): TypedContractMethod<
+    [game: string],
+    [IWegaGameController.GameSettingsStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getRoleAdmin"
+  ): TypedContractMethod<[role: BytesLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "grantRole"
+  ): TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "hasRole"
+  ): TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "initialize"
+  ): TypedContractMethod<
+    [
+      erc20EscrowAddress: AddressLike,
+      randomNumberController: AddressLike,
+      gameSettings: IWegaGameController.GameSettingsStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "isWegaProtocolAdmin"
+  ): TypedContractMethod<[account: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "playerScore"
+  ): TypedContractMethod<
+    [game: string, escrowHash: BytesLike, player: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "players"
+  ): TypedContractMethod<[escrowHash: BytesLike], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "proxiableUUID"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "randomizer"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "registerGame"
+  ): TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "removeGame"
+  ): TypedContractMethod<[game: string], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "removeWegaProtocolAdmin"
+  ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "removeWegaProtocolAdmins"
+  ): TypedContractMethod<[accounts: AddressLike[]], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "renounceRole"
+  ): TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "renounceWegaProtocolAdmin"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "revokeRole"
+  ): TypedContractMethod<
+    [role: BytesLike, account: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "rotateWegaProtocolAdmin"
+  ): TypedContractMethod<[receiver: AddressLike], [void], "payable">;
+  getFunction(
+    nameOrSignature: "setGameConfiguration"
+  ): TypedContractMethod<
+    [config: IWegaGameController.GameSettingsStruct],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "supportsInterface"
+  ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "upgradeTo"
+  ): TypedContractMethod<
+    [newImplementation: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "upgradeToAndCall"
+  ): TypedContractMethod<
+    [newImplementation: AddressLike, data: BytesLike],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "winners"
+  ): TypedContractMethod<
+    [game: string, escrowHash: BytesLike],
+    [string[]],
+    "view"
+  >;
+
+  getEvent(
+    key: "AdminChanged"
+  ): TypedContractEvent<
+    AdminChangedEvent.InputTuple,
+    AdminChangedEvent.OutputTuple,
+    AdminChangedEvent.OutputObject
+  >;
+  getEvent(
+    key: "BeaconUpgraded"
+  ): TypedContractEvent<
+    BeaconUpgradedEvent.InputTuple,
+    BeaconUpgradedEvent.OutputTuple,
+    BeaconUpgradedEvent.OutputObject
+  >;
+  getEvent(
+    key: "GameCreation"
+  ): TypedContractEvent<
+    GameCreationEvent.InputTuple,
+    GameCreationEvent.OutputTuple,
+    GameCreationEvent.OutputObject
+  >;
+  getEvent(
+    key: "GameRegistration"
+  ): TypedContractEvent<
+    GameRegistrationEvent.InputTuple,
+    GameRegistrationEvent.OutputTuple,
+    GameRegistrationEvent.OutputObject
+  >;
+  getEvent(
+    key: "Initialized"
+  ): TypedContractEvent<
+    InitializedEvent.InputTuple,
+    InitializedEvent.OutputTuple,
+    InitializedEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "RoleAdminChanged"
+  ): TypedContractEvent<
+    RoleAdminChangedEvent.InputTuple,
+    RoleAdminChangedEvent.OutputTuple,
+    RoleAdminChangedEvent.OutputObject
+  >;
+  getEvent(
+    key: "RoleGranted"
+  ): TypedContractEvent<
+    RoleGrantedEvent.InputTuple,
+    RoleGrantedEvent.OutputTuple,
+    RoleGrantedEvent.OutputObject
+  >;
+  getEvent(
+    key: "RoleRevoked"
+  ): TypedContractEvent<
+    RoleRevokedEvent.InputTuple,
+    RoleRevokedEvent.OutputTuple,
+    RoleRevokedEvent.OutputObject
+  >;
+  getEvent(
+    key: "SetGame"
+  ): TypedContractEvent<
+    SetGameEvent.InputTuple,
+    SetGameEvent.OutputTuple,
+    SetGameEvent.OutputObject
+  >;
+  getEvent(
+    key: "Upgraded"
+  ): TypedContractEvent<
+    UpgradedEvent.InputTuple,
+    UpgradedEvent.OutputTuple,
+    UpgradedEvent.OutputObject
+  >;
+  getEvent(
+    key: "WinnerDeclaration"
+  ): TypedContractEvent<
+    WinnerDeclarationEvent.InputTuple,
+    WinnerDeclarationEvent.OutputTuple,
+    WinnerDeclarationEvent.OutputObject
+  >;
 
   filters: {
-    "AdminChanged(address,address)"(
-      previousAdmin?: null,
-      newAdmin?: null
-    ): AdminChangedEventFilter;
-    AdminChanged(
-      previousAdmin?: null,
-      newAdmin?: null
-    ): AdminChangedEventFilter;
-
-    "BeaconUpgraded(address)"(
-      beacon?: PromiseOrValue<string> | null
-    ): BeaconUpgradedEventFilter;
-    BeaconUpgraded(
-      beacon?: PromiseOrValue<string> | null
-    ): BeaconUpgradedEventFilter;
-
-    "GameCreation(bytes32,uint256,address,string)"(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      nonce?: PromiseOrValue<BigNumberish> | null,
-      creator?: null,
-      name?: null
-    ): GameCreationEventFilter;
-    GameCreation(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      nonce?: PromiseOrValue<BigNumberish> | null,
-      creator?: null,
-      name?: null
-    ): GameCreationEventFilter;
-
-    "GameRegistration(string,address)"(
-      name?: null,
-      gameAddress?: null
-    ): GameRegistrationEventFilter;
-    GameRegistration(
-      name?: null,
-      gameAddress?: null
-    ): GameRegistrationEventFilter;
-
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
-    Initialized(version?: null): InitializedEventFilter;
-
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnershipTransferredEventFilter;
-
-    "RoleAdminChanged(bytes32,bytes32,bytes32)"(
-      role?: PromiseOrValue<BytesLike> | null,
-      previousAdminRole?: PromiseOrValue<BytesLike> | null,
-      newAdminRole?: PromiseOrValue<BytesLike> | null
-    ): RoleAdminChangedEventFilter;
-    RoleAdminChanged(
-      role?: PromiseOrValue<BytesLike> | null,
-      previousAdminRole?: PromiseOrValue<BytesLike> | null,
-      newAdminRole?: PromiseOrValue<BytesLike> | null
-    ): RoleAdminChangedEventFilter;
-
-    "RoleGranted(bytes32,address,address)"(
-      role?: PromiseOrValue<BytesLike> | null,
-      account?: PromiseOrValue<string> | null,
-      sender?: PromiseOrValue<string> | null
-    ): RoleGrantedEventFilter;
-    RoleGranted(
-      role?: PromiseOrValue<BytesLike> | null,
-      account?: PromiseOrValue<string> | null,
-      sender?: PromiseOrValue<string> | null
-    ): RoleGrantedEventFilter;
-
-    "RoleRevoked(bytes32,address,address)"(
-      role?: PromiseOrValue<BytesLike> | null,
-      account?: PromiseOrValue<string> | null,
-      sender?: PromiseOrValue<string> | null
-    ): RoleRevokedEventFilter;
-    RoleRevoked(
-      role?: PromiseOrValue<BytesLike> | null,
-      account?: PromiseOrValue<string> | null,
-      sender?: PromiseOrValue<string> | null
-    ): RoleRevokedEventFilter;
-
-    "SetGame(string,uint256,uint256,uint256,address,address)"(
-      name?: null,
-      denominator?: null,
-      minRounds?: null,
-      requiredPlayers?: null,
-      proxy?: null,
-      randomNumberController?: null
-    ): SetGameEventFilter;
-    SetGame(
-      name?: null,
-      denominator?: null,
-      minRounds?: null,
-      requiredPlayers?: null,
-      proxy?: null,
-      randomNumberController?: null
-    ): SetGameEventFilter;
-
-    "Upgraded(address)"(
-      implementation?: PromiseOrValue<string> | null
-    ): UpgradedEventFilter;
-    Upgraded(
-      implementation?: PromiseOrValue<string> | null
-    ): UpgradedEventFilter;
-
-    "WinnerDeclaration(bytes32,address[])"(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      winners?: PromiseOrValue<string>[] | null
-    ): WinnerDeclarationEventFilter;
-    WinnerDeclaration(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      winners?: PromiseOrValue<string>[] | null
-    ): WinnerDeclarationEventFilter;
-  };
-
-  estimateGas: {
-    DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    __WegaController_init(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    __WegaController_init_unchained(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    addWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    addWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    closeWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    erc20Escrow(overrides?: CallOverrides): Promise<BigNumber>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getGameSettings(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRoleAdmin(
-      role: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    grantRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    hasRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    initialize(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      randomNumberController: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    isWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
-
-    randomizer(overrides?: CallOverrides): Promise<BigNumber>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    removeWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    removeWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    renounceRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    renounceWegaProtocolAdmin(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    revokeRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    rotateWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    DEFAULT_ADMIN_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    WEGA_PROTOCOL_ADMIN_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    __WegaController_init(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    __WegaController_init_unchained(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    addWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    addWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    closeWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    createGame(
-      name: PromiseOrValue<string>,
-      tokenAddress: PromiseOrValue<string>,
-      wagerAmount: PromiseOrValue<BigNumberish>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "depositOrPlay(bytes32,uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "depositOrPlay(bytes32,uint256[],uint256[])"(
-      escrowHash: PromiseOrValue<BytesLike>,
-      playerChoices: PromiseOrValue<BigNumberish>[],
-      randomNumbers: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    erc20Escrow(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    existsGame(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    gameResults(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getGame(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getGameSettings(
-      game: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRoleAdmin(
-      role: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    grantRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    hasRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    initialize(
-      erc20EscrowAddress: PromiseOrValue<string>,
-      randomNumberController: PromiseOrValue<string>,
-      gameSettings: IWegaGameController.GameSettingsStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    isWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    playerScore(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      player: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    players(
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    randomizer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    registerGame(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    removeGame(
-      game: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    removeWegaProtocolAdmin(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    removeWegaProtocolAdmins(
-      accounts: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    renounceRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    renounceWegaProtocolAdmin(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    revokeRole(
-      role: PromiseOrValue<BytesLike>,
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    rotateWegaProtocolAdmin(
-      receiver: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setGameConfiguration(
-      config: IWegaGameController.GameSettingsStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    upgradeTo(
-      newImplementation: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    upgradeToAndCall(
-      newImplementation: PromiseOrValue<string>,
-      data: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    winners(
-      game: PromiseOrValue<string>,
-      escrowHash: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    "AdminChanged(address,address)": TypedContractEvent<
+      AdminChangedEvent.InputTuple,
+      AdminChangedEvent.OutputTuple,
+      AdminChangedEvent.OutputObject
+    >;
+    AdminChanged: TypedContractEvent<
+      AdminChangedEvent.InputTuple,
+      AdminChangedEvent.OutputTuple,
+      AdminChangedEvent.OutputObject
+    >;
+
+    "BeaconUpgraded(address)": TypedContractEvent<
+      BeaconUpgradedEvent.InputTuple,
+      BeaconUpgradedEvent.OutputTuple,
+      BeaconUpgradedEvent.OutputObject
+    >;
+    BeaconUpgraded: TypedContractEvent<
+      BeaconUpgradedEvent.InputTuple,
+      BeaconUpgradedEvent.OutputTuple,
+      BeaconUpgradedEvent.OutputObject
+    >;
+
+    "GameCreation(bytes32,uint256,address,string)": TypedContractEvent<
+      GameCreationEvent.InputTuple,
+      GameCreationEvent.OutputTuple,
+      GameCreationEvent.OutputObject
+    >;
+    GameCreation: TypedContractEvent<
+      GameCreationEvent.InputTuple,
+      GameCreationEvent.OutputTuple,
+      GameCreationEvent.OutputObject
+    >;
+
+    "GameRegistration(string,address)": TypedContractEvent<
+      GameRegistrationEvent.InputTuple,
+      GameRegistrationEvent.OutputTuple,
+      GameRegistrationEvent.OutputObject
+    >;
+    GameRegistration: TypedContractEvent<
+      GameRegistrationEvent.InputTuple,
+      GameRegistrationEvent.OutputTuple,
+      GameRegistrationEvent.OutputObject
+    >;
+
+    "Initialized(uint8)": TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+    Initialized: TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+
+    "RoleAdminChanged(bytes32,bytes32,bytes32)": TypedContractEvent<
+      RoleAdminChangedEvent.InputTuple,
+      RoleAdminChangedEvent.OutputTuple,
+      RoleAdminChangedEvent.OutputObject
+    >;
+    RoleAdminChanged: TypedContractEvent<
+      RoleAdminChangedEvent.InputTuple,
+      RoleAdminChangedEvent.OutputTuple,
+      RoleAdminChangedEvent.OutputObject
+    >;
+
+    "RoleGranted(bytes32,address,address)": TypedContractEvent<
+      RoleGrantedEvent.InputTuple,
+      RoleGrantedEvent.OutputTuple,
+      RoleGrantedEvent.OutputObject
+    >;
+    RoleGranted: TypedContractEvent<
+      RoleGrantedEvent.InputTuple,
+      RoleGrantedEvent.OutputTuple,
+      RoleGrantedEvent.OutputObject
+    >;
+
+    "RoleRevoked(bytes32,address,address)": TypedContractEvent<
+      RoleRevokedEvent.InputTuple,
+      RoleRevokedEvent.OutputTuple,
+      RoleRevokedEvent.OutputObject
+    >;
+    RoleRevoked: TypedContractEvent<
+      RoleRevokedEvent.InputTuple,
+      RoleRevokedEvent.OutputTuple,
+      RoleRevokedEvent.OutputObject
+    >;
+
+    "SetGame(string,uint256,uint256,uint256,address,address)": TypedContractEvent<
+      SetGameEvent.InputTuple,
+      SetGameEvent.OutputTuple,
+      SetGameEvent.OutputObject
+    >;
+    SetGame: TypedContractEvent<
+      SetGameEvent.InputTuple,
+      SetGameEvent.OutputTuple,
+      SetGameEvent.OutputObject
+    >;
+
+    "Upgraded(address)": TypedContractEvent<
+      UpgradedEvent.InputTuple,
+      UpgradedEvent.OutputTuple,
+      UpgradedEvent.OutputObject
+    >;
+    Upgraded: TypedContractEvent<
+      UpgradedEvent.InputTuple,
+      UpgradedEvent.OutputTuple,
+      UpgradedEvent.OutputObject
+    >;
+
+    "WinnerDeclaration(bytes32,address[])": TypedContractEvent<
+      WinnerDeclarationEvent.InputTuple,
+      WinnerDeclarationEvent.OutputTuple,
+      WinnerDeclarationEvent.OutputObject
+    >;
+    WinnerDeclaration: TypedContractEvent<
+      WinnerDeclarationEvent.InputTuple,
+      WinnerDeclarationEvent.OutputTuple,
+      WinnerDeclarationEvent.OutputObject
+    >;
   };
 }

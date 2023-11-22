@@ -2,6 +2,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('@openzeppelin/hardhat-upgrades');
 
+
 import path from 'path';
 import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types/config';
@@ -50,8 +51,10 @@ declare module 'hardhat/types/config' {
 // import '@typechain/hardhat';
 // import '@nomiclabs/hardhat-ethers';
 // import '@nomiclabs/hardhat-waffle';
-// import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-toolbox";
 import '@nomiclabs/hardhat-solhint';
+// import "@nomicfoundation/hardhat-verify"
+
 // import '@nomiclabs/hardhat-etherscan';
 
 // import '@openzeppelin/hardhat-upgrades';
@@ -247,7 +250,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: 'types',
-    target: 'ethers-v5',
+    target: 'ethers-v6',
   },
   gasReporter: {
     enabled: argv.enableGasReport,

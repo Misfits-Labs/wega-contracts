@@ -5,6 +5,7 @@ export * as dummies from "./dummies";
 export * as escrow from "./escrow";
 export * as events from "./events";
 export * as games from "./games";
+export * as randomizer from "./randomizer";
 export * as roles from "./roles";
 export { FeeManager__factory } from "./FeeManager__factory";
 export { IFeeManager__factory } from "./IFeeManager__factory";

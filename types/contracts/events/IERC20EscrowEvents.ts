@@ -3,216 +3,324 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  Signer,
-  utils,
+  FunctionFragment,
+  Interface,
+  EventFragment,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { EventFragment } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
 } from "../../common";
 
-export interface IERC20EscrowEventsInterface extends utils.Interface {
-  functions: {};
-
-  events: {
-    "ApplyFees(bool)": EventFragment;
-    "SetFeeManager(address)": EventFragment;
-    "SetGameControler(address)": EventFragment;
-    "SetWithdrawers(bytes32,address[])": EventFragment;
-    "WagerDeposit(bytes32,uint256,address)": EventFragment;
-    "WagerRequestCreation(bytes32,address,address,uint256)": EventFragment;
-    "WagerWithdrawal(bytes32,uint256,address)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "ApplyFees"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetFeeManager"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetGameControler"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetWithdrawers"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WagerDeposit"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WagerRequestCreation"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "WagerWithdrawal"): EventFragment;
+export interface IERC20EscrowEventsInterface extends Interface {
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "ApplyFees"
+      | "SetFeeManager"
+      | "SetGameControler"
+      | "SetWithdrawers"
+      | "WagerDeposit"
+      | "WagerRequestCreation"
+      | "WagerWithdrawal"
+  ): EventFragment;
 }
 
-export interface ApplyFeesEventObject {
-  areFeesApplied: boolean;
+export namespace ApplyFeesEvent {
+  export type InputTuple = [areFeesApplied: boolean];
+  export type OutputTuple = [areFeesApplied: boolean];
+  export interface OutputObject {
+    areFeesApplied: boolean;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type ApplyFeesEvent = TypedEvent<[boolean], ApplyFeesEventObject>;
 
-export type ApplyFeesEventFilter = TypedEventFilter<ApplyFeesEvent>;
-
-export interface SetFeeManagerEventObject {
-  feeManager: string;
+export namespace SetFeeManagerEvent {
+  export type InputTuple = [feeManager: AddressLike];
+  export type OutputTuple = [feeManager: string];
+  export interface OutputObject {
+    feeManager: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SetFeeManagerEvent = TypedEvent<[string], SetFeeManagerEventObject>;
 
-export type SetFeeManagerEventFilter = TypedEventFilter<SetFeeManagerEvent>;
-
-export interface SetGameControlerEventObject {
-  gameController: string;
+export namespace SetGameControlerEvent {
+  export type InputTuple = [gameController: AddressLike];
+  export type OutputTuple = [gameController: string];
+  export interface OutputObject {
+    gameController: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SetGameControlerEvent = TypedEvent<
-  [string],
-  SetGameControlerEventObject
->;
 
-export type SetGameControlerEventFilter =
-  TypedEventFilter<SetGameControlerEvent>;
-
-export interface SetWithdrawersEventObject {
-  escrowId: string;
-  withdrawers: string[];
+export namespace SetWithdrawersEvent {
+  export type InputTuple = [escrowId: BytesLike, withdrawers: AddressLike[]];
+  export type OutputTuple = [escrowId: string, withdrawers: string[]];
+  export interface OutputObject {
+    escrowId: string;
+    withdrawers: string[];
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SetWithdrawersEvent = TypedEvent<
-  [string, string[]],
-  SetWithdrawersEventObject
->;
 
-export type SetWithdrawersEventFilter = TypedEventFilter<SetWithdrawersEvent>;
-
-export interface WagerDepositEventObject {
-  escrowId: string;
-  wager: BigNumber;
-  player: string;
+export namespace WagerDepositEvent {
+  export type InputTuple = [
+    escrowId: BytesLike,
+    wager: BigNumberish,
+    player: AddressLike
+  ];
+  export type OutputTuple = [escrowId: string, wager: bigint, player: string];
+  export interface OutputObject {
+    escrowId: string;
+    wager: bigint;
+    player: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WagerDepositEvent = TypedEvent<
-  [string, BigNumber, string],
-  WagerDepositEventObject
->;
 
-export type WagerDepositEventFilter = TypedEventFilter<WagerDepositEvent>;
-
-export interface WagerRequestCreationEventObject {
-  escrowId: string;
-  token: string;
-  creator: string;
-  wager: BigNumber;
+export namespace WagerRequestCreationEvent {
+  export type InputTuple = [
+    escrowId: BytesLike,
+    token: AddressLike,
+    creator: AddressLike,
+    wager: BigNumberish
+  ];
+  export type OutputTuple = [
+    escrowId: string,
+    token: string,
+    creator: string,
+    wager: bigint
+  ];
+  export interface OutputObject {
+    escrowId: string;
+    token: string;
+    creator: string;
+    wager: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WagerRequestCreationEvent = TypedEvent<
-  [string, string, string, BigNumber],
-  WagerRequestCreationEventObject
->;
 
-export type WagerRequestCreationEventFilter =
-  TypedEventFilter<WagerRequestCreationEvent>;
-
-export interface WagerWithdrawalEventObject {
-  escrowHash: string;
-  transferAmount: BigNumber;
-  winner: string;
+export namespace WagerWithdrawalEvent {
+  export type InputTuple = [
+    escrowHash: BytesLike,
+    transferAmount: BigNumberish,
+    winner: AddressLike
+  ];
+  export type OutputTuple = [
+    escrowHash: string,
+    transferAmount: bigint,
+    winner: string
+  ];
+  export interface OutputObject {
+    escrowHash: string;
+    transferAmount: bigint;
+    winner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type WagerWithdrawalEvent = TypedEvent<
-  [string, BigNumber, string],
-  WagerWithdrawalEventObject
->;
-
-export type WagerWithdrawalEventFilter = TypedEventFilter<WagerWithdrawalEvent>;
 
 export interface IERC20EscrowEvents extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IERC20EscrowEvents;
+  waitForDeployment(): Promise<this>;
 
   interface: IERC20EscrowEventsInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {};
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  callStatic: {};
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getEvent(
+    key: "ApplyFees"
+  ): TypedContractEvent<
+    ApplyFeesEvent.InputTuple,
+    ApplyFeesEvent.OutputTuple,
+    ApplyFeesEvent.OutputObject
+  >;
+  getEvent(
+    key: "SetFeeManager"
+  ): TypedContractEvent<
+    SetFeeManagerEvent.InputTuple,
+    SetFeeManagerEvent.OutputTuple,
+    SetFeeManagerEvent.OutputObject
+  >;
+  getEvent(
+    key: "SetGameControler"
+  ): TypedContractEvent<
+    SetGameControlerEvent.InputTuple,
+    SetGameControlerEvent.OutputTuple,
+    SetGameControlerEvent.OutputObject
+  >;
+  getEvent(
+    key: "SetWithdrawers"
+  ): TypedContractEvent<
+    SetWithdrawersEvent.InputTuple,
+    SetWithdrawersEvent.OutputTuple,
+    SetWithdrawersEvent.OutputObject
+  >;
+  getEvent(
+    key: "WagerDeposit"
+  ): TypedContractEvent<
+    WagerDepositEvent.InputTuple,
+    WagerDepositEvent.OutputTuple,
+    WagerDepositEvent.OutputObject
+  >;
+  getEvent(
+    key: "WagerRequestCreation"
+  ): TypedContractEvent<
+    WagerRequestCreationEvent.InputTuple,
+    WagerRequestCreationEvent.OutputTuple,
+    WagerRequestCreationEvent.OutputObject
+  >;
+  getEvent(
+    key: "WagerWithdrawal"
+  ): TypedContractEvent<
+    WagerWithdrawalEvent.InputTuple,
+    WagerWithdrawalEvent.OutputTuple,
+    WagerWithdrawalEvent.OutputObject
+  >;
 
   filters: {
-    "ApplyFees(bool)"(
-      areFeesApplied?: PromiseOrValue<boolean> | null
-    ): ApplyFeesEventFilter;
-    ApplyFees(
-      areFeesApplied?: PromiseOrValue<boolean> | null
-    ): ApplyFeesEventFilter;
+    "ApplyFees(bool)": TypedContractEvent<
+      ApplyFeesEvent.InputTuple,
+      ApplyFeesEvent.OutputTuple,
+      ApplyFeesEvent.OutputObject
+    >;
+    ApplyFees: TypedContractEvent<
+      ApplyFeesEvent.InputTuple,
+      ApplyFeesEvent.OutputTuple,
+      ApplyFeesEvent.OutputObject
+    >;
 
-    "SetFeeManager(address)"(
-      feeManager?: PromiseOrValue<string> | null
-    ): SetFeeManagerEventFilter;
-    SetFeeManager(
-      feeManager?: PromiseOrValue<string> | null
-    ): SetFeeManagerEventFilter;
+    "SetFeeManager(address)": TypedContractEvent<
+      SetFeeManagerEvent.InputTuple,
+      SetFeeManagerEvent.OutputTuple,
+      SetFeeManagerEvent.OutputObject
+    >;
+    SetFeeManager: TypedContractEvent<
+      SetFeeManagerEvent.InputTuple,
+      SetFeeManagerEvent.OutputTuple,
+      SetFeeManagerEvent.OutputObject
+    >;
 
-    "SetGameControler(address)"(
-      gameController?: PromiseOrValue<string> | null
-    ): SetGameControlerEventFilter;
-    SetGameControler(
-      gameController?: PromiseOrValue<string> | null
-    ): SetGameControlerEventFilter;
+    "SetGameControler(address)": TypedContractEvent<
+      SetGameControlerEvent.InputTuple,
+      SetGameControlerEvent.OutputTuple,
+      SetGameControlerEvent.OutputObject
+    >;
+    SetGameControler: TypedContractEvent<
+      SetGameControlerEvent.InputTuple,
+      SetGameControlerEvent.OutputTuple,
+      SetGameControlerEvent.OutputObject
+    >;
 
-    "SetWithdrawers(bytes32,address[])"(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      withdrawers?: PromiseOrValue<string>[] | null
-    ): SetWithdrawersEventFilter;
-    SetWithdrawers(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      withdrawers?: PromiseOrValue<string>[] | null
-    ): SetWithdrawersEventFilter;
+    "SetWithdrawers(bytes32,address[])": TypedContractEvent<
+      SetWithdrawersEvent.InputTuple,
+      SetWithdrawersEvent.OutputTuple,
+      SetWithdrawersEvent.OutputObject
+    >;
+    SetWithdrawers: TypedContractEvent<
+      SetWithdrawersEvent.InputTuple,
+      SetWithdrawersEvent.OutputTuple,
+      SetWithdrawersEvent.OutputObject
+    >;
 
-    "WagerDeposit(bytes32,uint256,address)"(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      wager?: PromiseOrValue<BigNumberish> | null,
-      player?: PromiseOrValue<string> | null
-    ): WagerDepositEventFilter;
-    WagerDeposit(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      wager?: PromiseOrValue<BigNumberish> | null,
-      player?: PromiseOrValue<string> | null
-    ): WagerDepositEventFilter;
+    "WagerDeposit(bytes32,uint256,address)": TypedContractEvent<
+      WagerDepositEvent.InputTuple,
+      WagerDepositEvent.OutputTuple,
+      WagerDepositEvent.OutputObject
+    >;
+    WagerDeposit: TypedContractEvent<
+      WagerDepositEvent.InputTuple,
+      WagerDepositEvent.OutputTuple,
+      WagerDepositEvent.OutputObject
+    >;
 
-    "WagerRequestCreation(bytes32,address,address,uint256)"(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      token?: PromiseOrValue<string> | null,
-      creator?: PromiseOrValue<string> | null,
-      wager?: null
-    ): WagerRequestCreationEventFilter;
-    WagerRequestCreation(
-      escrowId?: PromiseOrValue<BytesLike> | null,
-      token?: PromiseOrValue<string> | null,
-      creator?: PromiseOrValue<string> | null,
-      wager?: null
-    ): WagerRequestCreationEventFilter;
+    "WagerRequestCreation(bytes32,address,address,uint256)": TypedContractEvent<
+      WagerRequestCreationEvent.InputTuple,
+      WagerRequestCreationEvent.OutputTuple,
+      WagerRequestCreationEvent.OutputObject
+    >;
+    WagerRequestCreation: TypedContractEvent<
+      WagerRequestCreationEvent.InputTuple,
+      WagerRequestCreationEvent.OutputTuple,
+      WagerRequestCreationEvent.OutputObject
+    >;
 
-    "WagerWithdrawal(bytes32,uint256,address)"(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      transferAmount?: PromiseOrValue<BigNumberish> | null,
-      winner?: PromiseOrValue<string> | null
-    ): WagerWithdrawalEventFilter;
-    WagerWithdrawal(
-      escrowHash?: PromiseOrValue<BytesLike> | null,
-      transferAmount?: PromiseOrValue<BigNumberish> | null,
-      winner?: PromiseOrValue<string> | null
-    ): WagerWithdrawalEventFilter;
+    "WagerWithdrawal(bytes32,uint256,address)": TypedContractEvent<
+      WagerWithdrawalEvent.InputTuple,
+      WagerWithdrawalEvent.OutputTuple,
+      WagerWithdrawalEvent.OutputObject
+    >;
+    WagerWithdrawal: TypedContractEvent<
+      WagerWithdrawalEvent.InputTuple,
+      WagerWithdrawalEvent.OutputTuple,
+      WagerWithdrawalEvent.OutputObject
+    >;
   };
-
-  estimateGas: {};
-
-  populateTransaction: {};
 }

@@ -3,52 +3,48 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../common";
 
 export declare namespace IFeeManager {
   export type FeeConfigStruct = {
-    applier: PromiseOrValue<string>;
-    feeTaker: PromiseOrValue<string>;
-    feeShare: PromiseOrValue<BigNumberish>;
-    shouldApply: PromiseOrValue<boolean>;
+    applier: AddressLike;
+    feeTaker: AddressLike;
+    feeShare: BigNumberish;
+    shouldApply: boolean;
   };
 
-  export type FeeConfigStructOutput = [string, string, BigNumber, boolean] & {
+  export type FeeConfigStructOutput = [
+    applier: string,
+    feeTaker: string,
+    feeShare: bigint,
+    shouldApply: boolean
+  ] & {
     applier: string;
     feeTaker: string;
-    feeShare: BigNumber;
+    feeShare: bigint;
     shouldApply: boolean;
   };
 }
 
-export interface IFeeManagerInterface extends utils.Interface {
-  functions: {
-    "calculateFeesForTransfer(address,uint256)": FunctionFragment;
-    "getFeeRule(address)": FunctionFragment;
-    "setFeeConfigs((address,address,uint256,bool)[])": FunctionFragment;
-    "shouldApplyFees(address)": FunctionFragment;
-  };
-
+export interface IFeeManagerInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "calculateFeesForTransfer"
       | "getFeeRule"
       | "setFeeConfigs"
@@ -57,11 +53,11 @@ export interface IFeeManagerInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "calculateFeesForTransfer",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getFeeRule",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeConfigs",
@@ -69,7 +65,7 @@ export interface IFeeManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "shouldApplyFees",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
 
   decodeFunctionResult(
@@ -85,158 +81,115 @@ export interface IFeeManagerInterface extends utils.Interface {
     functionFragment: "shouldApplyFees",
     data: BytesLike
   ): Result;
-
-  events: {};
 }
 
 export interface IFeeManager extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IFeeManager;
+  waitForDeployment(): Promise<this>;
 
   interface: IFeeManagerInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    calculateFeesForTransfer(
-      applier: PromiseOrValue<string>,
-      transferAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    getFeeRule(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<
-      [IFeeManager.FeeConfigStructOutput] & {
-        feeRule: IFeeManager.FeeConfigStructOutput;
-      }
-    >;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    setFeeConfigs(
-      configs: IFeeManager.FeeConfigStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    shouldApplyFees(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean] & { shouldApply: boolean }>;
-  };
-
-  calculateFeesForTransfer(
-    applier: PromiseOrValue<string>,
-    transferAmount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  getFeeRule(
-    applier: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<IFeeManager.FeeConfigStructOutput>;
-
-  setFeeConfigs(
-    configs: IFeeManager.FeeConfigStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  shouldApplyFees(
-    applier: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  callStatic: {
-    calculateFeesForTransfer(
-      applier: PromiseOrValue<string>,
-      transferAmount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber, BigNumber] & {
+  calculateFeesForTransfer: TypedContractMethod<
+    [applier: AddressLike, transferAmount: BigNumberish],
+    [
+      [string, bigint, bigint] & {
         feeTaker: string;
-        feeAmount: BigNumber;
-        sendAmount: BigNumber;
+        feeAmount: bigint;
+        sendAmount: bigint;
       }
-    >;
+    ],
+    "nonpayable"
+  >;
 
-    getFeeRule(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<IFeeManager.FeeConfigStructOutput>;
+  getFeeRule: TypedContractMethod<
+    [applier: AddressLike],
+    [IFeeManager.FeeConfigStructOutput],
+    "view"
+  >;
 
-    setFeeConfigs(
-      configs: IFeeManager.FeeConfigStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
+  setFeeConfigs: TypedContractMethod<
+    [configs: IFeeManager.FeeConfigStruct[]],
+    [void],
+    "nonpayable"
+  >;
 
-    shouldApplyFees(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-  };
+  shouldApplyFees: TypedContractMethod<
+    [applier: AddressLike],
+    [boolean],
+    "view"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "calculateFeesForTransfer"
+  ): TypedContractMethod<
+    [applier: AddressLike, transferAmount: BigNumberish],
+    [
+      [string, bigint, bigint] & {
+        feeTaker: string;
+        feeAmount: bigint;
+        sendAmount: bigint;
+      }
+    ],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getFeeRule"
+  ): TypedContractMethod<
+    [applier: AddressLike],
+    [IFeeManager.FeeConfigStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "setFeeConfigs"
+  ): TypedContractMethod<
+    [configs: IFeeManager.FeeConfigStruct[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "shouldApplyFees"
+  ): TypedContractMethod<[applier: AddressLike], [boolean], "view">;
 
   filters: {};
-
-  estimateGas: {
-    calculateFeesForTransfer(
-      applier: PromiseOrValue<string>,
-      transferAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getFeeRule(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    setFeeConfigs(
-      configs: IFeeManager.FeeConfigStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    shouldApplyFees(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    calculateFeesForTransfer(
-      applier: PromiseOrValue<string>,
-      transferAmount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getFeeRule(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    setFeeConfigs(
-      configs: IFeeManager.FeeConfigStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    shouldApplyFees(
-      applier: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-  };
 }

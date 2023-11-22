@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   WegaProtocolAdminRole,
   WegaProtocolAdminRoleInterface,
@@ -401,16 +400,16 @@ const _abi = [
 export class WegaProtocolAdminRole__factory {
   static readonly abi = _abi;
   static createInterface(): WegaProtocolAdminRoleInterface {
-    return new utils.Interface(_abi) as WegaProtocolAdminRoleInterface;
+    return new Interface(_abi) as WegaProtocolAdminRoleInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): WegaProtocolAdminRole {
     return new Contract(
       address,
       _abi,
-      signerOrProvider
-    ) as WegaProtocolAdminRole;
+      runner
+    ) as unknown as WegaProtocolAdminRole;
   }
 }
