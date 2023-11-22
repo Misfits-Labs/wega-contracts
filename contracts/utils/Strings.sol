@@ -1,9 +1,9 @@
 // @author Daosourced
 // @date August 21 2023
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
-pragma solidity ^0.8.0;
 
 library Strings {
     struct Slice {

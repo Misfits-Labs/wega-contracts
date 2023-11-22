@@ -45,6 +45,7 @@ async function main() {
     escrow: ['Wega ERC20 Escrow Service', '0.0.0'],
     initialDrands,
     drands,
+    feeTaker: chainId == 1337 ? '0xBcd4042DE499D14e55001CcbB24a551F3b954096' : '0x13C38b2bd4cF15985a1505fc4FAA65aE2AdE45A5',
   });
   mergeNetworkConfig(deployConfig);
   mergeRandomNumConfig({[chainId]: {

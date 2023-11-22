@@ -27,7 +27,7 @@ contract WegaDiceGame is Wega {
     address[] memory currentPlayers,
     uint256 denominator,
     uint256 minRounds
-  ) external override onlyWegaGameManager returns (address[] memory winners) {
+  ) external override onlyRole(GAME_CONTROLLER_ROLE) returns (address[] memory winners) {
     _play(escrowHash, currentPlayers, denominator, 1, minRounds);
     winners = _declareWinners(escrowHash, currentPlayers); 
   }

@@ -40,14 +40,14 @@ contract FeeManager is WegaProtocolAdminRole, IFeeManager, IFeeManagerEvents, UU
 
   function __FeeManager_init_unchained() internal onlyInitializing  {}
 
-  function _setFeeConfig(address applier, FeeConfig memory config) internal {
-   _feeRules[applier] = config;
-   emit SetFeeRule(applier, config.feeTaker, config.feeShare); 
+  function _setFeeConfig(FeeConfig memory config) internal {
+   _feeRules[config.applier] = config;
+   emit SetFeeRule(config.applier, config.feeTaker, config.feeShare); 
   }
 
-  function setFeeConfigs(address[] memory appliers, FeeConfig[] memory configs) external onlyWegaProtocolAdmin {
-    for(uint i = 0; i < appliers.length; i++) {
-     _setFeeConfig(appliers[i], configs[i]);
+  function setFeeConfigs(FeeConfig[] memory configs) external onlyWegaProtocolAdmin {
+    for(uint i = 0; i < configs.length; i++) {
+     _setFeeConfig(configs[i]);
     }  
   }
 

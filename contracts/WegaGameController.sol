@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.14;
 
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
@@ -52,30 +52,27 @@ contract WegaGameController is
   function initialize(
     address erc20EscrowAddress, 
     address randomNumberController,
-    string[] memory games,
     GameSettings[] memory gameSettings
   ) initializer public {
-    __WegaGameController_init(erc20EscrowAddress, games, gameSettings);
+    __WegaController_init(erc20EscrowAddress, gameSettings);
     __WegaProtocolAdminRole_init();
     __UUPSUpgradeable_init();
     randomizer = IWegaRandomNumberController(randomNumberController);
   }
 
-  function __WegaGameController_init(
+  function __WegaController_init(
     address erc20EscrowAddress, 
-    string[] memory games,
     GameSettings[] memory gameSettings
   ) public onlyInitializing {
-    __WegaGameController_init_unchained(erc20EscrowAddress, games, gameSettings);
+    __WegaController_init_unchained(erc20EscrowAddress, gameSettings);
   } 
 
-  function __WegaGameController_init_unchained(
+  function __WegaController_init_unchained(
     address erc20EscrowAddress, 
-    string[] memory games,
     GameSettings[] memory gameSettings
   ) public onlyInitializing {
     erc20Escrow = IWegaERC20Escrow(erc20EscrowAddress);
-    for(uint256 i = 0; i < games.length; i++) {
+    for(uint256 i = 0; i < gameSettings.length; i++) {
       _registeredGames[gameSettings[i].name.keyHash()] = gameSettings[i].proxy;
       _gameNameHashes.add(gameSettings[i].name.keyHash());
       _setGameConfiguration(gameSettings[i]);
@@ -90,7 +87,7 @@ contract WegaGameController is
   ) public override {
     require(_gameNameHashes.contains(name.keyHash()), INVALID_WEGA_GAME);
     GameSettings memory settings = getGameSettings(name);
-    _beforeCreateOrDeposit(randomNumbers);
+    _seedRandomizerBeforeCreateOrDeposit(randomNumbers);
     bytes32 escrowHash = erc20Escrow.createWagerRequest(
       tokenAddress, 
       _msgSender(), 
@@ -111,8 +108,8 @@ contract WegaGameController is
   function depositOrPlay(bytes32 escrowHash, uint256[] memory randomNumbers) public override {
     IWega.Wega memory game =_games[escrowHash];
     GameSettings memory settings = getGameSettings(game.name); 
-    _deposit(escrowHash);
-    _beforeCreateOrDeposit(randomNumbers);
+    _depositWagerTo(escrowHash);
+    _seedRandomizerBeforeCreateOrDeposit(randomNumbers); 
     if(_games[escrowHash].deposited == settings.requiredPlayers) {
       _playDice(settings.proxy, escrowHash, _games[escrowHash].currentPlayers, settings.denominator, settings.minRounds);
     }
@@ -125,8 +122,8 @@ contract WegaGameController is
   ) public override {
     IWega.Wega memory game =_games[escrowHash];
     GameSettings memory settings = getGameSettings(game.name); 
-    _deposit(escrowHash);
-    _beforeCreateOrDeposit(randomNumbers);
+    _depositWagerTo(escrowHash);
+    _seedRandomizerBeforeCreateOrDeposit(randomNumbers);
     if(_games[escrowHash].deposited == settings.requiredPlayers) {
       _playCoinFlip(
         settings.proxy, 
@@ -177,7 +174,7 @@ contract WegaGameController is
     emit WinnerDeclaration(escrowHash, gameWinners);
   }
 
-  function _deposit(bytes32 escrowHash) internal {
+  function _depositWagerTo(bytes32 escrowHash) internal {
     IWega.Wega memory game =_games[escrowHash];
     GameSettings memory settings = getGameSettings(game.name); 
     IEscrow.ERC20WagerRequest memory wagerRequest = erc20Escrow.getWagerRequest(escrowHash);
@@ -266,7 +263,7 @@ contract WegaGameController is
 
   function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 
-  function _beforeCreateOrDeposit(uint256[] memory randomNumbers) internal {
+  function _seedRandomizerBeforeCreateOrDeposit(uint256[] memory randomNumbers) internal {
     randomizer.addRandomNumbers(randomNumbers);
   }
 }

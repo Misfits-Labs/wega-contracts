@@ -1,6 +1,8 @@
 // @author Daosourced
 // @date November 7 2023
+pragma solidity ^0.8.14;
 import "@openzeppelin/contracts/utils/math/Math.sol";
+
 library Distribution { 
   using Math for uint256;
 

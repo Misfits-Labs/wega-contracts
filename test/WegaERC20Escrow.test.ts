@@ -64,12 +64,12 @@ describe("WegaERC20Escrow", () => {
     feeManagerFactory = new FeeManager__factory(coinbase);
     
     // deploy contracts
-    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'});
+    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize' }) as FeeManager;
     await feeManager.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
 
     erc20Escrow = await upgrades.deployProxy(
       erc20EscrowFactory, 
-      [ feeManager.address ], { kind: 'uups'}
+      [ feeManager.address ], { kind: 'uups', initializer: 'initialize' }
     );
 
     erc20Dummy = await erc20DummyFactory.deploy([
@@ -84,12 +84,13 @@ describe("WegaERC20Escrow", () => {
     await erc20Escrow.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
     feeConfigs = [
       { 
-       feeTaker: erc20Escrow.address as HexishString,
-       feeShare: 500,
-       shouldApply: true,
+        applier: erc20Escrow.address as HexishString,
+        feeTaker: erc20Escrow.address as HexishString,
+        feeShare: 500,
+        shouldApply: true,
       }
      ]
-    await feeManager.connect(protocolAdmin).setFeeConfigs([feeTaker.address], feeConfigs);
+    await feeManager.connect(protocolAdmin).setFeeConfigs(feeConfigs);
   });
 
   describe("Function: hash(address,address,uint256,uint256)", () => {

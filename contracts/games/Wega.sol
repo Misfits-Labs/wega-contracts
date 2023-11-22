@@ -18,14 +18,14 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "../escrow/WegaERC20Escrow.sol";
-import "../roles/WegaGameManagerRole.sol";
+import "../roles/WegaProtocolAdminRole.sol";
 import "../IWegaRandomNumberController.sol";
 import "../errors/AccessControlErrors.sol";
 import "../utils/Arrays.sol";
 import "./IWega.sol";
 
 
-abstract contract Wega is IWega, WegaGameManagerRole, UUPSUpgradeable {
+abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
 
   using EnumerableMap for EnumerableMap.UintToUintMap;
   using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
@@ -39,22 +39,25 @@ abstract contract Wega is IWega, WegaGameManagerRole, UUPSUpgradeable {
   mapping(bytes32 => mapping(address => uint256)) private _playerScores;
   mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _winners;
   CountersUpgradeable.Counter internal _nonces;
+  bytes32 public GAME_CONTROLLER_ROLE;
+
   
 
   function initialize(
     address randomNumberController
   ) initializer public {
     __UUPSUpgradeable_init();
-    __WegaGameManagerRole_init();
-    __Wega(randomNumberController);
-    _addWegaGameManager(owner());
+    __WegaProtocolAdminRole_init();
+    __Wega_init(randomNumberController);
+    GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
+    _setRoleAdmin(GAME_CONTROLLER_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
   }
 
-  function __Wega(address randomNumberController) public onlyInitializing {
-    __Wega_unchained(randomNumberController);
+  function __Wega_init(address randomNumberController) public onlyInitializing {
+    __Wega_init_unchained(randomNumberController);
   } 
 
-  function __Wega_unchained(address randomNumberController) public onlyInitializing {
+  function __Wega_init_unchained(address randomNumberController) public onlyInitializing {
     randomNumberGen = IWegaRandomNumberController(randomNumberController);
   }
 

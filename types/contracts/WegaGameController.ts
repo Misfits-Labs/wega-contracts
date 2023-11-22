@@ -75,8 +75,8 @@ export interface WegaGameControllerInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "WEGA_PROTOCOL_ADMIN_ROLE()": FunctionFragment;
-    "__WegaGameController_init(address,string[],(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
-    "__WegaGameController_init_unchained(address,string[],(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
+    "__WegaController_init(address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
+    "__WegaController_init_unchained(address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
     "addWegaProtocolAdmin(address)": FunctionFragment;
     "addWegaProtocolAdmins(address[])": FunctionFragment;
     "closeWegaProtocolAdmin(address)": FunctionFragment;
@@ -91,7 +91,7 @@ export interface WegaGameControllerInterface extends utils.Interface {
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "initialize(address,address,string[],(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
+    "initialize(address,address,(uint256,uint256,uint256,address,address,string)[])": FunctionFragment;
     "isWegaProtocolAdmin(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "playerScore(string,bytes32,address)": FunctionFragment;
@@ -119,8 +119,8 @@ export interface WegaGameControllerInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
-      | "__WegaGameController_init"
-      | "__WegaGameController_init_unchained"
+      | "__WegaController_init"
+      | "__WegaController_init_unchained"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
       | "closeWegaProtocolAdmin"
@@ -168,20 +168,12 @@ export interface WegaGameControllerInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "__WegaGameController_init",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>[],
-      IWegaGameController.GameSettingsStruct[]
-    ]
+    functionFragment: "__WegaController_init",
+    values: [PromiseOrValue<string>, IWegaGameController.GameSettingsStruct[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "__WegaGameController_init_unchained",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>[],
-      IWegaGameController.GameSettingsStruct[]
-    ]
+    functionFragment: "__WegaController_init_unchained",
+    values: [PromiseOrValue<string>, IWegaGameController.GameSettingsStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
@@ -257,7 +249,6 @@ export interface WegaGameControllerInterface extends utils.Interface {
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
-      PromiseOrValue<string>[],
       IWegaGameController.GameSettingsStruct[]
     ]
   ): string;
@@ -356,11 +347,11 @@ export interface WegaGameControllerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "__WegaGameController_init",
+    functionFragment: "__WegaController_init",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "__WegaGameController_init_unchained",
+    functionFragment: "__WegaController_init_unchained",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -665,16 +656,14 @@ export interface WegaGameController extends BaseContract {
 
     WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    __WegaGameController_init(
+    __WegaController_init(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    __WegaGameController_init_unchained(
+    __WegaController_init_unchained(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -763,7 +752,6 @@ export interface WegaGameController extends BaseContract {
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
       randomNumberController: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -873,16 +861,14 @@ export interface WegaGameController extends BaseContract {
 
   WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-  __WegaGameController_init(
+  __WegaController_init(
     erc20EscrowAddress: PromiseOrValue<string>,
-    games: PromiseOrValue<string>[],
     gameSettings: IWegaGameController.GameSettingsStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  __WegaGameController_init_unchained(
+  __WegaController_init_unchained(
     erc20EscrowAddress: PromiseOrValue<string>,
-    games: PromiseOrValue<string>[],
     gameSettings: IWegaGameController.GameSettingsStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -967,7 +953,6 @@ export interface WegaGameController extends BaseContract {
   initialize(
     erc20EscrowAddress: PromiseOrValue<string>,
     randomNumberController: PromiseOrValue<string>,
-    games: PromiseOrValue<string>[],
     gameSettings: IWegaGameController.GameSettingsStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -1077,16 +1062,14 @@ export interface WegaGameController extends BaseContract {
 
     WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
-    __WegaGameController_init(
+    __WegaController_init(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    __WegaGameController_init_unchained(
+    __WegaController_init_unchained(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1171,7 +1154,6 @@ export interface WegaGameController extends BaseContract {
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
       randomNumberController: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1396,16 +1378,14 @@ export interface WegaGameController extends BaseContract {
 
     WEGA_PROTOCOL_ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    __WegaGameController_init(
+    __WegaController_init(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    __WegaGameController_init_unchained(
+    __WegaController_init_unchained(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1490,7 +1470,6 @@ export interface WegaGameController extends BaseContract {
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
       randomNumberController: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1605,16 +1584,14 @@ export interface WegaGameController extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    __WegaGameController_init(
+    __WegaController_init(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    __WegaGameController_init_unchained(
+    __WegaController_init_unchained(
       erc20EscrowAddress: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1699,7 +1676,6 @@ export interface WegaGameController extends BaseContract {
     initialize(
       erc20EscrowAddress: PromiseOrValue<string>,
       randomNumberController: PromiseOrValue<string>,
-      games: PromiseOrValue<string>[],
       gameSettings: IWegaGameController.GameSettingsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

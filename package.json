@@ -43,7 +43,7 @@
   "scripts": {
     "compile": "hardhat compile --force",
     "compile:size": "env ENABLE_CONTRACT_SIZER=true yarn compile",
-    "deploy:localhost": "hardhat run --network localhost scripts/deploy_bridge.ts",
+    "deploy:localhost": "hardhat run --network localhost scripts/deploy_full.ts",
     "deploy:localhost:erc20-dummy": "hardhat run --network localhost scripts/deploy_erc20-dummy.ts",
     "deploy:localhost:erc20-escrow": "hardhat run --network localhost scripts/deploy_escrow.ts",
     "deploy:localhost:random-number-controller": "hardhat run --network localhost scripts/deploy_random-number-controller.ts",

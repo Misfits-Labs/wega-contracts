@@ -53,11 +53,11 @@ async function getArtifacts (): Promise<ArtifactsMap> {
   return {
     WegaERC20Escrow: await ethers.getContractFactory('WegaERC20Escrow'),
     WegaERC20Dummy: await ethers.getContractFactory('WegaERC20Dummy'),
-    WegaGameController: await ethers.getContractFactory('WegaGameController'),
     WegaRandomNumberController: await ethers.getContractFactory('WegaRandomNumberController'),
     WegaDiceGame: await ethers.getContractFactory('WegaDiceGame'),
     WegaCoinFlipGame: await ethers.getContractFactory('WegaCoinFlipGame'),
     FeeManager: await ethers.getContractFactory('FeeManager'),
+    WegaGameController: await ethers.getContractFactory('WegaGameController'),
   };
 }
 

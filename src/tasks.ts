@@ -1,5 +1,5 @@
-import { network, upgrades } from 'hardhat';
 import { BigNumber, Contract, utils } from 'ethers';
+import { network, upgrades, ethers } from 'hardhat';
 import { Deployer } from './deployer';
 import { merge } from 'lodash'
 
@@ -8,6 +8,15 @@ import verify from './verify';
 import { unwrap, unwrapDependencies, upgradeContract } from './helpers';
 import { mergeNetworkConfig } from './config';
 import { PROTOCOL_ROLES } from './constants'
+import { 
+  WegaRandomNumberController,
+  WegaGameController,
+  WegaGameController__factory,
+  FeeManager,
+  WegaDiceGame,
+  WegaCoinFlipGame, 
+  WegaERC20Escrow,
+} from '../types'
 
 export type Task = {
   tags: string[];
@@ -45,12 +54,14 @@ const setFeeRulesTask: Task = {
         ArtifactName.WegaERC20Escrow
       ],
     );
-    // configure game controller 
-    const rules = {
+    // configure game controller
+    const rules = [{
       applier: WegaERC20Escrow.address,
       shouldApply: false,
+      feeTaker: inputs.feeTaker,
       feeShare: 500
-    }
+    }];
+
     ctx.log('Setting fee rules...', JSON.stringify(rules));
     const feeManager = ctx.artifacts.FeeManager.attach(FeeManager.address);
     const tx = await feeManager.connect(protocolAdmin).setFeeConfigs(rules);
@@ -104,23 +115,32 @@ const configureProtocolTask: Task = {
     );
     
     // configure game controller 
-    const gameController = ctx.artifacts.WegaGameController.attach(WegaGameController.address);
-    const feeManager = ctx.artifacts.FeeManager.attach(FeeManager.address);
-    const erc20Escrow = ctx.artifacts.WegaERC20Escrow.attach(WegaERC20Escrow.address);
-    const randomNumController = ctx.artifacts.WegaRandomNumberController.attach(WegaRandomNumberController.address);
-    const diceGame = ctx.artifacts.WegaDiceGame.attach(WegaDiceGame.address);
-    const coinflipGame = ctx.artifacts.WegaCoinFlipGame.attach(WegaCoinFlipGame.address);
+    const gameController = ctx.artifacts.WegaGameController.attach(WegaGameController.address) as WegaGameController;
+    const feeManager = ctx.artifacts.FeeManager.attach(FeeManager.address) as FeeManager;
+    const erc20Escrow = ctx.artifacts.WegaERC20Escrow.attach(WegaERC20Escrow.address) as WegaERC20Escrow;
+    const randomNumController = ctx.artifacts.WegaRandomNumberController.attach(WegaRandomNumberController.address) as WegaRandomNumberController; 
+    const diceGame = ctx.artifacts.WegaDiceGame.attach(WegaDiceGame.address) as WegaDiceGame;
+    const coinflipGame = ctx.artifacts.WegaCoinFlipGame.attach(WegaCoinFlipGame.address) as WegaCoinFlipGame;
+
     ctx.log('Configuring settings on dependencies...');
     ctx.log('Adding game controller as manager on dependencies...');
-    
     // add EscrowManagerRole to gameController on escrow
-    await erc20Escrow.connect(owner).addWegaEscrowManager(gameController.address);
+    await erc20Escrow.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
+    
     // add RandomNumControllerManagerRole to gameController on randomNumController
-    await randomNumController.connect(owner).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address)
-    // add gameManager to 
-    await diceGame.connect(owner).addWegaGameManager(gameController.address);
-    // add gameManager to 
-    await coinflipGame.connect(owner).addWegaGameManager(gameController.address);
+    await randomNumController.connect(protocolAdmin).grantRole(
+      PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, 
+      gameController.address
+    )
+    
+    // configure dice games
+    await diceGame.connect(protocolAdmin).grantRole(
+      PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, 
+      gameController.address
+    );
+
+    // configure coinflip games  
+    await coinflipGame.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
     ctx.log('Adding managers done!');
 
     // add more randomNumbers
@@ -140,9 +160,22 @@ const configureProtocolTask: Task = {
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
     config = merge(ctx.getDeployConfig(), config);
 
-    const { WegaRandomNumberController } = config?.contracts || {};
+    const { 
+      WegaERC20Escrow,
+      WegaRandomNumberController,
+      WegaDiceGame,
+      WegaCoinFlipGame,
+      WegaGameController,
+      FeeManager } = config?.contracts || {};
 
-    const dependencies = { WegaRandomNumberController };
+    const dependencies = { 
+      WegaERC20Escrow,
+      WegaRandomNumberController,
+      WegaDiceGame,
+      WegaCoinFlipGame,
+      WegaGameController,
+      FeeManager 
+     };
 
     for (const [key, value] of Object.entries(dependencies)) {
       if (!value || !value.address) {
@@ -185,6 +218,7 @@ const deployWegaGameControllerTask: Task = {
     );
     const gameSettings = [
       {
+        name: 'DICE',
         denominator: 6,
         minRounds: 1,
         requiredPlayers: 2,
@@ -192,6 +226,7 @@ const deployWegaGameControllerTask: Task = {
         randomNumberController: WegaRandomNumberController.address
       },
       {
+        name: 'COINFLIP',
         denominator: 2,
         minRounds: 1,
         requiredPlayers: 2,
@@ -201,29 +236,34 @@ const deployWegaGameControllerTask: Task = {
     ]
     if(ctx.options.proxy) {
       gameController = await upgrades.deployProxy(
-        ctx.artifacts.WegaGameController.connect(owner), [
-          WegaERC20Escrow.address, 
-          WegaRandomNumberController.address,
-          ["DICE", "COINFLIP"],
-          gameSettings,
-        ], { 
-          initializer: "initialize",
+        ctx.artifacts.WegaGameController.connect(owner), [], { 
+          initializer: false,
           kind: 'uups'
         }
-      );
+      ) as WegaGameController;
       await gameController.deployTransaction.wait();
+      await gameController.initialize(
+        WegaERC20Escrow.address, 
+        WegaRandomNumberController.address, 
+        gameSettings
+        );
+      console.log(gameController)
       let gameControllerImpl = await upgrades.erc1967.getImplementationAddress(gameController.address);
+
       await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameControllerImpl);
       await verify(ctx, gameControllerImpl, []);
+      ctx.log('Adding protocol admins')
+      await gameController.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
     } else {
       gameController = await WegaGameController.connect(owner).deploy();      
       await gameController.connect(owner).initialize(WegaERC20Escrow.implementation, ["DICE", "COINFLIP"], [...gameSettings]);
       await ctx.saveContractConfig(ContractName.WegaGameController, gameController);
       await gameController.deployTransaction.wait();
       await verify(ctx, gameController.address, []);
+      ctx.log('Adding protocol admins')
+      await gameController.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
     } 
-    ctx.log('Adding protocol admins')
-    await gameController.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
+
   },
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
     config = merge(ctx.getDeployConfig(), config);
@@ -254,7 +294,7 @@ const deployDiceGameTask: Task = {
     inputs: any
   ) => {
     ctx.log('Deploying Wega Dice Game');
-    const { owner } = ctx.accounts;
+    const { owner, protocolAdmin } = ctx.accounts;
     const [
       WegaRandomNumberController
     ] = unwrapDependencies(
@@ -283,6 +323,8 @@ const deployDiceGameTask: Task = {
       await wegaDice.deployTransaction.wait();
       await verify(ctx, wegaDice.address, []);
     }
+    ctx.log('Adding protocol admins')
+    await wegaDice.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
   },
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
     config = merge(ctx.getDeployConfig(), config);
@@ -313,7 +355,7 @@ const deployCoinFlipGameTask: Task = {
     inputs: any
   ) => {
     ctx.log('Deploying Wega Coinflip Game');
-    const { owner } = ctx.accounts;
+    const { owner, protocolAdmin } = ctx.accounts;
     const [
       WegaRandomNumberController
     ] = unwrapDependencies(
@@ -330,7 +372,7 @@ const deployCoinFlipGameTask: Task = {
           initializer: 'initialize', 
           kind: 'uups'
         }
-      );
+      ) as WegaCoinFlipGame;
       await wegaCoinFlip.deployTransaction.wait();
       let wegaCoinFlipImpl = await upgrades.erc1967.getImplementationAddress(wegaCoinFlip.address);
       await ctx.saveContractConfig(ContractName.WegaCoinFlipGame, wegaCoinFlip, wegaCoinFlipImpl);
@@ -342,6 +384,8 @@ const deployCoinFlipGameTask: Task = {
       await wegaCoinFlip.deployTransaction.wait();
       await verify(ctx, wegaCoinFlip.address, []);
     }
+    ctx.log('Adding protocol admins')
+    await wegaCoinFlip.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
   },
   ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
     config = merge(ctx.getDeployConfig(), config);
@@ -481,15 +525,6 @@ const deployFeeManagerTask: Task = {
   ) => {
     ctx.log('Deploying Wega FeeManager');
     const { owner, protocolAdmin } = ctx.accounts;
-    // const [
-    //   WegaERC20Escrow
-    // ] = unwrapDependencies(
-    //   dependencies,
-    //   [
-    //     ArtifactName.WegaERC20Escrow,
-    //   ],
-    // );
-    // const { WegaCoinFlipGame } = ctx.artifacts;
     let feeManager: Contract;
     if(ctx.options.proxy) {      
       feeManager = await upgrades.deployProxy(

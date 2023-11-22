@@ -1,12 +1,12 @@
-import { BigNumber } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 
 export enum ArtifactName {
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
-  WegaGameController = 'WegaGameController',
   WegaRandomNumberController = 'WegaRandomNumberController',
   WegaDiceGame = 'WegaDiceGame',
   WegaCoinFlipGame = 'WegaCoinFlipGame',
+  WegaGameController = 'WegaGameController',
   FeeManager = 'FeeManager'
 }
 
@@ -14,11 +14,11 @@ export enum ContractName {
   ProxyAdmin = 'ProxyAdmin',
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
-  WegaGameController = 'WegaGameController',
   WegaRandomNumberController = 'WegaRandomNumberController',
   WegaDiceGame = 'WegaDiceGame',
   WegaCoinFlipGame = 'WegaCoinFlipGame',
   FeeManager = 'FeeManager',
+  WegaGameController = 'WegaGameController',
 }
 
 export type DeployedContract = {
@@ -62,6 +62,7 @@ export type RandomNumbersConfig = {
 }
 
 export type FeeConfig = {
+  applier: HexishString;
   feeTaker: HexishString;
   feeShare: number;
   shouldApply: boolean;
@@ -70,10 +71,10 @@ export type FeeConfig = {
 export type GameSetting = {
   name: string;
   proxy: HexishString;
-  requiredPlayers: number;
-  minRounds: number;
+  requiredPlayers: BigNumberish;
+  minRounds: BigNumberish;
   denominator: number;
-  randomNumberController: HexishString;
+  randomNumberController: HexishString | string;
 }
 
 export type HexishString = `0x${string}`;

@@ -43,12 +43,13 @@ describe("WegaFeeManager", () => {
     feeManagerFactory = new FeeManager__factory(coinbase);
     
     // deploy contracts
-    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'});
+    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'}) as FeeManager;
     await feeManager.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
 
     // feeConfigs
     feeConfigs = [
      { 
+      applier: feeApplier.address as HexishString,
       feeTaker: feeTaker.address as HexishString,
       feeShare: 500,
       shouldApply: false,
@@ -57,7 +58,7 @@ describe("WegaFeeManager", () => {
   });
   describe("Function: setFeeConfigs(address[],FeeConfig[])", () => {
    it("should allow only protocol admin to call", async () => {
-    await expect(feeManager.connect(signers[0]).setFeeConfigs([feeApplier.address], feeConfigs)).to.be.revertedWith("WegaAccessControl: CallerNotAllowed");
+    await expect(feeManager.connect(signers[0]).setFeeConfigs(feeConfigs)).to.be.revertedWith("WegaAccessControl: CallerNotAllowed");
    })
    it("should correctly set the fee configurations and emit correct event", async () => {
       await  expect(feeManager.connect(protocolAdmin).setFeeConfigs([feeApplier.address], feeConfigs)).to.emit(feeManager, 'SetFeeRule').withArgs(

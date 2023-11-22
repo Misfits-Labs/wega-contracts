@@ -281,7 +281,7 @@ const config: HardhatUserConfig = {
       localhost: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'],
       polygon: [process.env.POLYGON_PROTOCOL_ADMIN_ADDRESS as string],
       mumbai: [process.env.MUMBAI_PROTOCOL_ADMIN_ADDRESS as string],
-    }
+    },
   },
 };
 export default config;

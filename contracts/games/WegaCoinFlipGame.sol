@@ -27,7 +27,7 @@ contract WegaCoinFlipGame is Wega {
     uint256[] memory playerChoices, 
     uint256 denominator,
     uint256 minRounds
-  ) external override onlyWegaGameManager returns (address[] memory winners) {
+  ) external override onlyRole(GAME_CONTROLLER_ROLE) returns (address[] memory winners) {
     _play(escrowHash, currentPlayers, playerChoices, denominator, 1, minRounds);
     winners = _declareWinners(escrowHash, currentPlayers); 
   }

@@ -4,6 +4,7 @@ pragma solidity ^0.8.14;
 interface IFeeManager {
 
   struct FeeConfig {
+    address applier;
     address feeTaker;
     uint256 feeShare;
     bool shouldApply;
@@ -16,10 +17,9 @@ interface IFeeManager {
   function calculateFeesForTransfer(address applier, uint256 transferAmount) external returns (address feeTaker, uint256 feeAmount, uint256 sendAmount);
   /**
   * @notice allows an admin to set fee rules  
-  * @param appliers list of addresses that wil apply the fee
   * @param configs fee rules to be applied
   */
-  function setFeeConfigs(address[] memory appliers, FeeConfig[] memory configs) external;
+  function setFeeConfigs(FeeConfig[] memory configs) external;
   /**
   * @notice returns configurations on a fee rule  
   * @param applier list of addresses that wil apply the fee

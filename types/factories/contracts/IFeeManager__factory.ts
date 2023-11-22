@@ -58,6 +58,11 @@ const _abi = [
         components: [
           {
             internalType: "address",
+            name: "applier",
+            type: "address",
+          },
+          {
+            internalType: "address",
             name: "feeTaker",
             type: "address",
           },
@@ -83,12 +88,12 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address[]",
-        name: "appliers",
-        type: "address[]",
-      },
-      {
         components: [
+          {
+            internalType: "address",
+            name: "applier",
+            type: "address",
+          },
           {
             internalType: "address",
             name: "feeTaker",

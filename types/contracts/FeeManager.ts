@@ -30,12 +30,14 @@ import type {
 
 export declare namespace IFeeManager {
   export type FeeConfigStruct = {
+    applier: PromiseOrValue<string>;
     feeTaker: PromiseOrValue<string>;
     feeShare: PromiseOrValue<BigNumberish>;
     shouldApply: PromiseOrValue<boolean>;
   };
 
-  export type FeeConfigStructOutput = [string, BigNumber, boolean] & {
+  export type FeeConfigStructOutput = [string, string, BigNumber, boolean] & {
+    applier: string;
     feeTaker: string;
     feeShare: BigNumber;
     shouldApply: boolean;
@@ -66,7 +68,7 @@ export interface FeeManagerInterface extends utils.Interface {
     "renounceWegaProtocolAdmin()": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "rotateWegaProtocolAdmin(address)": FunctionFragment;
-    "setFeeConfigs(address[],(address,uint256,bool)[])": FunctionFragment;
+    "setFeeConfigs((address,address,uint256,bool)[])": FunctionFragment;
     "shouldApplyFees(address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -193,7 +195,7 @@ export interface FeeManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "setFeeConfigs",
-    values: [PromiseOrValue<string>[], IFeeManager.FeeConfigStruct[]]
+    values: [IFeeManager.FeeConfigStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "shouldApplyFees",
@@ -459,7 +461,8 @@ export interface FeeManager extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, boolean] & {
+      [string, string, BigNumber, boolean] & {
+        applier: string;
         feeTaker: string;
         feeShare: BigNumber;
         shouldApply: boolean;
@@ -568,7 +571,6 @@ export interface FeeManager extends BaseContract {
     ): Promise<ContractTransaction>;
 
     setFeeConfigs(
-      appliers: PromiseOrValue<string>[],
       configs: IFeeManager.FeeConfigStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -608,7 +610,8 @@ export interface FeeManager extends BaseContract {
     arg0: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber, boolean] & {
+    [string, string, BigNumber, boolean] & {
+      applier: string;
       feeTaker: string;
       feeShare: BigNumber;
       shouldApply: boolean;
@@ -713,7 +716,6 @@ export interface FeeManager extends BaseContract {
   ): Promise<ContractTransaction>;
 
   setFeeConfigs(
-    appliers: PromiseOrValue<string>[],
     configs: IFeeManager.FeeConfigStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -753,7 +755,8 @@ export interface FeeManager extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber, boolean] & {
+      [string, string, BigNumber, boolean] & {
+        applier: string;
         feeTaker: string;
         feeShare: BigNumber;
         shouldApply: boolean;
@@ -852,7 +855,6 @@ export interface FeeManager extends BaseContract {
     ): Promise<void>;
 
     setFeeConfigs(
-      appliers: PromiseOrValue<string>[],
       configs: IFeeManager.FeeConfigStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1067,7 +1069,6 @@ export interface FeeManager extends BaseContract {
     ): Promise<BigNumber>;
 
     setFeeConfigs(
-      appliers: PromiseOrValue<string>[],
       configs: IFeeManager.FeeConfigStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1205,7 +1206,6 @@ export interface FeeManager extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     setFeeConfigs(
-      appliers: PromiseOrValue<string>[],
       configs: IFeeManager.FeeConfigStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
