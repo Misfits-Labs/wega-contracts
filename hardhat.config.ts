@@ -1,4 +1,5 @@
-require("@nomicfoundation/hardhat-chai-matchers");
+// require("@nomicfoundation/hardhat-chai-matchers");
+require("@nomicfoundation/hardhat-toolbox");
 require('@openzeppelin/hardhat-upgrades');
 
 import path from 'path';
@@ -46,18 +47,19 @@ declare module 'hardhat/types/config' {
   }
 }
 
-import '@typechain/hardhat';
-import '@nomiclabs/hardhat-ethers';
+// import '@typechain/hardhat';
+// import '@nomiclabs/hardhat-ethers';
 // import '@nomiclabs/hardhat-waffle';
+// import "@nomicfoundation/hardhat-toolbox";
 import '@nomiclabs/hardhat-solhint';
-import '@nomiclabs/hardhat-etherscan';
+// import '@nomiclabs/hardhat-etherscan';
 
-import '@openzeppelin/hardhat-upgrades';
+// import '@openzeppelin/hardhat-upgrades';
 
 // There are no type declarations for
-require('solidity-coverage');
+// require('solidity-coverage');
 
-import 'hardhat-gas-reporter';
+// import 'hardhat-gas-reporter';
 import 'hardhat-contract-sizer';
 import yargs from 'yargs/yargs';
 
@@ -168,6 +170,15 @@ const config: HardhatUserConfig = {
       },
       {
         version: '0.8.19',
+        settings: {
+          ...settings,
+          metadata: {
+            bytecodeHash: 'none',
+          },
+        },
+      },
+      {
+        version: '0.8.20',
         settings: {
           ...settings,
           metadata: {
