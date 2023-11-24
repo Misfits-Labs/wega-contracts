@@ -1,34 +1,34 @@
 const { ethers, upgrades } =  require('hardhat');
-import { constants, BigNumber, utils } from 'ethers';
+import { ZeroAddress, toBigInt, parseEther, BigNumberish } from 'ethers';
 import { expect } from 'chai';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { FeeManager, FeeManager__factory } from '../types';
 
 import { TransactionState, FeeConfig, HexishString } from '../src/types'
 import { toSolidityShaWithAbiEncoder } from './helpers/eth.utils'
 
-export type RequestInput = (string | number | BigNumber)[]
+export type RequestInput = (string | number | BigNumberish)[]
 
 
 describe("WegaFeeManager", () => {
 
   // contracts
-  let feeManager: FeeManager;
+  let feeManager: any;
       
   // factories
   let feeManagerFactory: FeeManager__factory;
 
   // accounts
-  let signers: SignerWithAddress[],
-      coinbase: SignerWithAddress, 
-      protocolAdmin: SignerWithAddress, 
-      feeTaker: SignerWithAddress,
-      feeApplier: SignerWithAddress; 
+  let signers: HardhatEthersSigner[],
+      coinbase: HardhatEthersSigner, 
+      protocolAdmin: HardhatEthersSigner, 
+      feeTaker: HardhatEthersSigner,
+      feeApplier: HardhatEthersSigner; 
 
   // amounts
-  let aliceAmounts: BigNumber[]  = [utils.parseEther(String(1)), utils.parseEther(String(5)), utils.parseEther(String(10))];
-  let bobAmounts: BigNumber[] = aliceAmounts;
-  let carlAmounts: BigNumber[] = aliceAmounts;
+  let aliceAmounts: BigNumberish[]  = [parseEther(String(1)), parseEther(String(5)), parseEther(String(10))];
+  let bobAmounts: BigNumberish[] = aliceAmounts;
+  let carlAmounts: BigNumberish[] = aliceAmounts;
 
   // configs
   let feeConfigs: FeeConfig[];
@@ -43,7 +43,7 @@ describe("WegaFeeManager", () => {
     feeManagerFactory = new FeeManager__factory(coinbase);
     
     // deploy contracts
-    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'}) as FeeManager;
+    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize'});
     await feeManager.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
 
     // feeConfigs
@@ -61,7 +61,7 @@ describe("WegaFeeManager", () => {
     await expect(feeManager.connect(signers[0]).setFeeConfigs(feeConfigs)).to.be.revertedWith("WegaAccessControl: CallerNotAllowed");
    })
    it("should correctly set the fee configurations and emit correct event", async () => {
-      await  expect(feeManager.connect(protocolAdmin).setFeeConfigs([feeApplier.address], feeConfigs)).to.emit(feeManager, 'SetFeeRule').withArgs(
+      await  expect(feeManager.connect(protocolAdmin).setFeeConfigs(feeConfigs)).to.emit(feeManager, 'SetFeeRule').withArgs(
        feeApplier.address, 
        feeConfigs[0].feeTaker, 
        feeConfigs[0].feeShare
@@ -71,7 +71,7 @@ describe("WegaFeeManager", () => {
   });
   describe("Function: shouldApplyFees(address)", () => {
    it("should return true if should apply fees", async () => {
-    await feeManager.connect(protocolAdmin).setFeeConfigs([feeApplier.address], feeConfigs);
+    await feeManager.connect(protocolAdmin).setFeeConfigs(feeConfigs);
     expect(await feeManager.shouldApplyFees(feeApplier.address)).to.be.false;
    })
   });
@@ -85,12 +85,12 @@ describe("WegaFeeManager", () => {
   });
   describe("Function: calculateFeesForTransfer(address,uint256)", () => {
    it("should correctly calculate the feeShare", async () => {
-    const amount = utils.parseEther('5');
-    const feeAmountControl = amount.mul(BigNumber.from(feeConfigs[0].feeShare)).div(BigNumber.from(10000));
+    const amount = parseEther('5');
+    const feeAmountControl = (amount * toBigInt(feeConfigs[0].feeShare)) / toBigInt(10000);
     const data = await feeManager.calculateFeesForTransfer(feeApplier.address, amount);
     expect(data.feeTaker).to.be.equal(feeConfigs[0].feeTaker);
     expect(data.feeAmount).to.be.equal(feeAmountControl);
-    expect(data.sendAmount).to.be.equal(amount.sub(feeAmountControl));
+    expect(data.sendAmount).to.be.equal(amount - feeAmountControl);
    })
   });
 });
