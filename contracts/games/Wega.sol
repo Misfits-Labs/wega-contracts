@@ -19,7 +19,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "../escrow/WegaERC20Escrow.sol";
 import "../roles/WegaProtocolAdminRole.sol";
-import "../IWegaRandomNumberController.sol";
+import "../IWegaRandomizerController.sol";
 import "../errors/AccessControlErrors.sol";
 import "../utils/Arrays.sol";
 import "./IWega.sol";
@@ -32,7 +32,7 @@ abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
   using Math for uint256;
   using Arrays for uint256[];
 
-  IWegaRandomNumberController internal randomNumberGen;
+  IWegaRandomizerController internal _randomizerController;
   
   // escrowHash -> address of the player -> results
   mapping(bytes32 => mapping(address => uint256[])) private _gameResults;
@@ -58,7 +58,7 @@ abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
   } 
 
   function __Wega_init_unchained(address randomNumberController) public onlyInitializing {
-    randomNumberGen = IWegaRandomNumberController(randomNumberController);
+    _randomizerController = IWegaRandomizerController(randomNumberController);
   }
 
   function winners(bytes32 escrowHash) external view override returns(address[] memory) {
@@ -108,7 +108,7 @@ abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
   }
 
   function randomNumbersContract() external view returns(address) {
-    return address(randomNumberGen);
+    return address(_randomizerController);
   }
   
   // coinflip

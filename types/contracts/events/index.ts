@@ -4,3 +4,4 @@
 export type { IERC20EscrowEvents } from "./IERC20EscrowEvents";
 export type { IFeeManagerEvents } from "./IFeeManagerEvents";
 export type { IWegaGameControllerEvents } from "./IWegaGameControllerEvents";
+export type { IWegaRandomizerControllerEvents } from "./IWegaRandomizerControllerEvents";

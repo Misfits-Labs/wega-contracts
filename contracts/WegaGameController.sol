@@ -12,7 +12,7 @@ import "./roles/WegaProtocolAdminRole.sol";
 import "./events/IWegaGameControllerEvents.sol";
 import "./events/IERC20EscrowEvents.sol";
 import "./IWegaGameController.sol";
-import "./IWegaRandomNumberController.sol";
+import "./IWegaRandomizerController.sol";
 import "./utils/Arrays.sol";
 import './errors/WegaGameControllerErrors.sol';
 import "./utils/Strings.sol";
@@ -27,7 +27,6 @@ import "./games/IWega.sol";
   * that require two people for play 
   * @dev note this is draft contract not meant to be used in production
 */
-
 contract WegaGameController is 
   IWegaGameController, 
   IWegaGameControllerEvents,
@@ -42,7 +41,7 @@ contract WegaGameController is
   using Arrays for uint256[];
 
   IWegaERC20Escrow public erc20Escrow;
-  IWegaRandomNumberController public randomizer;
+  IWegaRandomizerController public randomizerController;
   
   mapping(bytes32 => IWega.Wega) private _games;
   mapping(uint256 => address) _registeredGames;
@@ -51,13 +50,13 @@ contract WegaGameController is
   
   function initialize(
     address erc20EscrowAddress, 
-    address randomNumberController,
+    address randomizerController_,
     GameSettings[] memory gameSettings
   ) initializer public {
     __WegaController_init(erc20EscrowAddress, gameSettings);
     __WegaProtocolAdminRole_init();
     __UUPSUpgradeable_init();
-    randomizer = IWegaRandomNumberController(randomNumberController);
+    randomizerController = IWegaRandomizerController(randomizerController_);
   }
 
   function __WegaController_init(
@@ -264,6 +263,6 @@ contract WegaGameController is
   function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 
   function _seedRandomizerBeforeCreateOrDeposit(uint256[] memory randomNumbers) internal {
-    randomizer.addRandomNumbers(randomNumbers);
+    randomizerController.seedRandomizer(randomNumbers);
   }
 }

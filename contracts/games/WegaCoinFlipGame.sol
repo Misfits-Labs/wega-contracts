@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "../escrow/WegaERC20Escrow.sol";
 import "../roles/WegaGameManagerRole.sol";
-import "../IWegaRandomNumberController.sol";
+import "../IWegaRandomizerController.sol";
 import "./Wega.sol";
 
 
@@ -45,17 +45,17 @@ contract WegaCoinFlipGame is Wega {
    }
    
    // users have chosen a coin to flip
-   uint256 coinflip = randomNumberGen.generate(denominator, _nonces.current());
-   _nonces.increment();
+   _randomizerController.incrementControllerNonce();
+   uint256 coinflip = _randomizerController.generate(denominator);
    for (uint256 i = 0; i < currentPlayers.length; i++) { 
       uint256 result;
      if(playerChoices[i] == coinflip) {
-      result = 1; // win 1 point
+      result = 1;
      } else {
-      result = 0; // lose 0 point
+      result = 0;
      }
-     _addResult(escrowHash, currentPlayers[i], result); // just sets result
-     _addScore(escrowHash, currentPlayers[i], result); // 1 point for 
+     _addResult(escrowHash, currentPlayers[i], result);
+     _addScore(escrowHash, currentPlayers[i], result); 
    }
     return _play(escrowHash, currentPlayers, playerChoices, denominator, currentRound + 1, minRounds);
   }

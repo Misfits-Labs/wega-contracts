@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 /**
   * @title WegaDiceGame (MVP)
   * @author @RasenGUY @Daosourced.
-  * @notice a simple decentralized onchain dice game
+  * @notice a simple decentralized dice game
   * @dev note this is draft contract not meant to be used in production
 */
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "../escrow/WegaERC20Escrow.sol";
 import "../roles/WegaGameManagerRole.sol";
-import "../IWegaRandomNumberController.sol";
+import "../IWegaRandomizerController.sol";
 import "./Wega.sol";
 
 
@@ -45,8 +45,8 @@ contract WegaDiceGame is Wega {
     // roll dice
     uint256[] memory results = new uint256[](currentPlayers.length);
     for (uint256 i = 0; i < currentPlayers.length; i++) { 
-      results[i] = randomNumberGen.generate(denominator, _nonces.current());
-      _nonces.increment();
+      _randomizerController.incrementControllerNonce();
+      results[i] = _randomizerController.generate(denominator);
       _addResult(escrowHash, currentPlayers[i], results[i]);
     }
     _tallyResultsIntoScores(escrowHash, currentPlayers, results);

@@ -23,84 +23,27 @@ import type {
   TypedContractMethod,
 } from "../common";
 
-export declare namespace IWegaGameController {
-  export type GameSettingsStruct = {
-    denominator: BigNumberish;
-    minRounds: BigNumberish;
-    requiredPlayers: BigNumberish;
-    proxy: AddressLike;
-    randomNumberController: AddressLike;
-    name: string;
-  };
-
-  export type GameSettingsStructOutput = [
-    denominator: bigint,
-    minRounds: bigint,
-    requiredPlayers: bigint,
-    proxy: string,
-    randomNumberController: string,
-    name: string
-  ] & {
-    denominator: bigint;
-    minRounds: bigint;
-    requiredPlayers: bigint;
-    proxy: string;
-    randomNumberController: string;
-    name: string;
-  };
-}
-
-export declare namespace IWega {
-  export type WegaStruct = {
-    name: string;
-    currentPlayers: AddressLike[];
-    deposited: BigNumberish;
-    state: BigNumberish;
-  };
-
-  export type WegaStructOutput = [
-    name: string,
-    currentPlayers: string[],
-    deposited: bigint,
-    state: bigint
-  ] & {
-    name: string;
-    currentPlayers: string[];
-    deposited: bigint;
-    state: bigint;
-  };
-}
-
-export interface WegaGameControllerInterface extends Interface {
+export interface WegaRandomizerControllerInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "DEFAULT_ADMIN_ROLE"
+      | "GAME_CONTROLLER_ROLE"
+      | "GAME_ROLE"
+      | "RANDOMIZER"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
-      | "__WegaController_init"
-      | "__WegaController_init_unchained"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
       | "closeWegaProtocolAdmin"
-      | "createGame"
-      | "depositOrPlay(bytes32,uint256[])"
-      | "depositOrPlay(bytes32,uint256[],uint256[])"
-      | "erc20Escrow"
-      | "existsGame"
-      | "gameResults"
-      | "getGame"
-      | "getGameSettings"
+      | "generate"
+      | "getRandomizer"
       | "getRoleAdmin"
       | "grantRole"
       | "hasRole"
+      | "incrementControllerNonce"
       | "initialize"
       | "isWegaProtocolAdmin"
       | "owner"
-      | "playerScore"
-      | "players"
       | "proxiableUUID"
-      | "randomizerController"
-      | "registerGame"
-      | "removeGame"
       | "removeWegaProtocolAdmin"
       | "removeWegaProtocolAdmins"
       | "renounceOwnership"
@@ -108,28 +51,26 @@ export interface WegaGameControllerInterface extends Interface {
       | "renounceWegaProtocolAdmin"
       | "revokeRole"
       | "rotateWegaProtocolAdmin"
-      | "setGameConfiguration"
+      | "seedRandomizer"
+      | "setRandomizer"
+      | "spawnRandomizer"
       | "supportsInterface"
       | "transferOwnership"
       | "upgradeTo"
       | "upgradeToAndCall"
-      | "winners"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
       | "AdminChanged"
       | "BeaconUpgraded"
-      | "GameCreation"
-      | "GameRegistration"
       | "Initialized"
       | "OwnershipTransferred"
+      | "RandomizerSet"
       | "RoleAdminChanged"
       | "RoleGranted"
       | "RoleRevoked"
-      | "SetGame"
       | "Upgraded"
-      | "WinnerDeclaration"
   ): EventFragment;
 
   encodeFunctionData(
@@ -137,16 +78,17 @@ export interface WegaGameControllerInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
+    functionFragment: "GAME_CONTROLLER_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "GAME_ROLE", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "RANDOMIZER",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "__WegaController_init",
-    values: [AddressLike, IWegaGameController.GameSettingsStruct[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "__WegaController_init_unchained",
-    values: [AddressLike, IWegaGameController.GameSettingsStruct[]]
+    functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
@@ -161,30 +103,12 @@ export interface WegaGameControllerInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "createGame",
-    values: [string, AddressLike, BigNumberish, BigNumberish[]]
+    functionFragment: "generate",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "depositOrPlay(bytes32,uint256[])",
-    values: [BytesLike, BigNumberish[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "depositOrPlay(bytes32,uint256[],uint256[])",
-    values: [BytesLike, BigNumberish[], BigNumberish[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "erc20Escrow",
+    functionFragment: "getRandomizer",
     values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "existsGame", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "gameResults",
-    values: [string, BytesLike, AddressLike]
-  ): string;
-  encodeFunctionData(functionFragment: "getGame", values: [BytesLike]): string;
-  encodeFunctionData(
-    functionFragment: "getGameSettings",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -199,8 +123,12 @@ export interface WegaGameControllerInterface extends Interface {
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "incrementControllerNonce",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "initialize",
-    values: [AddressLike, AddressLike, IWegaGameController.GameSettingsStruct[]]
+    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "isWegaProtocolAdmin",
@@ -208,23 +136,9 @@ export interface WegaGameControllerInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "playerScore",
-    values: [string, BytesLike, AddressLike]
-  ): string;
-  encodeFunctionData(functionFragment: "players", values: [BytesLike]): string;
-  encodeFunctionData(
     functionFragment: "proxiableUUID",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "randomizerController",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "registerGame",
-    values: [IWegaGameController.GameSettingsStruct]
-  ): string;
-  encodeFunctionData(functionFragment: "removeGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "removeWegaProtocolAdmin",
     values: [AddressLike]
@@ -254,8 +168,16 @@ export interface WegaGameControllerInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setGameConfiguration",
-    values: [IWegaGameController.GameSettingsStruct]
+    functionFragment: "seedRandomizer",
+    values: [BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setRandomizer",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "spawnRandomizer",
+    values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -273,25 +195,19 @@ export interface WegaGameControllerInterface extends Interface {
     functionFragment: "upgradeToAndCall",
     values: [AddressLike, BytesLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "winners",
-    values: [string, BytesLike]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "GAME_CONTROLLER_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "GAME_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "RANDOMIZER", data: BytesLike): Result;
+  decodeFunctionResult(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "__WegaController_init",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "__WegaController_init_unchained",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -306,27 +222,9 @@ export interface WegaGameControllerInterface extends Interface {
     functionFragment: "closeWegaProtocolAdmin",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "generate", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "depositOrPlay(bytes32,uint256[])",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "depositOrPlay(bytes32,uint256[],uint256[])",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "erc20Escrow",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "existsGame", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "gameResults",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "getGame", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getGameSettings",
+    functionFragment: "getRandomizer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -335,6 +233,10 @@ export interface WegaGameControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "incrementControllerNonce",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isWegaProtocolAdmin",
@@ -342,23 +244,9 @@ export interface WegaGameControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "playerScore",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "players", data: BytesLike): Result;
-  decodeFunctionResult(
     functionFragment: "proxiableUUID",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "randomizerController",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "registerGame",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "removeGame", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "removeWegaProtocolAdmin",
     data: BytesLike
@@ -385,7 +273,15 @@ export interface WegaGameControllerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setGameConfiguration",
+    functionFragment: "seedRandomizer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRandomizer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "spawnRandomizer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -401,7 +297,6 @@ export interface WegaGameControllerInterface extends Interface {
     functionFragment: "upgradeToAndCall",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
 }
 
 export namespace AdminChangedEvent {
@@ -429,44 +324,6 @@ export namespace BeaconUpgradedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace GameCreationEvent {
-  export type InputTuple = [
-    escrowHash: BytesLike,
-    nonce: BigNumberish,
-    creator: AddressLike,
-    name: string
-  ];
-  export type OutputTuple = [
-    escrowHash: string,
-    nonce: bigint,
-    creator: string,
-    name: string
-  ];
-  export interface OutputObject {
-    escrowHash: string;
-    nonce: bigint;
-    creator: string;
-    name: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace GameRegistrationEvent {
-  export type InputTuple = [name: string, gameAddress: AddressLike];
-  export type OutputTuple = [name: string, gameAddress: string];
-  export interface OutputObject {
-    name: string;
-    gameAddress: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
 export namespace InitializedEvent {
   export type InputTuple = [version: BigNumberish];
   export type OutputTuple = [version: bigint];
@@ -485,6 +342,18 @@ export namespace OwnershipTransferredEvent {
   export interface OutputObject {
     previousOwner: string;
     newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace RandomizerSetEvent {
+  export type InputTuple = [newRandomizer: AddressLike];
+  export type OutputTuple = [newRandomizer: string];
+  export interface OutputObject {
+    newRandomizer: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -550,37 +419,6 @@ export namespace RoleRevokedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace SetGameEvent {
-  export type InputTuple = [
-    name: string,
-    denominator: BigNumberish,
-    minRounds: BigNumberish,
-    requiredPlayers: BigNumberish,
-    proxy: AddressLike,
-    randomNumberController: AddressLike
-  ];
-  export type OutputTuple = [
-    name: string,
-    denominator: bigint,
-    minRounds: bigint,
-    requiredPlayers: bigint,
-    proxy: string,
-    randomNumberController: string
-  ];
-  export interface OutputObject {
-    name: string;
-    denominator: bigint;
-    minRounds: bigint;
-    requiredPlayers: bigint;
-    proxy: string;
-    randomNumberController: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
 export namespace UpgradedEvent {
   export type InputTuple = [implementation: AddressLike];
   export type OutputTuple = [implementation: string];
@@ -593,24 +431,11 @@ export namespace UpgradedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace WinnerDeclarationEvent {
-  export type InputTuple = [escrowHash: BytesLike, winners: AddressLike[]];
-  export type OutputTuple = [escrowHash: string, winners: string[]];
-  export interface OutputObject {
-    escrowHash: string;
-    winners: string[];
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export interface WegaGameController extends BaseContract {
-  connect(runner?: ContractRunner | null): WegaGameController;
+export interface WegaRandomizerController extends BaseContract {
+  connect(runner?: ContractRunner | null): WegaRandomizerController;
   waitForDeployment(): Promise<this>;
 
-  interface: WegaGameControllerInterface;
+  interface: WegaRandomizerControllerInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -651,25 +476,13 @@ export interface WegaGameController extends BaseContract {
 
   DEFAULT_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
+  GAME_CONTROLLER_ROLE: TypedContractMethod<[], [string], "view">;
+
+  GAME_ROLE: TypedContractMethod<[], [string], "view">;
+
+  RANDOMIZER: TypedContractMethod<[], [string], "view">;
+
   WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
-
-  __WegaController_init: TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-
-  __WegaController_init_unchained: TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
 
   addWegaProtocolAdmin: TypedContractMethod<
     [account: AddressLike],
@@ -689,54 +502,9 @@ export interface WegaGameController extends BaseContract {
     "payable"
   >;
 
-  createGame: TypedContractMethod<
-    [
-      name: string,
-      tokenAddress: AddressLike,
-      wagerAmount: BigNumberish,
-      randomNumbers: BigNumberish[]
-    ],
-    [void],
-    "nonpayable"
-  >;
+  generate: TypedContractMethod<[denominator: BigNumberish], [bigint], "view">;
 
-  "depositOrPlay(bytes32,uint256[])": TypedContractMethod<
-    [escrowHash: BytesLike, randomNumbers: BigNumberish[]],
-    [void],
-    "nonpayable"
-  >;
-
-  "depositOrPlay(bytes32,uint256[],uint256[])": TypedContractMethod<
-    [
-      escrowHash: BytesLike,
-      playerChoices: BigNumberish[],
-      randomNumbers: BigNumberish[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-
-  erc20Escrow: TypedContractMethod<[], [string], "view">;
-
-  existsGame: TypedContractMethod<[game: string], [boolean], "view">;
-
-  gameResults: TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint[]],
-    "view"
-  >;
-
-  getGame: TypedContractMethod<
-    [escrowHash: BytesLike],
-    [IWega.WegaStructOutput],
-    "view"
-  >;
-
-  getGameSettings: TypedContractMethod<
-    [game: string],
-    [IWegaGameController.GameSettingsStructOutput],
-    "view"
-  >;
+  getRandomizer: TypedContractMethod<[], [string], "view">;
 
   getRoleAdmin: TypedContractMethod<[role: BytesLike], [string], "view">;
 
@@ -752,12 +520,10 @@ export interface WegaGameController extends BaseContract {
     "view"
   >;
 
+  incrementControllerNonce: TypedContractMethod<[], [void], "nonpayable">;
+
   initialize: TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      randomizerController_: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
+    [randomNumbers: BigNumberish[]],
     [void],
     "nonpayable"
   >;
@@ -770,25 +536,7 @@ export interface WegaGameController extends BaseContract {
 
   owner: TypedContractMethod<[], [string], "view">;
 
-  playerScore: TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint],
-    "view"
-  >;
-
-  players: TypedContractMethod<[escrowHash: BytesLike], [string[]], "view">;
-
   proxiableUUID: TypedContractMethod<[], [string], "view">;
-
-  randomizerController: TypedContractMethod<[], [string], "view">;
-
-  registerGame: TypedContractMethod<
-    [config: IWegaGameController.GameSettingsStruct],
-    [void],
-    "nonpayable"
-  >;
-
-  removeGame: TypedContractMethod<[game: string], [void], "nonpayable">;
 
   removeWegaProtocolAdmin: TypedContractMethod<
     [account: AddressLike],
@@ -824,8 +572,20 @@ export interface WegaGameController extends BaseContract {
     "payable"
   >;
 
-  setGameConfiguration: TypedContractMethod<
-    [config: IWegaGameController.GameSettingsStruct],
+  seedRandomizer: TypedContractMethod<
+    [randomNumbers: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+
+  setRandomizer: TypedContractMethod<
+    [randomizer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  spawnRandomizer: TypedContractMethod<
+    [randomNumbers: BigNumberish[]],
     [void],
     "nonpayable"
   >;
@@ -854,12 +614,6 @@ export interface WegaGameController extends BaseContract {
     "payable"
   >;
 
-  winners: TypedContractMethod<
-    [game: string, escrowHash: BytesLike],
-    [string[]],
-    "view"
-  >;
-
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -868,28 +622,17 @@ export interface WegaGameController extends BaseContract {
     nameOrSignature: "DEFAULT_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
+    nameOrSignature: "GAME_CONTROLLER_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "__WegaController_init"
-  ): TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "GAME_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "__WegaController_init_unchained"
-  ): TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "RANDOMIZER"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "addWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
@@ -900,62 +643,11 @@ export interface WegaGameController extends BaseContract {
     nameOrSignature: "closeWegaProtocolAdmin"
   ): TypedContractMethod<[receiver: AddressLike], [void], "payable">;
   getFunction(
-    nameOrSignature: "createGame"
-  ): TypedContractMethod<
-    [
-      name: string,
-      tokenAddress: AddressLike,
-      wagerAmount: BigNumberish,
-      randomNumbers: BigNumberish[]
-    ],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "generate"
+  ): TypedContractMethod<[denominator: BigNumberish], [bigint], "view">;
   getFunction(
-    nameOrSignature: "depositOrPlay(bytes32,uint256[])"
-  ): TypedContractMethod<
-    [escrowHash: BytesLike, randomNumbers: BigNumberish[]],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "depositOrPlay(bytes32,uint256[],uint256[])"
-  ): TypedContractMethod<
-    [
-      escrowHash: BytesLike,
-      playerChoices: BigNumberish[],
-      randomNumbers: BigNumberish[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "erc20Escrow"
+    nameOrSignature: "getRandomizer"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "existsGame"
-  ): TypedContractMethod<[game: string], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "gameResults"
-  ): TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getGame"
-  ): TypedContractMethod<
-    [escrowHash: BytesLike],
-    [IWega.WegaStructOutput],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getGameSettings"
-  ): TypedContractMethod<
-    [game: string],
-    [IWegaGameController.GameSettingsStructOutput],
-    "view"
-  >;
   getFunction(
     nameOrSignature: "getRoleAdmin"
   ): TypedContractMethod<[role: BytesLike], [string], "view">;
@@ -974,16 +666,11 @@ export interface WegaGameController extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "incrementControllerNonce"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "initialize"
-  ): TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      randomizerController_: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
+  ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "isWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [boolean], "view">;
@@ -991,31 +678,8 @@ export interface WegaGameController extends BaseContract {
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "playerScore"
-  ): TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "players"
-  ): TypedContractMethod<[escrowHash: BytesLike], [string[]], "view">;
-  getFunction(
     nameOrSignature: "proxiableUUID"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "randomizerController"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "registerGame"
-  ): TypedContractMethod<
-    [config: IWegaGameController.GameSettingsStruct],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "removeGame"
-  ): TypedContractMethod<[game: string], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "removeWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
@@ -1046,12 +710,14 @@ export interface WegaGameController extends BaseContract {
     nameOrSignature: "rotateWegaProtocolAdmin"
   ): TypedContractMethod<[receiver: AddressLike], [void], "payable">;
   getFunction(
-    nameOrSignature: "setGameConfiguration"
-  ): TypedContractMethod<
-    [config: IWegaGameController.GameSettingsStruct],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "seedRandomizer"
+  ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setRandomizer"
+  ): TypedContractMethod<[randomizer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "spawnRandomizer"
+  ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
@@ -1072,13 +738,6 @@ export interface WegaGameController extends BaseContract {
     [void],
     "payable"
   >;
-  getFunction(
-    nameOrSignature: "winners"
-  ): TypedContractMethod<
-    [game: string, escrowHash: BytesLike],
-    [string[]],
-    "view"
-  >;
 
   getEvent(
     key: "AdminChanged"
@@ -1095,20 +754,6 @@ export interface WegaGameController extends BaseContract {
     BeaconUpgradedEvent.OutputObject
   >;
   getEvent(
-    key: "GameCreation"
-  ): TypedContractEvent<
-    GameCreationEvent.InputTuple,
-    GameCreationEvent.OutputTuple,
-    GameCreationEvent.OutputObject
-  >;
-  getEvent(
-    key: "GameRegistration"
-  ): TypedContractEvent<
-    GameRegistrationEvent.InputTuple,
-    GameRegistrationEvent.OutputTuple,
-    GameRegistrationEvent.OutputObject
-  >;
-  getEvent(
     key: "Initialized"
   ): TypedContractEvent<
     InitializedEvent.InputTuple,
@@ -1121,6 +766,13 @@ export interface WegaGameController extends BaseContract {
     OwnershipTransferredEvent.InputTuple,
     OwnershipTransferredEvent.OutputTuple,
     OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "RandomizerSet"
+  ): TypedContractEvent<
+    RandomizerSetEvent.InputTuple,
+    RandomizerSetEvent.OutputTuple,
+    RandomizerSetEvent.OutputObject
   >;
   getEvent(
     key: "RoleAdminChanged"
@@ -1144,25 +796,11 @@ export interface WegaGameController extends BaseContract {
     RoleRevokedEvent.OutputObject
   >;
   getEvent(
-    key: "SetGame"
-  ): TypedContractEvent<
-    SetGameEvent.InputTuple,
-    SetGameEvent.OutputTuple,
-    SetGameEvent.OutputObject
-  >;
-  getEvent(
     key: "Upgraded"
   ): TypedContractEvent<
     UpgradedEvent.InputTuple,
     UpgradedEvent.OutputTuple,
     UpgradedEvent.OutputObject
-  >;
-  getEvent(
-    key: "WinnerDeclaration"
-  ): TypedContractEvent<
-    WinnerDeclarationEvent.InputTuple,
-    WinnerDeclarationEvent.OutputTuple,
-    WinnerDeclarationEvent.OutputObject
   >;
 
   filters: {
@@ -1188,28 +826,6 @@ export interface WegaGameController extends BaseContract {
       BeaconUpgradedEvent.OutputObject
     >;
 
-    "GameCreation(bytes32,uint256,address,string)": TypedContractEvent<
-      GameCreationEvent.InputTuple,
-      GameCreationEvent.OutputTuple,
-      GameCreationEvent.OutputObject
-    >;
-    GameCreation: TypedContractEvent<
-      GameCreationEvent.InputTuple,
-      GameCreationEvent.OutputTuple,
-      GameCreationEvent.OutputObject
-    >;
-
-    "GameRegistration(string,address)": TypedContractEvent<
-      GameRegistrationEvent.InputTuple,
-      GameRegistrationEvent.OutputTuple,
-      GameRegistrationEvent.OutputObject
-    >;
-    GameRegistration: TypedContractEvent<
-      GameRegistrationEvent.InputTuple,
-      GameRegistrationEvent.OutputTuple,
-      GameRegistrationEvent.OutputObject
-    >;
-
     "Initialized(uint8)": TypedContractEvent<
       InitializedEvent.InputTuple,
       InitializedEvent.OutputTuple,
@@ -1230,6 +846,17 @@ export interface WegaGameController extends BaseContract {
       OwnershipTransferredEvent.InputTuple,
       OwnershipTransferredEvent.OutputTuple,
       OwnershipTransferredEvent.OutputObject
+    >;
+
+    "RandomizerSet(address)": TypedContractEvent<
+      RandomizerSetEvent.InputTuple,
+      RandomizerSetEvent.OutputTuple,
+      RandomizerSetEvent.OutputObject
+    >;
+    RandomizerSet: TypedContractEvent<
+      RandomizerSetEvent.InputTuple,
+      RandomizerSetEvent.OutputTuple,
+      RandomizerSetEvent.OutputObject
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)": TypedContractEvent<
@@ -1265,17 +892,6 @@ export interface WegaGameController extends BaseContract {
       RoleRevokedEvent.OutputObject
     >;
 
-    "SetGame(string,uint256,uint256,uint256,address,address)": TypedContractEvent<
-      SetGameEvent.InputTuple,
-      SetGameEvent.OutputTuple,
-      SetGameEvent.OutputObject
-    >;
-    SetGame: TypedContractEvent<
-      SetGameEvent.InputTuple,
-      SetGameEvent.OutputTuple,
-      SetGameEvent.OutputObject
-    >;
-
     "Upgraded(address)": TypedContractEvent<
       UpgradedEvent.InputTuple,
       UpgradedEvent.OutputTuple,
@@ -1285,17 +901,6 @@ export interface WegaGameController extends BaseContract {
       UpgradedEvent.InputTuple,
       UpgradedEvent.OutputTuple,
       UpgradedEvent.OutputObject
-    >;
-
-    "WinnerDeclaration(bytes32,address[])": TypedContractEvent<
-      WinnerDeclarationEvent.InputTuple,
-      WinnerDeclarationEvent.OutputTuple,
-      WinnerDeclarationEvent.OutputObject
-    >;
-    WinnerDeclaration: TypedContractEvent<
-      WinnerDeclarationEvent.InputTuple,
-      WinnerDeclarationEvent.OutputTuple,
-      WinnerDeclarationEvent.OutputObject
     >;
   };
 }

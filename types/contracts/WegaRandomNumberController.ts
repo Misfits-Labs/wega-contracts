@@ -28,20 +28,22 @@ export interface WegaRandomNumberControllerInterface extends Interface {
     nameOrSignature:
       | "DEFAULT_ADMIN_ROLE"
       | "GAME_CONTROLLER_ROLE"
+      | "GAME_ROLE"
+      | "RANDOMIZER"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
-      | "addRandomNumbers"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
       | "closeWegaProtocolAdmin"
       | "generate"
+      | "getRandomizer"
       | "getRoleAdmin"
       | "grantRole"
       | "hasRole"
+      | "incrementControllerNonce"
       | "initialize"
       | "isWegaProtocolAdmin"
       | "owner"
       | "proxiableUUID"
-      | "randomNumbersCount"
       | "removeWegaProtocolAdmin"
       | "removeWegaProtocolAdmins"
       | "renounceOwnership"
@@ -50,6 +52,8 @@ export interface WegaRandomNumberControllerInterface extends Interface {
       | "revokeRole"
       | "rotateWegaProtocolAdmin"
       | "seedRandomizer"
+      | "setRandomizer"
+      | "spawnRandomizer"
       | "supportsInterface"
       | "transferOwnership"
       | "upgradeTo"
@@ -62,6 +66,7 @@ export interface WegaRandomNumberControllerInterface extends Interface {
       | "BeaconUpgraded"
       | "Initialized"
       | "OwnershipTransferred"
+      | "RandomizerSet"
       | "RoleAdminChanged"
       | "RoleGranted"
       | "RoleRevoked"
@@ -76,13 +81,14 @@ export interface WegaRandomNumberControllerInterface extends Interface {
     functionFragment: "GAME_CONTROLLER_ROLE",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "GAME_ROLE", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
+    functionFragment: "RANDOMIZER",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "addRandomNumbers",
-    values: [BigNumberish[]]
+    functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
@@ -98,7 +104,11 @@ export interface WegaRandomNumberControllerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "generate",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRandomizer",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -113,6 +123,10 @@ export interface WegaRandomNumberControllerInterface extends Interface {
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "incrementControllerNonce",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "initialize",
     values: [BigNumberish[]]
   ): string;
@@ -123,10 +137,6 @@ export interface WegaRandomNumberControllerInterface extends Interface {
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "randomNumbersCount",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -162,6 +172,14 @@ export interface WegaRandomNumberControllerInterface extends Interface {
     values: [BigNumberish[]]
   ): string;
   encodeFunctionData(
+    functionFragment: "setRandomizer",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "spawnRandomizer",
+    values: [BigNumberish[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
@@ -186,12 +204,10 @@ export interface WegaRandomNumberControllerInterface extends Interface {
     functionFragment: "GAME_CONTROLLER_ROLE",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "GAME_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "RANDOMIZER", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addRandomNumbers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -208,11 +224,19 @@ export interface WegaRandomNumberControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "generate", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "getRandomizer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getRoleAdmin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "incrementControllerNonce",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isWegaProtocolAdmin",
@@ -221,10 +245,6 @@ export interface WegaRandomNumberControllerInterface extends Interface {
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proxiableUUID",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "randomNumbersCount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -254,6 +274,14 @@ export interface WegaRandomNumberControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "seedRandomizer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRandomizer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "spawnRandomizer",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -314,6 +342,18 @@ export namespace OwnershipTransferredEvent {
   export interface OutputObject {
     previousOwner: string;
     newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace RandomizerSetEvent {
+  export type InputTuple = [newRandomizer: AddressLike];
+  export type OutputTuple = [newRandomizer: string];
+  export interface OutputObject {
+    newRandomizer: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -438,13 +478,11 @@ export interface WegaRandomNumberController extends BaseContract {
 
   GAME_CONTROLLER_ROLE: TypedContractMethod<[], [string], "view">;
 
-  WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
+  GAME_ROLE: TypedContractMethod<[], [string], "view">;
 
-  addRandomNumbers: TypedContractMethod<
-    [randomNumbers: BigNumberish[]],
-    [void],
-    "nonpayable"
-  >;
+  RANDOMIZER: TypedContractMethod<[], [string], "view">;
+
+  WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
   addWegaProtocolAdmin: TypedContractMethod<
     [account: AddressLike],
@@ -464,11 +502,9 @@ export interface WegaRandomNumberController extends BaseContract {
     "payable"
   >;
 
-  generate: TypedContractMethod<
-    [denominator: BigNumberish, nonce: BigNumberish],
-    [bigint],
-    "view"
-  >;
+  generate: TypedContractMethod<[denominator: BigNumberish], [bigint], "view">;
+
+  getRandomizer: TypedContractMethod<[], [string], "view">;
 
   getRoleAdmin: TypedContractMethod<[role: BytesLike], [string], "view">;
 
@@ -483,6 +519,8 @@ export interface WegaRandomNumberController extends BaseContract {
     [boolean],
     "view"
   >;
+
+  incrementControllerNonce: TypedContractMethod<[], [void], "nonpayable">;
 
   initialize: TypedContractMethod<
     [randomNumbers: BigNumberish[]],
@@ -499,8 +537,6 @@ export interface WegaRandomNumberController extends BaseContract {
   owner: TypedContractMethod<[], [string], "view">;
 
   proxiableUUID: TypedContractMethod<[], [string], "view">;
-
-  randomNumbersCount: TypedContractMethod<[], [bigint], "view">;
 
   removeWegaProtocolAdmin: TypedContractMethod<
     [account: AddressLike],
@@ -542,6 +578,18 @@ export interface WegaRandomNumberController extends BaseContract {
     "nonpayable"
   >;
 
+  setRandomizer: TypedContractMethod<
+    [randomizer: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  spawnRandomizer: TypedContractMethod<
+    [randomNumbers: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+
   supportsInterface: TypedContractMethod<
     [interfaceId: BytesLike],
     [boolean],
@@ -577,11 +625,14 @@ export interface WegaRandomNumberController extends BaseContract {
     nameOrSignature: "GAME_CONTROLLER_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
+    nameOrSignature: "GAME_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "addRandomNumbers"
-  ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
+    nameOrSignature: "RANDOMIZER"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "addWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
@@ -593,11 +644,10 @@ export interface WegaRandomNumberController extends BaseContract {
   ): TypedContractMethod<[receiver: AddressLike], [void], "payable">;
   getFunction(
     nameOrSignature: "generate"
-  ): TypedContractMethod<
-    [denominator: BigNumberish, nonce: BigNumberish],
-    [bigint],
-    "view"
-  >;
+  ): TypedContractMethod<[denominator: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getRandomizer"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getRoleAdmin"
   ): TypedContractMethod<[role: BytesLike], [string], "view">;
@@ -616,6 +666,9 @@ export interface WegaRandomNumberController extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "incrementControllerNonce"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "initialize"
   ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
   getFunction(
@@ -627,9 +680,6 @@ export interface WegaRandomNumberController extends BaseContract {
   getFunction(
     nameOrSignature: "proxiableUUID"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "randomNumbersCount"
-  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "removeWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
@@ -661,6 +711,12 @@ export interface WegaRandomNumberController extends BaseContract {
   ): TypedContractMethod<[receiver: AddressLike], [void], "payable">;
   getFunction(
     nameOrSignature: "seedRandomizer"
+  ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setRandomizer"
+  ): TypedContractMethod<[randomizer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "spawnRandomizer"
   ): TypedContractMethod<[randomNumbers: BigNumberish[]], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "supportsInterface"
@@ -710,6 +766,13 @@ export interface WegaRandomNumberController extends BaseContract {
     OwnershipTransferredEvent.InputTuple,
     OwnershipTransferredEvent.OutputTuple,
     OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "RandomizerSet"
+  ): TypedContractEvent<
+    RandomizerSetEvent.InputTuple,
+    RandomizerSetEvent.OutputTuple,
+    RandomizerSetEvent.OutputObject
   >;
   getEvent(
     key: "RoleAdminChanged"
@@ -783,6 +846,17 @@ export interface WegaRandomNumberController extends BaseContract {
       OwnershipTransferredEvent.InputTuple,
       OwnershipTransferredEvent.OutputTuple,
       OwnershipTransferredEvent.OutputObject
+    >;
+
+    "RandomizerSet(address)": TypedContractEvent<
+      RandomizerSetEvent.InputTuple,
+      RandomizerSetEvent.OutputTuple,
+      RandomizerSetEvent.OutputObject
+    >;
+    RandomizerSet: TypedContractEvent<
+      RandomizerSetEvent.InputTuple,
+      RandomizerSetEvent.OutputTuple,
+      RandomizerSetEvent.OutputObject
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)": TypedContractEvent<

@@ -98,6 +98,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Math__factory>;
     getContractFactory(
+      name: "Nonces",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Nonces__factory>;
+    getContractFactory(
       name: "EnumerableMap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EnumerableMap__factory>;
@@ -125,6 +129,10 @@ declare module "hardhat/types/runtime" {
       name: "IWegaGameControllerEvents",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameControllerEvents__factory>;
+    getContractFactory(
+      name: "IWegaRandomizerControllerEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IWegaRandomizerControllerEvents__factory>;
     getContractFactory(
       name: "FeeManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -162,13 +170,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWegaGameController__factory>;
     getContractFactory(
-      name: "IWegaRandomNumberController",
+      name: "IWegaRandomizerController",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWegaRandomNumberController__factory>;
+    ): Promise<Contracts.IWegaRandomizerController__factory>;
     getContractFactory(
-      name: "IRandomizer",
+      name: "IWegaRandomizer",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IRandomizer__factory>;
+    ): Promise<Contracts.IWegaRandomizer__factory>;
+    getContractFactory(
+      name: "WegaRandomizer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WegaRandomizer__factory>;
     getContractFactory(
       name: "WegaEscrowManagerRole",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -190,9 +202,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WegaGameController__factory>;
     getContractFactory(
-      name: "WegaRandomNumberController",
+      name: "WegaRandomizerController",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.WegaRandomNumberController__factory>;
+    ): Promise<Contracts.WegaRandomizerController__factory>;
 
     getContractAt(
       name: "AccessControlUpgradeable",
@@ -300,6 +312,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Math>;
     getContractAt(
+      name: "Nonces",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Nonces>;
+    getContractAt(
       name: "EnumerableMap",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -334,6 +351,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaGameControllerEvents>;
+    getContractAt(
+      name: "IWegaRandomizerControllerEvents",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IWegaRandomizerControllerEvents>;
     getContractAt(
       name: "FeeManager",
       address: string | ethers.Addressable,
@@ -380,15 +402,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWegaGameController>;
     getContractAt(
-      name: "IWegaRandomNumberController",
+      name: "IWegaRandomizerController",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IWegaRandomNumberController>;
+    ): Promise<Contracts.IWegaRandomizerController>;
     getContractAt(
-      name: "IRandomizer",
+      name: "IWegaRandomizer",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IRandomizer>;
+    ): Promise<Contracts.IWegaRandomizer>;
+    getContractAt(
+      name: "WegaRandomizer",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WegaRandomizer>;
     getContractAt(
       name: "WegaEscrowManagerRole",
       address: string | ethers.Addressable,
@@ -415,10 +442,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.WegaGameController>;
     getContractAt(
-      name: "WegaRandomNumberController",
+      name: "WegaRandomizerController",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.WegaRandomNumberController>;
+    ): Promise<Contracts.WegaRandomizerController>;
 
     deployContract(
       name: "AccessControlUpgradeable",
@@ -505,6 +532,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Math>;
     deployContract(
+      name: "Nonces",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Nonces>;
+    deployContract(
       name: "EnumerableMap",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.EnumerableMap>;
@@ -532,6 +563,10 @@ declare module "hardhat/types/runtime" {
       name: "IWegaGameControllerEvents",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IWegaGameControllerEvents>;
+    deployContract(
+      name: "IWegaRandomizerControllerEvents",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IWegaRandomizerControllerEvents>;
     deployContract(
       name: "FeeManager",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -569,13 +604,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IWegaGameController>;
     deployContract(
-      name: "IWegaRandomNumberController",
+      name: "IWegaRandomizerController",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IWegaRandomNumberController>;
+    ): Promise<Contracts.IWegaRandomizerController>;
     deployContract(
-      name: "IRandomizer",
+      name: "IWegaRandomizer",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IRandomizer>;
+    ): Promise<Contracts.IWegaRandomizer>;
+    deployContract(
+      name: "WegaRandomizer",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.WegaRandomizer>;
     deployContract(
       name: "WegaEscrowManagerRole",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -597,9 +636,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WegaGameController>;
     deployContract(
-      name: "WegaRandomNumberController",
+      name: "WegaRandomizerController",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.WegaRandomNumberController>;
+    ): Promise<Contracts.WegaRandomizerController>;
 
     deployContract(
       name: "AccessControlUpgradeable",
@@ -707,6 +746,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Math>;
     deployContract(
+      name: "Nonces",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Nonces>;
+    deployContract(
       name: "EnumerableMap",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -741,6 +785,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IWegaGameControllerEvents>;
+    deployContract(
+      name: "IWegaRandomizerControllerEvents",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IWegaRandomizerControllerEvents>;
     deployContract(
       name: "FeeManager",
       args: any[],
@@ -787,15 +836,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IWegaGameController>;
     deployContract(
-      name: "IWegaRandomNumberController",
+      name: "IWegaRandomizerController",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IWegaRandomNumberController>;
+    ): Promise<Contracts.IWegaRandomizerController>;
     deployContract(
-      name: "IRandomizer",
+      name: "IWegaRandomizer",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IRandomizer>;
+    ): Promise<Contracts.IWegaRandomizer>;
+    deployContract(
+      name: "WegaRandomizer",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.WegaRandomizer>;
     deployContract(
       name: "WegaEscrowManagerRole",
       args: any[],
@@ -822,10 +876,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WegaGameController>;
     deployContract(
-      name: "WegaRandomNumberController",
+      name: "WegaRandomizerController",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.WegaRandomNumberController>;
+    ): Promise<Contracts.WegaRandomizerController>;
 
     // default types
     getContractFactory(

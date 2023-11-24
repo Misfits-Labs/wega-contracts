@@ -14,18 +14,26 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
-import "./IWegaRandomNumberController.sol";
+import "./IWegaRandomizerController.sol";
+import "./errors/AccessControlErrors.sol";
 import "./roles/WegaProtocolAdminRole.sol";
+import "./randomizer/IWegaRandomizer.sol";
+import "./randomizer/WegaRandomizer.sol";
 
-contract WegaRandomNumberController is IWegaRandomNumberController, WegaProtocolAdminRole, UUPSUpgradeable {
+contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole, UUPSUpgradeable, IWegaRandomizerController {
 
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
   using Math for uint256;
   using CountersUpgradeable for CountersUpgradeable.Counter;
   
+  address public RANDOMIZER; 
   bytes32 public GAME_CONTROLLER_ROLE;
-  CountersUpgradeable.Counter _nonce;
-  EnumerableMapUpgradeable.UintToUintMap private _randomNumbers;
+  bytes32 public GAME_ROLE;
+
+  modifier onlyGameOrGameController {
+    require(hasRole(GAME_CONTROLLER_ROLE, _msgSender()) || hasRole(GAME_ROLE, _msgSender()), CALLER_NOT_ALLOWED);
+    _;
+  }
 
   function initialize(uint256[] memory randomNumbers) initializer public {
     __UUPSUpgradeable_init();
@@ -35,52 +43,52 @@ contract WegaRandomNumberController is IWegaRandomNumberController, WegaProtocol
 
   function __WegaRandomNumberController_init(uint256[] memory randomNumbers) internal onlyInitializing {
     GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
+    GAME_ROLE = keccak256('GAME_ROLE');
     _setRoleAdmin(GAME_CONTROLLER_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
+    _setRoleAdmin(GAME_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
     __WegaRandomNumberController_init_unchained(randomNumbers);
   } 
 
   function __WegaRandomNumberController_init_unchained(uint256[] memory randomNumbers) internal onlyInitializing {
-   _seedRandomizer(randomNumbers);
-   _nonce.increment();
+   _spawnRandomizer(randomNumbers);
   } 
 
-  function generate(uint256 denominator, uint256 nonce) public view override returns(uint256) {
-    uint256 randomNumber = _retrieveRandomNumber(nonce);
+  function generate(uint256 denominator) public view override returns(uint256) {
+    uint256 randomNumber = getRandomizer().retrieve();
     uint256 result = (randomNumber % denominator) + 1;
     return result;
   }
 
-  function _retrieveRandomNumber(uint256 nonce) internal view returns (uint256){
-    uint256 count = _randomNumbers.length();
-    uint256 randomIndex = uint256(keccak256(abi.encodePacked(
-      tx.origin,
-      blockhash(block.number - nonce),
-      block.timestamp,
-      block.prevrandao,
-      nonce
-    ))) % count;
-    return _randomNumbers.get(randomIndex); 
-  }
-
-  function randomNumbersCount() public view override returns (uint256) {
-    return _randomNumbers.length();
-  }
-
-  function addRandomNumbers(uint256[] memory randomNumbers) public override onlyRole(GAME_CONTROLLER_ROLE) {
-    _seedRandomizer(randomNumbers);
-  }
-
-  function seedRandomizer(uint256[] memory randomNumbers) public override onlyWegaProtocolAdmin {
-    _seedRandomizer(randomNumbers);
+  function seedRandomizer(uint256[] memory randomNumbers) public override onlyRole(GAME_CONTROLLER_ROLE) {
+    getRandomizer().seed(randomNumbers);
   }
   
-  function _seedRandomizer(uint256[] memory randomNumbers) internal {
-    for(uint256 i = _randomNumbers.length(); i < randomNumbers.length;i++) {
-      if(!_randomNumbers.contains(randomNumbers[i])) {
-        _randomNumbers.set(i, randomNumbers[i]);
-      }
-    }
+  function incrementControllerNonce() public override onlyGameOrGameController {
+    getRandomizer().useOwnerNonce();
   }
 
   function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
+  function getRandomizer() public view returns (IWegaRandomizer randomizer){
+    randomizer = IWegaRandomizer(RANDOMIZER);
+  }
+
+  function setRandomizer(address randomizer) public onlyWegaProtocolAdmin {
+    _setRandomizer(randomizer);
+  } 
+  
+  function _setRandomizer(address randomizer) internal {
+    RANDOMIZER = randomizer;
+    emit RandomizerSet(RANDOMIZER);
+  }
+
+  function spawnRandomizer(uint256[] memory randomNumbers) public onlyWegaProtocolAdmin {
+    _spawnRandomizer(randomNumbers);
+  }
+
+  function _spawnRandomizer(uint256[] memory randomNumbers) internal {
+    WegaRandomizer randomizer = new WegaRandomizer(randomNumbers);
+    RANDOMIZER = address(randomizer);
+    emit RandomizerSet(RANDOMIZER);
+  }
 }
