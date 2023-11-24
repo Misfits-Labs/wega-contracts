@@ -49,7 +49,7 @@ const DEFAULT_OPTIONS: DeployerOptions = {
   proxy: true,
 };
 
-async function getArtifacts (): Promise<ArtifactsMap> {
+async function getArtifacts (signer: SignerWithAddress): Promise<ArtifactsMap> {
   return {
     WegaERC20Escrow: await ethers.getContractFactory('WegaERC20Escrow'),
     WegaERC20Dummy: await ethers.getContractFactory('WegaERC20Dummy'),

@@ -1,7 +1,7 @@
-const { ethers, upgrades } =  require('hardhat');
-import { constants, BigNumber, utils } from 'ethers';
 import { expect } from 'chai';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
+import { ethers, upgrades } from 'hardhat';
+import { Contract, parseEther, toBigInt, ZeroAddress } from 'ethers';
 import { 
   WegaERC20Escrow,
   WegaERC20Escrow__factory, 
@@ -16,15 +16,15 @@ import { PROTOCOL_ROLES } from '../src/constants'
 import { getRandomExpiryDate, randomNumber } from './helpers/utils'
 import { toSolidityShaWithAbiEncoder } from './helpers/eth.utils'
 
-export type RequestInput = (string | number | BigNumber)[]
+export type RequestInput = (string | number | bigint)[]
 
 
 describe("WegaERC20Escrow", () => {
 
   // contracts
-  let erc20Escrow: WegaERC20Escrow,
-      erc20Dummy: WegaERC20Dummy, 
-      feeManager: FeeManager;
+  let erc20Escrow: any,
+      erc20Dummy: any, 
+      feeManager: any;
       
   // factories
   let erc20EscrowFactory: WegaERC20Escrow__factory,
@@ -33,21 +33,21 @@ describe("WegaERC20Escrow", () => {
 
 
   // accounts
-  let signers: SignerWithAddress[],
-      protocolAdmin: SignerWithAddress, 
-      coinbase: SignerWithAddress, 
-      gameController: SignerWithAddress,
-      alice: SignerWithAddress, 
-      bob: SignerWithAddress, 
-      carl: SignerWithAddress,
-      david: SignerWithAddress,
-      ed: SignerWithAddress,
-      feeTaker: SignerWithAddress;
+  let signers: HardhatEthersSigner[],
+      protocolAdmin: HardhatEthersSigner, 
+      coinbase: HardhatEthersSigner, 
+      gameController: HardhatEthersSigner,
+      alice: HardhatEthersSigner, 
+      bob: HardhatEthersSigner, 
+      carl: HardhatEthersSigner,
+      david: HardhatEthersSigner,
+      ed: HardhatEthersSigner,
+      feeTaker: HardhatEthersSigner;
 
   // amounts
-  let aliceAmounts: BigNumber[]  = [utils.parseEther(String(1)), utils.parseEther(String(5)), utils.parseEther(String(10))];
-  let bobAmounts: BigNumber[] = aliceAmounts;
-  let carlAmounts: BigNumber[] = aliceAmounts;
+  let aliceAmounts: bigint[]  = [parseEther(String(1)), parseEther(String(5)), parseEther(String(10))];
+  let bobAmounts: bigint[] = aliceAmounts;
+  let carlAmounts: bigint[] = aliceAmounts;
 
 
   let feeConfigs: FeeConfig[];
@@ -57,19 +57,18 @@ describe("WegaERC20Escrow", () => {
     signers = await ethers.getSigners();
     [coinbase, protocolAdmin, gameController, feeTaker, ...signers] = signers;
     [alice, bob, carl, david, ed, ...signers] = signers;
-
+    
     // factory setup
     erc20EscrowFactory = new WegaERC20Escrow__factory(coinbase);
     erc20DummyFactory = new WegaERC20Dummy__factory(coinbase);
     feeManagerFactory = new FeeManager__factory(coinbase);
     
     // deploy contracts
-    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize' }) as FeeManager;
-    await feeManager.connect(coinbase).addWegaProtocolAdmin(protocolAdmin.address);
+    feeManager = await upgrades.deployProxy(feeManagerFactory, [], { kind: 'uups', initializer: 'initialize' });
+    await feeManager.addWegaProtocolAdmin(protocolAdmin.address);
 
-    erc20Escrow = await upgrades.deployProxy(
-      erc20EscrowFactory, 
-      [ feeManager.address ], { kind: 'uups', initializer: 'initialize' }
+    erc20Escrow = await upgrades.deployProxy(erc20EscrowFactory, 
+      [ feeManager.target ], { kind: 'uups', initializer: 'initialize' }
     );
 
     erc20Dummy = await erc20DummyFactory.deploy([
@@ -84,8 +83,8 @@ describe("WegaERC20Escrow", () => {
     await erc20Escrow.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.address);
     feeConfigs = [
       { 
-        applier: erc20Escrow.address as HexishString,
-        feeTaker: erc20Escrow.address as HexishString,
+        applier: erc20Escrow.target as HexishString,
+        feeTaker: erc20Escrow.target as HexishString,
         feeShare: 500,
         shouldApply: true,
       }
@@ -96,19 +95,19 @@ describe("WegaERC20Escrow", () => {
   describe("Function: hash(address,address,uint256,uint256)", () => {
     it("should correctly return requestId", async () => {
       const requestTypes = ['address','address','uint256','uint256','uint256'];
-      const requestValues = [erc20Dummy.address, alice.address, 2, utils.parseEther(String(10)), 0];
+      const requestValues = [erc20Dummy.target, alice.address, 2, parseEther(String(10)), 0];
       const calculatedRequestId = toSolidityShaWithAbiEncoder(requestTypes, requestValues);
-      expect(await erc20Escrow.connect(coinbase).hash(erc20Dummy.address, alice.address, 2, utils.parseEther(String(10)), 0)).to.equal(calculatedRequestId);
+      expect(await erc20Escrow.connect(coinbase).hash(erc20Dummy.target, alice.address, 2, parseEther(String(10)), 0)).to.equal(calculatedRequestId);
     });
   });
 
   describe("Function: createWagerRequest(address,address,uint256,uint256)", () => {
     it("should allow only gameController to call", async () => {
       const request = [
-        constants.AddressZero, 
+        ZeroAddress, 
         alice.address, 
         2, 
-        utils.parseEther(String(5))
+        parseEther(String(5))
       ]
       await expect(erc20Escrow.connect(alice).createWagerRequest(
         request[0] as string, 
@@ -119,29 +118,29 @@ describe("WegaERC20Escrow", () => {
       ).to.be.revertedWith(`AccessControl: account ${alice.address.toLowerCase()} is missing role ${PROTOCOL_ROLES.GAME_CONTROLLER_ROLE}`);
     })
     it("should throw if request data is invalid", async () => {
-      await erc20Dummy.connect(alice).approve(erc20Escrow.address, utils.parseEther(String(5)));
+      await erc20Dummy.connect(alice).approve(erc20Escrow.target, parseEther(String(5)));
 
       const invalidRequests = [
         [
-          constants.AddressZero,
+          ZeroAddress,
           alice.address, 
           2, 
-          utils.parseEther(String(5))
+          parseEther(String(5))
         ],
         [
-          erc20Dummy.address, 
-          constants.AddressZero, 
+          erc20Dummy.target, 
+          ZeroAddress, 
           2, 
-          utils.parseEther(String(5)), 
+          parseEther(String(5)), 
         ],
         [
-          erc20Dummy.address, 
+          erc20Dummy.target, 
           alice.address, 
           0, 
-          utils.parseEther(String(5)), 
+          parseEther(String(5)), 
         ],
         [
-          erc20Dummy.address, 
+          erc20Dummy.target, 
           alice.address, 
           2, 
           0, 
@@ -159,26 +158,26 @@ describe("WegaERC20Escrow", () => {
     });
     it("should emit the correct event and create a new escrow request", async () => {
       const depositors = 2;
-      const token = erc20Dummy.address as string;
+      const token = erc20Dummy.target as string;
       const account = alice.address as string;
       const nonce = await erc20Escrow.currentNonce(alice.address);
       const wager = aliceAmounts[0] 
-      await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceAmounts[0]);
+      await erc20Dummy.connect(alice).approve(erc20Escrow.target, aliceAmounts[0]);
       const escId = await erc20Escrow.hash(token, account, depositors, wager, nonce);
       await expect(erc20Escrow.connect(gameController).createWagerRequest(token, account, depositors, wager)).to.emit(erc20Escrow, 'WagerRequestCreation').withArgs(escId, token, account, wager);
     });
   });
 
   describe("Function: deposit(bytes32,uint256)", () => {
-    let accounts: SignerWithAddress[];
+    let accounts: HardhatEthersSigner[];
     let escrowId: any;
-    let wager: BigNumber = utils.parseEther("5");
-    let creator: SignerWithAddress;  
+    let wager: bigint = parseEther("5");
+    let creator: HardhatEthersSigner;  
     let nonce: any;
     let token: any;
     let depositors: number;
     beforeEach(async () => {
-      token = erc20Dummy.address as string;
+      token = erc20Dummy.target as string;
       accounts = [bob, ed, carl];
       depositors = accounts.length;
       creator = bob;
@@ -186,7 +185,7 @@ describe("WegaERC20Escrow", () => {
 
       // simulate wager creation
       escrowId = await erc20Escrow.hash(token, creator.address, depositors, wager, nonce);
-      await erc20Dummy.connect(creator).approve(erc20Escrow.address, wager);
+      await erc20Dummy.connect(creator).approve(erc20Escrow.target, wager);
       await erc20Escrow.connect(gameController).createWagerRequest(token, bob.address, depositors, wager);
     })
     it("should allow only gameController to call", async () => {
@@ -197,22 +196,22 @@ describe("WegaERC20Escrow", () => {
       ).to.be.revertedWith(`AccessControl: account ${alice.address.toLowerCase()} is missing role ${PROTOCOL_ROLES.GAME_CONTROLLER_ROLE}`);
     })
     it("should throw if wager amount is more or less then ask amount", async () => {
-      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
-      await expect(erc20Escrow.connect(gameController).deposit(escrowId, accounts[1].address, wager.sub(BigNumber.from("2")))).to.be.revertedWith("WegaEscrow: InvalidWagerAmount")
-      await expect(erc20Escrow.connect(gameController).deposit(escrowId, accounts[1].address, wager.add(BigNumber.from("4")))).to.be.revertedWith("WegaEscrow: InvalidWagerAmount")
+      await erc20Dummy.connect(accounts[1]).approve(erc20Escrow.target, wager);
+      await expect(erc20Escrow.connect(gameController).deposit(escrowId, accounts[1].address, wager - toBigInt("2"))).to.be.revertedWith("WegaEscrow: InvalidWagerAmount")
+      await expect(erc20Escrow.connect(gameController).deposit(escrowId, accounts[1].address, wager - toBigInt("4"))).to.be.revertedWith("WegaEscrow: InvalidWagerAmount")
     });
     it("should throw if creator is the one depositing", async () => {
-      await erc20Dummy.connect(creator).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(creator).approve(erc20Escrow.target, wager);
       await expect(erc20Escrow.connect(gameController).deposit(escrowId, creator.address, wager)).to.be.revertedWith("WegaEscrow: CanOnlyDepositOnce")
     })
     it("should deposit wager amount and emit the correct event", async ()=> {
-      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(accounts[2]).approve(erc20Escrow.target, wager);
       await expect(erc20Escrow.connect(gameController).deposit(escrowId, accounts[2].address , wager)).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, accounts[2].address);
     });
     it("should correctly change state if the total wager amount is reached", async () => {
       // arrange
-      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
-      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(accounts[1]).approve(erc20Escrow.target, wager);
+      await erc20Dummy.connect(accounts[2]).approve(erc20Escrow.target, wager);
       
       // act 
       await erc20Escrow.connect(gameController).deposit(escrowId, accounts[1].address, wager);
@@ -225,9 +224,9 @@ describe("WegaERC20Escrow", () => {
 
     it("should reject if tx state is not OPEN", async () => {
       // arrange
-      await erc20Dummy.connect(accounts[1]).increaseAllowance(erc20Escrow.address, wager);
-      await erc20Dummy.connect(accounts[2]).increaseAllowance(erc20Escrow.address, wager);
-      await erc20Dummy.connect(ed).increaseAllowance(erc20Escrow.address, wager);
+      await erc20Dummy.connect(accounts[1]).approve(erc20Escrow.target, wager);
+      await erc20Dummy.connect(accounts[2]).approve(erc20Escrow.target, wager);
+      await erc20Dummy.connect(ed).approve(erc20Escrow.target, wager);
       
       // act 
       await erc20Escrow.connect(gameController).deposit(escrowId, accounts[1].address, wager);
@@ -239,26 +238,26 @@ describe("WegaERC20Escrow", () => {
   });
 
   describe("Getters", () => {
-    let accounts: SignerWithAddress[];
+    let accounts: HardhatEthersSigner[];
     let escrowId: any;
-    let aliceWager: BigNumber;
+    let aliceWager: bigint;
     let nonce: any;
     beforeEach(async () => {
       const depositors = 2;
-      const token = erc20Dummy.address as string;
+      const token = erc20Dummy.target as string;
       accounts = [bob, carl];
       nonce = await erc20Escrow.currentNonce(alice.address);
-      aliceWager = utils.parseEther(String(5));
+      aliceWager = parseEther(String(5));
 
       // for querying one
       escrowId = await erc20Escrow.hash(token, alice.address, 2, aliceWager, nonce);
-      await erc20Dummy.connect(alice).approve(erc20Escrow.address, aliceWager);
+      await erc20Dummy.connect(alice).approve(erc20Escrow.target, aliceWager);
       await erc20Escrow.connect(gameController).createWagerRequest(token, alice.address, 2, aliceWager);
       
       await Promise.all(accounts.map(async (acc) => {
-        const w = utils.parseEther(String(5));
+        const w = parseEther(String(5));
         // console.log(await erc20Dummy.balanceOf(acc.address), w); 
-        await erc20Dummy.connect(acc).approve(erc20Escrow.address, w);
+        await erc20Dummy.connect(acc).approve(erc20Escrow.target, w);
         await erc20Escrow.connect(gameController).createWagerRequest(token, acc.address, 2, w);
       }))
     })
@@ -272,9 +271,9 @@ describe("WegaERC20Escrow", () => {
       const request = await erc20Escrow.getWagerRequest(escrowId);
       expect(request.escrowHash).to.equal(escrowId);
       expect(request.wagerAmount).to.equal(aliceWager);
-      expect(request.tokenAddress).to.equal(erc20Dummy.address);
+      expect(request.tokenAddress).to.equal(erc20Dummy.target);
       expect(request.nonce).to.equal(nonce);
-      expect(request.totalWager).to.equal(aliceWager.mul(BigNumber.from(2)));11
+      expect(request.totalWager).to.equal(aliceWager * toBigInt(2));11
     });
     it('should return the correct deposit amount of a user', async () => {
       expect(await erc20Escrow.depositOf(escrowId, alice.address)).to.equal(aliceWager);
@@ -285,26 +284,26 @@ describe("WegaERC20Escrow", () => {
   })
 
   describe('Withdrawals', () => {
-    let winner: SignerWithAddress;
-    let loser: SignerWithAddress;
+    let winner: HardhatEthersSigner;
+    let loser: HardhatEthersSigner;
     let escrowId: any;
-    let wager: BigNumber;
+    let wager: bigint;
     let nonce: any;
     let token: any;
-    let winningAmount: BigNumber;
+    let winningAmount: bigint;
 
     beforeEach(async () => {
       winner = carl;
       loser = bob; 
       
-      token = erc20Dummy.address as string;
+      token = erc20Dummy.target as string;
       nonce = await erc20Escrow.currentNonce(winner.address);
-      wager = utils.parseEther(String(5));
+      wager = parseEther(String(5));
 
       // for querying one
       escrowId = await erc20Escrow.hash(token, winner.address, 2, wager, nonce);
-      await erc20Dummy.connect(winner).approve(erc20Escrow.address, wager);
-      await erc20Dummy.connect(loser).approve(erc20Escrow.address, wager);
+      await erc20Dummy.connect(winner).approve(erc20Escrow.target, wager);
+      await erc20Dummy.connect(loser).approve(erc20Escrow.target, wager);
       await erc20Escrow.connect(gameController).createWagerRequest(token, winner.address, 2, wager);
     })
     describe('Function: setWithdrawer(bytes32 escrowId, address winner)', () => {
@@ -331,11 +330,11 @@ describe("WegaERC20Escrow", () => {
         await expect(erc20Escrow.connect(gameController).withdraw(escrowId)).to.be.revertedWith("WegaEscrow: InsufficientBalance")
       })
       it('it should emit the correct event and transfer the correct amount', async () => {
-        const balanceB: BigNumber = await erc20Dummy.balanceOf(winner.address);
+        const balanceB: bigint = await erc20Dummy.balanceOf(winner.address);
         await erc20Escrow.connect(gameController).deposit(escrowId, loser.address, wager);
         await erc20Escrow.connect(gameController).setWithdrawers(escrowId, [winner.address]);
-        await expect(erc20Escrow.connect(winner).withdraw(escrowId)).to.emit(erc20Escrow, 'WagerWithdrawal').withArgs(escrowId, wager.add(wager), winner.address);
-        expect(await erc20Dummy.balanceOf(winner.address)).to.equal(balanceB.add(wager.add(wager)));
+        await expect(erc20Escrow.connect(winner).withdraw(escrowId)).to.emit(erc20Escrow, 'WagerWithdrawal').withArgs(escrowId, wager + wager , winner.address);
+        expect(await erc20Dummy.balanceOf(winner.address)).to.equal(balanceB + wager + wager);
         expect((await erc20Escrow.getWagerRequest(escrowId)).state).to.equal(TransactionState.CLOSED);
       })
     })

@@ -1,6 +1,6 @@
 // require("@nomicfoundation/hardhat-chai-matchers");
-require("@nomicfoundation/hardhat-toolbox");
-require('@openzeppelin/hardhat-upgrades');
+import '@openzeppelin/hardhat-upgrades';
+import "@nomicfoundation/hardhat-toolbox";
 
 
 import path from 'path';
@@ -48,11 +48,11 @@ declare module 'hardhat/types/config' {
   }
 }
 
+import '@nomiclabs/hardhat-solhint';
 // import '@typechain/hardhat';
 // import '@nomiclabs/hardhat-ethers';
 // import '@nomiclabs/hardhat-waffle';
-import "@nomicfoundation/hardhat-toolbox";
-import '@nomiclabs/hardhat-solhint';
+// import "@nomicfoundation/hardhat-toolbox";
 // import "@nomicfoundation/hardhat-verify"
 
 // import '@nomiclabs/hardhat-etherscan';
