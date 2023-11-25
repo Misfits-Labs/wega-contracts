@@ -3,18 +3,20 @@ import { BigNumberish } from 'ethers';
 export enum ArtifactName {
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
-  WegaRandomNumberController = 'WegaRandomNumberController',
+  WegaRandomizerController = 'WegaRandomizerController',
   WegaDiceGame = 'WegaDiceGame',
   WegaCoinFlipGame = 'WegaCoinFlipGame',
   WegaGameController = 'WegaGameController',
-  FeeManager = 'FeeManager'
+  FeeManager = 'FeeManager',
+  WegaRandomizer = 'WegaRandomizer',
 }
 
 export enum ContractName {
   ProxyAdmin = 'ProxyAdmin',
   WegaERC20Escrow = 'WegaERC20Escrow',
   WegaERC20Dummy = 'WegaERC20Dummy',
-  WegaRandomNumberController = 'WegaRandomNumberController',
+  WegaRandomizerController = 'WegaRandomizerController',
+  WegaRandomizer = 'WegaRandomizer',
   WegaDiceGame = 'WegaDiceGame',
   WegaCoinFlipGame = 'WegaCoinFlipGame',
   FeeManager = 'FeeManager',

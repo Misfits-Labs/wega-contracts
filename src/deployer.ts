@@ -5,7 +5,7 @@ import { merge, uniq } from 'lodash';
 import debug from 'debug';
 import { mergeNetworkConfig, getNetworkConfig } from './config'
 import { Contract, ContractFactory } from 'ethers';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { NetworkConfig as HardHatNetworkConfig } from 'hardhat/types';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
 import {
@@ -49,11 +49,12 @@ const DEFAULT_OPTIONS: DeployerOptions = {
   proxy: true,
 };
 
-async function getArtifacts (signer: SignerWithAddress): Promise<ArtifactsMap> {
+async function getArtifacts (): Promise<ArtifactsMap> {
   return {
     WegaERC20Escrow: await ethers.getContractFactory('WegaERC20Escrow'),
     WegaERC20Dummy: await ethers.getContractFactory('WegaERC20Dummy'),
-    WegaRandomNumberController: await ethers.getContractFactory('WegaRandomNumberController'),
+    WegaRandomizerController: await ethers.getContractFactory('WegaRandomizerController'),
+    WegaRandomizer: await ethers.getContractFactory('WegaRandomizer'),
     WegaDiceGame: await ethers.getContractFactory('WegaDiceGame'),
     WegaCoinFlipGame: await ethers.getContractFactory('WegaCoinFlipGame'),
     FeeManager: await ethers.getContractFactory('FeeManager'),
@@ -170,7 +171,7 @@ export class Deployer {
         implementation: value.implementation,
         deploymentBlock:
           value.transaction &&
-          ethers.BigNumber.from(value.transaction.blockNumber).toHexString(),
+          ethers.toBigInt(String(value.transaction.blockNumber)).toString(16),
         forwarder: value.forwarder,
         legacyAddresses: uniq(value.legacyAddresses)
       };
@@ -203,11 +204,11 @@ export class Deployer {
     legacyAddresses?: string[], 
   ): Promise<void> {
     const config = this.getDeployConfig();
-    const transaction = contract.deployTransaction && (await contract.deployTransaction.wait());
+    const transaction = contract.deployTransaction && (await contract.deployTransaction());
     const _config = merge(config, {
       contracts: {
         [name as string]: {
-          address: contract.address,
+          address: contract.target,
           implementation: implAddress,
           transaction,
           legacyAddresses

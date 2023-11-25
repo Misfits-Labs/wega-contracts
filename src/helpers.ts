@@ -1,10 +1,7 @@
 import { ArtifactName, DependenciesMap, DeployedContract } from './types';
-import { config, upgrades } from 'hardhat';
-import { HardhatConfig } from 'hardhat/types';
-import { DeployConfig } from './deployer';
-import path from 'path'
+import { upgrades } from 'hardhat';
 import { Contract } from 'ethers';
-import { Deployer } from './deployer'
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function unwrap (object: any, key: string): any {
@@ -49,7 +46,7 @@ export async function upgradeContract({
         implementationFactory,
         forceImport.options
       ) 
-      legacyAddress = forceImportContract.address;  
+      legacyAddress = forceImportContract.target as string;  
       contractInstance = await upgrades.upgradeProxy(forceImportContract, options);
     } else { 
       legacyAddress = deployedContractConfig.implementation as string;
@@ -59,7 +56,7 @@ export async function upgradeContract({
         options
       );
     }
-    if(contractInstance.deployTransAction) await contractInstance.deployTransAction.wait();
+    if(contractInstance.deployTransAction) await contractInstance.deployTransAction();
     return {contractInstance, legacyAddress};
 }
 
