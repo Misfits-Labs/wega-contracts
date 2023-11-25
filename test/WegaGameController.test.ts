@@ -190,7 +190,7 @@ describe("WegaGameController", () => {
     await erc20Dummy.connect(ed).approve(erc20Escrow.target, toBigInt(wager) * toBigInt(10));
     await erc20Dummy.connect(david).approve(erc20Escrow.target, toBigInt(wager) * toBigInt(10));
     await erc20Dummy.connect(fred).approve(erc20Escrow.target, toBigInt(wager) * toBigInt(10));
-    const currentNonce = await erc20Escrow.currentNonce(players[0].address); 
+    const currentNonce = await erc20Escrow.nonces(players[0].address); 
     escrowId = await erc20Escrow.hash(token, players[0].address, 2, wager, currentNonce);
 
     // make give games game roll on randomizer
@@ -210,13 +210,13 @@ describe("WegaGameController", () => {
       )).to.be.revertedWith('WegaGameController: InvalidGame')
     })
     it('should create a game and emit correct event', async () => {
-      const diceNonce = await erc20Escrow.currentNonce(players[0].address);
+      const diceNonce = await erc20Escrow.nonces(players[0].address);
       await expect(gameController.connect(players[0]).createGame("DICE", token, wager, [parseEther('78409832094')])).to.emit(gameController, 'GameCreation').withArgs(
         escrowId, 
         diceNonce, 
         players[0].address, "DICE"
       );
-      const coinflipNonce = await erc20Escrow.currentNonce(players[0].address);
+      const coinflipNonce = await erc20Escrow.nonces(players[0].address);
       const coinflipId = await erc20Escrow.hash(token, players[0].address, 2, wager, coinflipNonce)
       await expect(gameController.connect(players[0]).createGame("COINFLIP", token, wager, [parseEther('78409832094')])).to.emit(
         gameController, 
@@ -230,7 +230,7 @@ describe("WegaGameController", () => {
       await expect(gameController.connect(players[1])[depositOrPlayDice](escrowId,[parseEther('78409832094')])).to.emit(erc20Escrow, 'WagerDeposit').withArgs(escrowId, wager, players[1].address);
     });
     it('should play DICE if game is ready', async () => {
-      const currentNonce = await erc20Escrow.currentNonce(players[0].address); 
+      const currentNonce = await erc20Escrow.nonces(players[0].address); 
       escrowId = await erc20Escrow.hash(token, players[0].address, 2, wager, currentNonce);
   
       await gameController.connect(players[0]).createGame("DICE", token, wager,[parseEther('78409832094')]);
@@ -238,7 +238,7 @@ describe("WegaGameController", () => {
       expect((await gameController.getGame(escrowId)).state).to.equal(GameState.PLAYED);
     })
     it('should play COINFLIP if game is ready', async () => {
-      const cfn = await erc20Escrow.currentNonce(players[2].address); 
+      const cfn = await erc20Escrow.nonces(players[2].address); 
       const cfeid = await erc20Escrow.hash(token, players[2].address, 2, wager, cfn);
       const playerChoices = [1, 2];
       await gameController.connect(players[2]).createGame("COINFLIP", token, wager,[parseEther('78409832094')]);
@@ -246,7 +246,7 @@ describe("WegaGameController", () => {
       expect((await gameController.getGame(cfeid)).state).to.equal(GameState.PLAYED);
     })
     it('should throw if game is played', async () => {
-      const currentNonce = await erc20Escrow.currentNonce(players[0].address); 
+      const currentNonce = await erc20Escrow.nonces(players[0].address); 
       escrowId = await erc20Escrow.hash(token, players[0].address, 2, wager, currentNonce);
       
       await gameController.connect(players[0]).createGame("DICE", token, wager,[parseEther('78409832094')])

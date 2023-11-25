@@ -2,12 +2,13 @@
 pragma solidity ^0.8.14;
 
 // lib imports
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Nonces.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 // protocol imports
@@ -32,11 +33,12 @@ contract WegaERC20Escrow is
     IERC20EscrowEvents,
     WegaProtocolAdminRole,
     WegaEscrowErrors,
+    ReentrancyGuardUpgradeable,
+    Nonces,
     UUPSUpgradeable
 {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.AddressSet;
     using Math for uint256;
     
     bytes32 public GAME_CONTROLLER_ROLE;
@@ -48,10 +50,7 @@ contract WegaERC20Escrow is
     mapping(bytes32 => mapping(address => uint256)) private _deposits;
 
     // for keeping track of depositor addresses
-    mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) _depositors;
-
-    // mapping of creators -> nonces
-    mapping(address => CountersUpgradeable.Counter) private _wagerNonces;
+    mapping(bytes32 => EnumerableSet.AddressSet) _depositors;
 
     // request balance
     mapping(bytes32 => uint256) private _escrowBalances;
@@ -60,7 +59,7 @@ contract WegaERC20Escrow is
     mapping(address => uint256) private _accountBalances;
 
     // stores all the transfer Ids, will be used enumeration
-    EnumerableSetUpgradeable.Bytes32Set private _escrowHashes;
+    EnumerableSet.Bytes32Set private _escrowHashes;
 
     // fees
     IFeeManager internal _feeManager;
@@ -133,11 +132,11 @@ contract WegaERC20Escrow is
         wagerRequest_.tokenAddress = tokenAddress;
         wagerRequest_.wagerAmount = wagerAmount;
         wagerRequest_.totalWager = wagerAmount * requiredPlayerNum;
-        wagerRequest_.nonce = currentNonce(account);
+        wagerRequest_.nonce = nonces(account);
 
         // increment user nonce
-        _wagerNonces[account].increment();
-
+        _useNonce(account);
+        
         // create escrowHash
         bytes32 escrowHash_ = hash(
             wagerRequest_.tokenAddress,
@@ -162,7 +161,7 @@ contract WegaERC20Escrow is
         _escrowBalances[escrowHash_] += wagerAmount;
 
         // deposit to escrow
-        IERC20Upgradeable(wagerRequest_.tokenAddress).transferFrom(
+        ERC20Upgradeable(wagerRequest_.tokenAddress).transferFrom(
             account,
             address(this),
             wagerAmount
@@ -188,12 +187,6 @@ contract WegaERC20Escrow is
         escrowHash_ = keccak256(
             abi.encodePacked(token, creator, requiredPlayerNum, wager, nonce)
         );
-    }
-
-    function currentNonce(
-        address account
-    ) public view override returns (uint256) {
-        return _wagerNonces[account].current();
     }
 
     function getWagerRequests()
@@ -243,7 +236,7 @@ contract WegaERC20Escrow is
         
         // transfer tokens to escrow
         _escrowBalances[escrowHash] += wagerAmount;
-        IERC20Upgradeable(request.tokenAddress).transferFrom(
+        ERC20Upgradeable(request.tokenAddress).transferFrom(
             account,
             address(this),
             wagerAmount
@@ -284,7 +277,7 @@ contract WegaERC20Escrow is
         emit SetWithdrawers(escrowHash, winners_);
     }
 
-    function withdraw(bytes32 escrowHash) public {
+    function withdraw(bytes32 escrowHash) public nonReentrant {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
         require(request.state == TransactionState.READY, INVALID_REQUEST_STATE);
         require(_accountBalances[_msgSender()] > 0 ether, INVALID_WITHDRAW_BALANCE);
@@ -298,16 +291,16 @@ contract WegaERC20Escrow is
                 uint256 feeAmount, 
                 uint256 sendAmount
             ) = _feeManager.calculateFeesForTransfer(address(this), transferAmount);
-            IERC20Upgradeable(request.tokenAddress).transfer(
+            ERC20Upgradeable(request.tokenAddress).transfer(
                 _msgSender(),
                 sendAmount
             );
-            IERC20Upgradeable(request.tokenAddress).transfer(
+            ERC20Upgradeable(request.tokenAddress).transfer(
                 feeTaker,
                 feeAmount
             );
         } else {
-            IERC20Upgradeable(request.tokenAddress).transfer(
+            ERC20Upgradeable(request.tokenAddress).transfer(
                 _msgSender(),
                 transferAmount
             );

@@ -53,7 +53,6 @@ export interface IWegaERC20EscrowInterface extends Interface {
     nameOrSignature:
       | "containsPlayer"
       | "createWagerRequest"
-      | "currentNonce"
       | "deposit"
       | "depositOf"
       | "getWagerRequest"
@@ -71,10 +70,6 @@ export interface IWegaERC20EscrowInterface extends Interface {
   encodeFunctionData(
     functionFragment: "createWagerRequest",
     values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentNonce",
-    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
@@ -115,10 +110,6 @@ export interface IWegaERC20EscrowInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createWagerRequest",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "currentNonce",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
@@ -206,8 +197,6 @@ export interface IWegaERC20Escrow extends BaseContract {
     "nonpayable"
   >;
 
-  currentNonce: TypedContractMethod<[account: AddressLike], [bigint], "view">;
-
   deposit: TypedContractMethod<
     [escrowHash: BytesLike, account: AddressLike, amount: BigNumberish],
     [void],
@@ -281,9 +270,6 @@ export interface IWegaERC20Escrow extends BaseContract {
     [string],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "currentNonce"
-  ): TypedContractMethod<[account: AddressLike], [bigint], "view">;
   getFunction(
     nameOrSignature: "deposit"
   ): TypedContractMethod<

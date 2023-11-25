@@ -23,7 +23,7 @@ abstract contract  WegaFeeAdminRole is OwnableUpgradeable, AccessControlErrors, 
 
     // solhint-disable-next-line func-name-mixedcase
     function __WegaFeeAdminRole_init() internal onlyInitializing {
-        __Ownable_init(); // set the msgSender as owner
+        __Ownable_init(_msgSender()); // set the msgSender as owner
         __AccessControl_init(); // also make the owner a controller ADMIN
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setRoleAdmin(WEGA_FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);

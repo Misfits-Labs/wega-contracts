@@ -6,7 +6,6 @@ pragma solidity ^0.8.19;
   * @notice a simple decentralized onchain coinflip game
   * @dev note this is draft contract not meant to be used in production
 */
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -19,8 +18,7 @@ import "./Wega.sol";
 contract WegaCoinFlipGame is Wega {
 
   using Arrays for uint256[];
-  using CountersUpgradeable for CountersUpgradeable.Counter;
-
+  
   function play( 
     bytes32 escrowHash,
     address[] memory currentPlayers,

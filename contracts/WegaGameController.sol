@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "hardhat/console.sol";
 
@@ -35,8 +35,8 @@ contract WegaGameController is
   UUPSUpgradeable
   {
 
-  using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
-  using EnumerableSetUpgradeable for EnumerableSetUpgradeable.UintSet; 
+  using EnumerableMap for EnumerableMap.UintToUintMap;
+  using EnumerableSet for EnumerableSet.UintSet; 
   using Strings for string;
   using Arrays for uint256[];
 
@@ -46,7 +46,7 @@ contract WegaGameController is
   mapping(bytes32 => IWega.Wega) private _games;
   mapping(uint256 => address) _registeredGames;
   mapping(uint256 => GameSettings) _gameSettings;
-  EnumerableSetUpgradeable.UintSet _gameNameHashes;
+  EnumerableSet.UintSet _gameNameHashes;
   
   function initialize(
     address erc20EscrowAddress, 

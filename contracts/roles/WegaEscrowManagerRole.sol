@@ -23,7 +23,7 @@ abstract contract  WegaEscrowManagerRole is OwnableUpgradeable, AccessControlErr
 
     // solhint-disable-next-line func-name-mixedcase
     function __WegaEscrowManagerRole_init() internal onlyInitializing {
-        __Ownable_init(); // set the msgSender as owner
+        __Ownable_init(_msgSender()); // set the msgSender as owner
         __AccessControl_init(); // also make the owner a controller ADMIN
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setRoleAdmin(WEGA_ESCROW_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);

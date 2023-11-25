@@ -7,7 +7,7 @@
     "@ethereumjs/tx": "^4.0.2",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@nomicfoundation/hardhat-chai-matchers": "1",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.9",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
@@ -15,7 +15,7 @@
     "@nomiclabs/hardhat-ganache": "^2.0.1",
     "@nomiclabs/hardhat-solhint": "^2.0.1",
     "@openzeppelin/contracts": "^5.0.0",
-    "@openzeppelin/contracts-upgradeable": "^4.8.0",
+    "@openzeppelin/contracts-upgradeable": "^5.0.0",
     "@openzeppelin/hardhat-upgrades": "^2.4.1",
     "@openzeppelin/upgrades-core": "^1.20.5",
     "@typechain/ethers-v6": "^0.5.1",
@@ -27,7 +27,7 @@
     "@types/node": "^18.11.13",
     "chai": "^4.3.10",
     "dotenv": "^16.0.3",
-    "ethers": "6.6.2",
+    "ethers": "^6.8.1",
     "hardhat": "^2.19.1",
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
@@ -68,7 +68,7 @@
     "drand": "ts-node ./scripts/crawl-random-numbers.ts",
     "gas-report": "env ENABLE_GAS_REPORT=true yarn test:sol",
     "analyze": "slither . --hardhat-artifacts-directory ./.artifacts --sarif slither.sarif --config-file .slither.json",
-    "test": "hardhat test ./test/WegaGameController.test.ts ./test/WegaRandomNumberController.test.ts ./test/WegaERC20Escrow.test.ts ./test/WegaFeeManager.test.ts"
+    "test": "hardhat test ./test/WegaGameController.test.ts ./test/WegaRandomizerController.test.ts ./test/WegaERC20Escrow.test.ts ./test/WegaFeeManager.test.ts"
   },
   "dependencies": {
     "@types/yargs": "^17.0.17",

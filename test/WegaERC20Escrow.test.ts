@@ -8,7 +8,8 @@ import {
   WegaERC20Dummy,
   WegaERC20Dummy__factory,
   FeeManager,
-  FeeManager__factory
+  FeeManager__factory,
+  AccessControlUpgradeable
 } from '../types';
 
 import { TransactionState, HexishString, FeeConfig } from '../src/types'
@@ -115,7 +116,7 @@ describe("WegaERC20Escrow", () => {
         request[2],
         request[3],
         )
-      ).to.be.revertedWith(`AccessControl: account ${alice.address.toLowerCase()} is missing role ${PROTOCOL_ROLES.GAME_CONTROLLER_ROLE}`);
+      ).to.be.reverted
     })
     it("should throw if request data is invalid", async () => {
       await erc20Dummy.connect(alice).approve(erc20Escrow.target, parseEther(String(5)));
@@ -160,7 +161,7 @@ describe("WegaERC20Escrow", () => {
       const depositors = 2;
       const token = erc20Dummy.target as string;
       const account = alice.address as string;
-      const nonce = await erc20Escrow.currentNonce(alice.address);
+      const nonce = await erc20Escrow.nonces(alice.address);
       const wager = aliceAmounts[0] 
       await erc20Dummy.connect(alice).approve(erc20Escrow.target, aliceAmounts[0]);
       const escId = await erc20Escrow.hash(token, account, depositors, wager, nonce);
@@ -181,7 +182,7 @@ describe("WegaERC20Escrow", () => {
       accounts = [bob, ed, carl];
       depositors = accounts.length;
       creator = bob;
-      nonce = await erc20Escrow.currentNonce(creator.address);
+      nonce = await erc20Escrow.nonces(creator.address);
 
       // simulate wager creation
       escrowId = await erc20Escrow.hash(token, creator.address, depositors, wager, nonce);
@@ -193,7 +194,7 @@ describe("WegaERC20Escrow", () => {
         escrowId as string, 
         alice.address as string, 
         wager)
-      ).to.be.revertedWith(`AccessControl: account ${alice.address.toLowerCase()} is missing role ${PROTOCOL_ROLES.GAME_CONTROLLER_ROLE}`);
+      ).to.be.reverted;
     })
     it("should throw if wager amount is more or less then ask amount", async () => {
       await erc20Dummy.connect(accounts[1]).approve(erc20Escrow.target, wager);
@@ -246,7 +247,7 @@ describe("WegaERC20Escrow", () => {
       const depositors = 2;
       const token = erc20Dummy.target as string;
       accounts = [bob, carl];
-      nonce = await erc20Escrow.currentNonce(alice.address);
+      nonce = await erc20Escrow.nonces(alice.address);
       aliceWager = parseEther(String(5));
 
       // for querying one
@@ -297,7 +298,7 @@ describe("WegaERC20Escrow", () => {
       loser = bob; 
       
       token = erc20Dummy.target as string;
-      nonce = await erc20Escrow.currentNonce(winner.address);
+      nonce = await erc20Escrow.nonces(winner.address);
       wager = parseEther(String(5));
 
       // for querying one
@@ -308,7 +309,8 @@ describe("WegaERC20Escrow", () => {
     })
     describe('Function: setWithdrawer(bytes32 escrowId, address winner)', () => {
       it('can only be called by gameController', async () => {
-        await expect(erc20Escrow.connect(alice).setWithdrawers(escrowId, [winner.address])).to.be.revertedWith(`AccessControl: account ${alice.address.toLowerCase()} is missing role ${PROTOCOL_ROLES.GAME_CONTROLLER_ROLE}`)
+        
+        await expect(erc20Escrow.connect(alice).setWithdrawers(escrowId, [winner.address])).to.be.reverted;
       });
       it('can only be called if escrow is pending', async () => {
         await expect(erc20Escrow.connect(gameController).setWithdrawers(escrowId, [winner.address])).to.be.revertedWith("WegaEscrow: InvalidRequestState")

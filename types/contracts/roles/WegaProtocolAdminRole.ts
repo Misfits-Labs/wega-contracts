@@ -381,7 +381,7 @@ export interface WegaProtocolAdminRole extends BaseContract {
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   renounceRole: TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -466,7 +466,7 @@ export interface WegaProtocolAdminRole extends BaseContract {
   getFunction(
     nameOrSignature: "renounceRole"
   ): TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -527,7 +527,7 @@ export interface WegaProtocolAdminRole extends BaseContract {
   >;
 
   filters: {
-    "Initialized(uint8)": TypedContractEvent<
+    "Initialized(uint64)": TypedContractEvent<
       InitializedEvent.InputTuple,
       InitializedEvent.OutputTuple,
       InitializedEvent.OutputObject

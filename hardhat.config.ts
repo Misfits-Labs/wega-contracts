@@ -1,6 +1,7 @@
 // require("@nomicfoundation/hardhat-chai-matchers");
 import '@openzeppelin/hardhat-upgrades';
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-chai-matchers";
 
 
 import path from 'path';

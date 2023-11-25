@@ -30,6 +30,7 @@ export interface WegaRandomizerControllerInterface extends Interface {
       | "GAME_CONTROLLER_ROLE"
       | "GAME_ROLE"
       | "RANDOMIZER"
+      | "UPGRADE_INTERFACE_VERSION"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
@@ -56,14 +57,11 @@ export interface WegaRandomizerControllerInterface extends Interface {
       | "spawnRandomizer"
       | "supportsInterface"
       | "transferOwnership"
-      | "upgradeTo"
       | "upgradeToAndCall"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "AdminChanged"
-      | "BeaconUpgraded"
       | "Initialized"
       | "OwnershipTransferred"
       | "RandomizerSet"
@@ -84,6 +82,10 @@ export interface WegaRandomizerControllerInterface extends Interface {
   encodeFunctionData(functionFragment: "GAME_ROLE", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "RANDOMIZER",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "UPGRADE_INTERFACE_VERSION",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -188,10 +190,6 @@ export interface WegaRandomizerControllerInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "upgradeTo",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "upgradeToAndCall",
     values: [AddressLike, BytesLike]
   ): string;
@@ -206,6 +204,10 @@ export interface WegaRandomizerControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "GAME_ROLE", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "RANDOMIZER", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "UPGRADE_INTERFACE_VERSION",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
     data: BytesLike
@@ -292,36 +294,10 @@ export interface WegaRandomizerControllerInterface extends Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "upgradeToAndCall",
     data: BytesLike
   ): Result;
-}
-
-export namespace AdminChangedEvent {
-  export type InputTuple = [previousAdmin: AddressLike, newAdmin: AddressLike];
-  export type OutputTuple = [previousAdmin: string, newAdmin: string];
-  export interface OutputObject {
-    previousAdmin: string;
-    newAdmin: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace BeaconUpgradedEvent {
-  export type InputTuple = [beacon: AddressLike];
-  export type OutputTuple = [beacon: string];
-  export interface OutputObject {
-    beacon: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace InitializedEvent {
@@ -482,6 +458,8 @@ export interface WegaRandomizerController extends BaseContract {
 
   RANDOMIZER: TypedContractMethod<[], [string], "view">;
 
+  UPGRADE_INTERFACE_VERSION: TypedContractMethod<[], [string], "view">;
+
   WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
   addWegaProtocolAdmin: TypedContractMethod<
@@ -553,7 +531,7 @@ export interface WegaRandomizerController extends BaseContract {
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   renounceRole: TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -602,12 +580,6 @@ export interface WegaRandomizerController extends BaseContract {
     "nonpayable"
   >;
 
-  upgradeTo: TypedContractMethod<
-    [newImplementation: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-
   upgradeToAndCall: TypedContractMethod<
     [newImplementation: AddressLike, data: BytesLike],
     [void],
@@ -629,6 +601,9 @@ export interface WegaRandomizerController extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "RANDOMIZER"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "UPGRADE_INTERFACE_VERSION"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
@@ -692,7 +667,7 @@ export interface WegaRandomizerController extends BaseContract {
   getFunction(
     nameOrSignature: "renounceRole"
   ): TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -725,13 +700,6 @@ export interface WegaRandomizerController extends BaseContract {
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "upgradeTo"
-  ): TypedContractMethod<
-    [newImplementation: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "upgradeToAndCall"
   ): TypedContractMethod<
     [newImplementation: AddressLike, data: BytesLike],
@@ -739,20 +707,6 @@ export interface WegaRandomizerController extends BaseContract {
     "payable"
   >;
 
-  getEvent(
-    key: "AdminChanged"
-  ): TypedContractEvent<
-    AdminChangedEvent.InputTuple,
-    AdminChangedEvent.OutputTuple,
-    AdminChangedEvent.OutputObject
-  >;
-  getEvent(
-    key: "BeaconUpgraded"
-  ): TypedContractEvent<
-    BeaconUpgradedEvent.InputTuple,
-    BeaconUpgradedEvent.OutputTuple,
-    BeaconUpgradedEvent.OutputObject
-  >;
   getEvent(
     key: "Initialized"
   ): TypedContractEvent<
@@ -804,29 +758,7 @@ export interface WegaRandomizerController extends BaseContract {
   >;
 
   filters: {
-    "AdminChanged(address,address)": TypedContractEvent<
-      AdminChangedEvent.InputTuple,
-      AdminChangedEvent.OutputTuple,
-      AdminChangedEvent.OutputObject
-    >;
-    AdminChanged: TypedContractEvent<
-      AdminChangedEvent.InputTuple,
-      AdminChangedEvent.OutputTuple,
-      AdminChangedEvent.OutputObject
-    >;
-
-    "BeaconUpgraded(address)": TypedContractEvent<
-      BeaconUpgradedEvent.InputTuple,
-      BeaconUpgradedEvent.OutputTuple,
-      BeaconUpgradedEvent.OutputObject
-    >;
-    BeaconUpgraded: TypedContractEvent<
-      BeaconUpgradedEvent.InputTuple,
-      BeaconUpgradedEvent.OutputTuple,
-      BeaconUpgradedEvent.OutputObject
-    >;
-
-    "Initialized(uint8)": TypedContractEvent<
+    "Initialized(uint64)": TypedContractEvent<
       InitializedEvent.InputTuple,
       InitializedEvent.OutputTuple,
       InitializedEvent.OutputObject

@@ -10,10 +10,9 @@ pragma solidity ^0.8.19;
   * oracle implementation for random numbers
   * @dev note this is draft contract not meant to be used in production
 */
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -28,7 +27,7 @@ import "./IWega.sol";
 abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
 
   using EnumerableMap for EnumerableMap.UintToUintMap;
-  using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+  using EnumerableSet for EnumerableSet.AddressSet;
   using Math for uint256;
   using Arrays for uint256[];
 
@@ -37,8 +36,7 @@ abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
   // escrowHash -> address of the player -> results
   mapping(bytes32 => mapping(address => uint256[])) private _gameResults;
   mapping(bytes32 => mapping(address => uint256)) private _playerScores;
-  mapping(bytes32 => EnumerableSetUpgradeable.AddressSet) private _winners;
-  CountersUpgradeable.Counter internal _nonces;
+  mapping(bytes32 => EnumerableSet.AddressSet) private _winners;
   bytes32 public GAME_CONTROLLER_ROLE;
 
   

@@ -58,6 +58,7 @@ export interface WegaERC20EscrowInterface extends Interface {
       | "GAME_CONTROLLER_ROLE"
       | "NAME"
       | "TYPE"
+      | "UPGRADE_INTERFACE_VERSION"
       | "VERSION"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
       | "addWegaProtocolAdmin"
@@ -65,7 +66,6 @@ export interface WegaERC20EscrowInterface extends Interface {
       | "closeWegaProtocolAdmin"
       | "containsPlayer"
       | "createWagerRequest"
-      | "currentNonce"
       | "deposit"
       | "depositOf"
       | "getRoleAdmin"
@@ -76,6 +76,7 @@ export interface WegaERC20EscrowInterface extends Interface {
       | "hash"
       | "initialize"
       | "isWegaProtocolAdmin"
+      | "nonces"
       | "owner"
       | "proxiableUUID"
       | "removeWegaProtocolAdmin"
@@ -90,7 +91,6 @@ export interface WegaERC20EscrowInterface extends Interface {
       | "supportsInterface"
       | "toggleFees"
       | "transferOwnership"
-      | "upgradeTo"
       | "upgradeToAndCall"
       | "wagerBalance"
       | "withdraw"
@@ -98,9 +98,7 @@ export interface WegaERC20EscrowInterface extends Interface {
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "AdminChanged"
       | "ApplyFees"
-      | "BeaconUpgraded"
       | "Initialized"
       | "OwnershipTransferred"
       | "RoleAdminChanged"
@@ -129,6 +127,10 @@ export interface WegaERC20EscrowInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
   encodeFunctionData(functionFragment: "TYPE", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "UPGRADE_INTERFACE_VERSION",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "VERSION", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
@@ -153,10 +155,6 @@ export interface WegaERC20EscrowInterface extends Interface {
   encodeFunctionData(
     functionFragment: "createWagerRequest",
     values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currentNonce",
-    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "deposit",
@@ -198,6 +196,7 @@ export interface WegaERC20EscrowInterface extends Interface {
     functionFragment: "isWegaProtocolAdmin",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(functionFragment: "nonces", values: [AddressLike]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "proxiableUUID",
@@ -252,10 +251,6 @@ export interface WegaERC20EscrowInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "upgradeTo",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "upgradeToAndCall",
     values: [AddressLike, BytesLike]
   ): string;
@@ -276,6 +271,10 @@ export interface WegaERC20EscrowInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "TYPE", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "UPGRADE_INTERFACE_VERSION",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "VERSION", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
@@ -301,10 +300,6 @@ export interface WegaERC20EscrowInterface extends Interface {
     functionFragment: "createWagerRequest",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "currentNonce",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "depositOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -327,6 +322,7 @@ export interface WegaERC20EscrowInterface extends Interface {
     functionFragment: "isWegaProtocolAdmin",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "proxiableUUID",
@@ -374,7 +370,6 @@ export interface WegaERC20EscrowInterface extends Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "upgradeToAndCall",
     data: BytesLike
@@ -386,36 +381,11 @@ export interface WegaERC20EscrowInterface extends Interface {
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 }
 
-export namespace AdminChangedEvent {
-  export type InputTuple = [previousAdmin: AddressLike, newAdmin: AddressLike];
-  export type OutputTuple = [previousAdmin: string, newAdmin: string];
-  export interface OutputObject {
-    previousAdmin: string;
-    newAdmin: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
 export namespace ApplyFeesEvent {
   export type InputTuple = [areFeesApplied: boolean];
   export type OutputTuple = [areFeesApplied: boolean];
   export interface OutputObject {
     areFeesApplied: boolean;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace BeaconUpgradedEvent {
-  export type InputTuple = [beacon: AddressLike];
-  export type OutputTuple = [beacon: string];
-  export interface OutputObject {
-    beacon: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -673,6 +643,8 @@ export interface WegaERC20Escrow extends BaseContract {
 
   TYPE: TypedContractMethod<[], [string], "view">;
 
+  UPGRADE_INTERFACE_VERSION: TypedContractMethod<[], [string], "view">;
+
   VERSION: TypedContractMethod<[], [string], "view">;
 
   WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
@@ -711,8 +683,6 @@ export interface WegaERC20Escrow extends BaseContract {
     [string],
     "nonpayable"
   >;
-
-  currentNonce: TypedContractMethod<[account: AddressLike], [bigint], "view">;
 
   deposit: TypedContractMethod<
     [escrowHash: BytesLike, account: AddressLike, wagerAmount: BigNumberish],
@@ -776,6 +746,8 @@ export interface WegaERC20Escrow extends BaseContract {
     "view"
   >;
 
+  nonces: TypedContractMethod<[owner: AddressLike], [bigint], "view">;
+
   owner: TypedContractMethod<[], [string], "view">;
 
   proxiableUUID: TypedContractMethod<[], [string], "view">;
@@ -795,7 +767,7 @@ export interface WegaERC20Escrow extends BaseContract {
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   renounceRole: TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -840,12 +812,6 @@ export interface WegaERC20Escrow extends BaseContract {
     "nonpayable"
   >;
 
-  upgradeTo: TypedContractMethod<
-    [newImplementation: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-
   upgradeToAndCall: TypedContractMethod<
     [newImplementation: AddressLike, data: BytesLike],
     [void],
@@ -874,6 +840,9 @@ export interface WegaERC20Escrow extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "TYPE"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "UPGRADE_INTERFACE_VERSION"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "VERSION"
@@ -909,9 +878,6 @@ export interface WegaERC20Escrow extends BaseContract {
     [string],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "currentNonce"
-  ): TypedContractMethod<[account: AddressLike], [bigint], "view">;
   getFunction(
     nameOrSignature: "deposit"
   ): TypedContractMethod<
@@ -973,6 +939,9 @@ export interface WegaERC20Escrow extends BaseContract {
     nameOrSignature: "isWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [boolean], "view">;
   getFunction(
+    nameOrSignature: "nonces"
+  ): TypedContractMethod<[owner: AddressLike], [bigint], "view">;
+  getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
@@ -990,7 +959,7 @@ export interface WegaERC20Escrow extends BaseContract {
   getFunction(
     nameOrSignature: "renounceRole"
   ): TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -1027,13 +996,6 @@ export interface WegaERC20Escrow extends BaseContract {
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "upgradeTo"
-  ): TypedContractMethod<
-    [newImplementation: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "upgradeToAndCall"
   ): TypedContractMethod<
     [newImplementation: AddressLike, data: BytesLike],
@@ -1048,25 +1010,11 @@ export interface WegaERC20Escrow extends BaseContract {
   ): TypedContractMethod<[escrowHash: BytesLike], [void], "nonpayable">;
 
   getEvent(
-    key: "AdminChanged"
-  ): TypedContractEvent<
-    AdminChangedEvent.InputTuple,
-    AdminChangedEvent.OutputTuple,
-    AdminChangedEvent.OutputObject
-  >;
-  getEvent(
     key: "ApplyFees"
   ): TypedContractEvent<
     ApplyFeesEvent.InputTuple,
     ApplyFeesEvent.OutputTuple,
     ApplyFeesEvent.OutputObject
-  >;
-  getEvent(
-    key: "BeaconUpgraded"
-  ): TypedContractEvent<
-    BeaconUpgradedEvent.InputTuple,
-    BeaconUpgradedEvent.OutputTuple,
-    BeaconUpgradedEvent.OutputObject
   >;
   getEvent(
     key: "Initialized"
@@ -1154,17 +1102,6 @@ export interface WegaERC20Escrow extends BaseContract {
   >;
 
   filters: {
-    "AdminChanged(address,address)": TypedContractEvent<
-      AdminChangedEvent.InputTuple,
-      AdminChangedEvent.OutputTuple,
-      AdminChangedEvent.OutputObject
-    >;
-    AdminChanged: TypedContractEvent<
-      AdminChangedEvent.InputTuple,
-      AdminChangedEvent.OutputTuple,
-      AdminChangedEvent.OutputObject
-    >;
-
     "ApplyFees(bool)": TypedContractEvent<
       ApplyFeesEvent.InputTuple,
       ApplyFeesEvent.OutputTuple,
@@ -1176,18 +1113,7 @@ export interface WegaERC20Escrow extends BaseContract {
       ApplyFeesEvent.OutputObject
     >;
 
-    "BeaconUpgraded(address)": TypedContractEvent<
-      BeaconUpgradedEvent.InputTuple,
-      BeaconUpgradedEvent.OutputTuple,
-      BeaconUpgradedEvent.OutputObject
-    >;
-    BeaconUpgraded: TypedContractEvent<
-      BeaconUpgradedEvent.InputTuple,
-      BeaconUpgradedEvent.OutputTuple,
-      BeaconUpgradedEvent.OutputObject
-    >;
-
-    "Initialized(uint8)": TypedContractEvent<
+    "Initialized(uint64)": TypedContractEvent<
       InitializedEvent.InputTuple,
       InitializedEvent.OutputTuple,
       InitializedEvent.OutputObject

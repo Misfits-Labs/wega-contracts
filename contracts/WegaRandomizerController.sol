@@ -9,9 +9,9 @@ pragma solidity ^0.8.19;
   * oracle implementation for random numbers
   * @dev note this is draft contract not meant to be used in production
 */
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "./IWegaRandomizerController.sol";
@@ -23,9 +23,9 @@ import "./randomizer/WegaRandomizer.sol";
 
 contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole, UUPSUpgradeable, IWegaRandomizerController {
 
-  using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
+  using EnumerableMap for EnumerableMap.UintToUintMap;
   using Math for uint256;
-  using CountersUpgradeable for CountersUpgradeable.Counter;
+  
   
   address public RANDOMIZER; 
   bytes32 public constant GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');

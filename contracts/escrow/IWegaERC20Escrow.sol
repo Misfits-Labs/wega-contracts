@@ -51,12 +51,6 @@ interface IWegaERC20Escrow {
  ) external view returns (bytes32 escrowHash_);
 
  /**
- * @notice retrieves the current nonce of account that wants to create a wager
- * @param account is the account that will create the wager
- */
- function currentNonce(address account) external view returns (uint256);
-
- /**
  * @notice retrieves all erc20 wager requests in existance
  */
  function getWagerRequests() external view returns (IEscrow.ERC20WagerRequest[] memory);
