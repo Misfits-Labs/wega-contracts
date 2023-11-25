@@ -20,6 +20,7 @@ import "./roles/WegaProtocolAdminRole.sol";
 import "./randomizer/IWegaRandomizer.sol";
 import "./randomizer/WegaRandomizer.sol";
 
+
 contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole, UUPSUpgradeable, IWegaRandomizerController {
 
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
@@ -27,8 +28,8 @@ contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole,
   using CountersUpgradeable for CountersUpgradeable.Counter;
   
   address public RANDOMIZER; 
-  bytes32 public GAME_CONTROLLER_ROLE;
-  bytes32 public GAME_ROLE;
+  bytes32 public constant GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
+  bytes32 public constant GAME_ROLE = keccak256('GAME_ROLE');
 
   modifier onlyGameOrGameController {
     require(hasRole(GAME_CONTROLLER_ROLE, _msgSender()) || hasRole(GAME_ROLE, _msgSender()), CALLER_NOT_ALLOWED);
@@ -42,8 +43,6 @@ contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole,
   }
 
   function __WegaRandomNumberController_init(uint256[] memory randomNumbers) internal onlyInitializing {
-    GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
-    GAME_ROLE = keccak256('GAME_ROLE');
     _setRoleAdmin(GAME_CONTROLLER_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
     _setRoleAdmin(GAME_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
     __WegaRandomNumberController_init_unchained(randomNumbers);
