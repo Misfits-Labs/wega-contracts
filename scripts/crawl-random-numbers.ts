@@ -1,5 +1,5 @@
 import { getRandomNumbersConfig, mergeRandomNumConfig } from '../src/config';
-import { utils, BigNumber } from 'ethers';
+import { solidityPackedSha256, toBigInt } from 'ethers';
 import { unwrap } from '../src/helpers';
 import { network } from "hardhat";
 
@@ -36,11 +36,12 @@ async function getRandomNumber(
    cache: 'no-cache' as RequestCache
   }
 
-  const url = `https://api.drand.sh/${chainHash}/public/${round}`
+  const url = `https://api.drand.sh/dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493/public/4000`;
+  const ran = '0xea97d6b28d3a4111b1ed17a770ae473dff631b0fa0dc913d02245b7205a77ae6'
   let fulfilled = false;
-  let result: { round: number, randomness: string, signature: string } = {
+  let result: { round: number, randomness: bigint, signature: string } = {
    round: 0,
-   randomness: "",
+   randomness: 0n,
    signature: "", 
   }
   while (!fulfilled) {
@@ -60,8 +61,8 @@ async function getRandomNumber(
   return result;
 }
 
-function convertBytesToNumber(bytes: string){
- return BigNumber.from(String(utils.sha256(utils.arrayify("0x".concat(bytes))))).toString()
+function convertBytesToNumber(bytes: string): bigint {
+ return toBigInt(solidityPackedSha256(['bytes'],["0x".concat(bytes)]));
 }
 
 main().then(() => console.log('DONE!')).catch(e => {

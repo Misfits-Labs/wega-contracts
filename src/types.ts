@@ -59,7 +59,7 @@ export type RandomNumbersConfig = {
   [chainId: number]: {
     lastParsedRound: number;
     lastStoredIndex?: number;
-    drands: ({ round: number, randomness: string, signature: string })[];
+    drands: ({ round: number, randomness: BigNumberish, signature: string })[];
   }
 }
 

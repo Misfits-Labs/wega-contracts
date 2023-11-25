@@ -5,7 +5,6 @@ import {
 } from '../src/config';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';
-import { BigNumber } from 'ethers';
 
 
 async function main() {

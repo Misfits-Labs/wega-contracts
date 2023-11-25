@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { getNetworkConfig, mergeNetworkConfig, getRandomNumbersConfig, mergeRandomNumConfig } from '../src/config';
-import { BigNumber } from 'ethers';
+import { toBigInt } from 'ethers';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';
 
@@ -17,7 +17,7 @@ async function main() {
   }
   const deployer = await Deployer.create();
   const deployConfig = await deployer.execute(['wega_random_number_controller'], config, { 
-    initialDrands: [ ...randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(0, 101) ] 
+    initialDrands: [ ...randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(0, 101) ] 
    });
   mergeNetworkConfig(deployConfig);
   mergeRandomNumConfig({[chainId]: { ...randomNumConfig[chainId], lastStoredIndex: 100 } }, drandChainhash)

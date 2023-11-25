@@ -7,7 +7,7 @@ import {
 } from '../src/config';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';
-import { BigNumber } from 'ethers';
+import { toBigInt } from 'ethers';
 
 async function main() {
   console.log('Network:', network.name);
@@ -22,8 +22,8 @@ async function main() {
 
   const deployer = await Deployer.create();
   const drandIndexesToAdd = 500;
-  const initialDrands = randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(0, 101); 
-  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => BigNumber.from(randomness)).slice(101, drandIndexesToAdd + 1); 
+  const initialDrands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(0, 101); 
+  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(101, drandIndexesToAdd + 1); 
   const deployConfig = await deployer.execute(['full'], config, {
     tokenReceivers: chainId == 1337 ? [
       '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
@@ -56,7 +56,6 @@ async function main() {
 }
 
 // We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

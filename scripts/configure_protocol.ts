@@ -2,7 +2,6 @@ import { network } from 'hardhat';
 import { getNetworkConfig } from '../src/config';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';
-import { ArtifactName, ContractName } from '../src/types';
 
 async function main () {
   const deployer = await Deployer.create();

@@ -2,4 +2,3 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ERC20Upgradeable } from "./ERC20Upgradeable";
-export type { IERC20Upgradeable } from "./IERC20Upgradeable";

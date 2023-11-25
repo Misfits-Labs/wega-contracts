@@ -1,4 +1,4 @@
-import { ethers, network } from "hardhat";
+import { network } from "hardhat";
 import { getNetworkConfig, mergeNetworkConfig } from '../src/config';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';

@@ -1,5 +1,5 @@
 import { network } from 'hardhat';
-import { mergeNetworkConfig, getNetworkConfig } from '../src/config';
+import { getNetworkConfig } from '../src/config';
 import { Deployer } from '../src/deployer';
 import { unwrap } from '../src/helpers';
 import { ArtifactName, ContractName } from '../src/types';

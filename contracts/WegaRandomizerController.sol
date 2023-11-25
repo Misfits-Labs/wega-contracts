@@ -36,6 +36,11 @@ contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole,
     _;
   }
 
+  modifier onlyGameControllerOrAdmin {
+    require(hasRole(GAME_CONTROLLER_ROLE, _msgSender()) || hasRole(WEGA_PROTOCOL_ADMIN_ROLE, _msgSender()), CALLER_NOT_ALLOWED);
+    _;
+  }
+
   function initialize(uint256[] memory randomNumbers) initializer public {
     __UUPSUpgradeable_init();
     __WegaProtocolAdminRole_init();
@@ -58,7 +63,7 @@ contract WegaRandomizerController is AccessControlErrors, WegaProtocolAdminRole,
     return result;
   }
 
-  function seedRandomizer(uint256[] memory randomNumbers) public override onlyRole(GAME_CONTROLLER_ROLE) {
+  function seedRandomizer(uint256[] memory randomNumbers) public override onlyGameControllerOrAdmin {
     getRandomizer().seed(randomNumbers);
   }
   

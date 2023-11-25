@@ -11,12 +11,10 @@ import { PROTOCOL_ROLES } from './constants'
 import { 
   WegaRandomizerController,
   WegaGameController,
-  WegaGameController__factory,
   FeeManager,
   WegaDiceGame,
   WegaCoinFlipGame, 
   WegaERC20Escrow,
-  WegaERC20Dummy,
 } from '../types'
 
 export type Task = {
@@ -142,7 +140,12 @@ const configureProtocolTask: Task = {
     // configure coinflip games  
     await coinflipGame.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_CONTROLLER_ROLE, gameController.target);
     ctx.log('Adding managers done!');
-
+    
+    // add roles for game on randomNum controller
+    await randomNumController.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
+    await randomNumController.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_ROLE, diceGame.target);
+    await randomNumController.connect(protocolAdmin).grantRole(PROTOCOL_ROLES.GAME_ROLE, coinflipGame.target);
+    
     // add more randomNumbers
     ctx.log('Adding random numbers!!!');
     if (inputs.drands.length > 0) {
@@ -241,7 +244,7 @@ const deployWegaGameControllerTask: Task = {
           kind: 'uups'
         }
       );
-      await gameController.deployTransaction();
+    
       await gameController.initialize(
         WegaERC20Escrow.address, 
         WegaRandomizerController.address, 
@@ -258,7 +261,7 @@ const deployWegaGameControllerTask: Task = {
       gameController = await WegaGameController.connect(owner).deploy();      
       await gameController.connect(owner).initialize(WegaERC20Escrow.implementation, ["DICE", "COINFLIP"], [...gameSettings]);
       await ctx.saveContractConfig(ContractName.WegaGameController, gameController);
-      await gameController.deployTransaction();
+    
       await verify(ctx, gameController.target, []);
       ctx.log('Adding protocol admins')
       await gameController.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
@@ -312,7 +315,7 @@ const deployDiceGameTask: Task = {
           kind: 'uups'
         }
       );
-      await wegaDice.deployTransaction();
+    
       let wegaDiceImpl = await upgrades.erc1967.getImplementationAddress(wegaDice.target);
       await ctx.saveContractConfig(ContractName.WegaDiceGame, wegaDice, wegaDiceImpl);
       await verify(ctx, wegaDiceImpl, []);
@@ -320,7 +323,7 @@ const deployDiceGameTask: Task = {
       wegaDice = await WegaDiceGame.connect(owner).deploy();
       await wegaDice.connect(owner).initialize(WegaRandomizerController.address);
       await ctx.saveContractConfig(ContractName.WegaDiceGame, wegaDice);
-      await wegaDice.deployTransaction();
+    
       await verify(ctx, wegaDice.target, []);
     }
     ctx.log('Adding protocol admins')
@@ -373,16 +376,16 @@ const deployCoinFlipGameTask: Task = {
           kind: 'uups'
         }
       );
-      await wegaCoinFlip.deployTransaction();
-      let wegaCoinFlipImpl = await upgrades.erc1967.getImplementationAddress(wegaCoinFlip.address);
+    
+      let wegaCoinFlipImpl = await upgrades.erc1967.getImplementationAddress(wegaCoinFlip.target);
       await ctx.saveContractConfig(ContractName.WegaCoinFlipGame, wegaCoinFlip, wegaCoinFlipImpl);
       await verify(ctx, wegaCoinFlipImpl, []);
     } else {
       wegaCoinFlip = await WegaCoinFlipGame.connect(owner).deploy();
       await wegaCoinFlip.connect(owner).initialize(WegaRandomizerController.address);
       await ctx.saveContractConfig(ContractName.WegaCoinFlipGame, wegaCoinFlip);
-      await wegaCoinFlip.deployTransaction();
-      await verify(ctx, wegaCoinFlip.address, []);
+    
+      await verify(ctx, wegaCoinFlip.target, []);
     }
     ctx.log('Adding protocol admins')
     await wegaCoinFlip.connect(owner).addWegaProtocolAdmin(protocolAdmin.address);
@@ -425,7 +428,7 @@ const deployWegaRandomizerControllerTask: Task = {
           kind: 'uups'
         }
       );
-      await randController.deployTransaction();
+    
       let randControllerImpl = await upgrades.erc1967.getImplementationAddress(randController.target);
       await ctx.saveContractConfig(ContractName.WegaRandomizerController, randController, randControllerImpl);
       await verify(ctx, randControllerImpl, []);
@@ -433,7 +436,7 @@ const deployWegaRandomizerControllerTask: Task = {
       randController = await ctx.artifacts.WegaRandomizerController.connect(owner).deploy();
       await randController.connect(owner).initialize(inputs.initialDrands);
       await ctx.saveContractConfig(ContractName.WegaRandomizerController, randController);
-      await randController.deployTransaction();
+    
       await verify(ctx, randController.target, []);
     }
     ctx.log('Adding protocol admins')
@@ -481,7 +484,7 @@ const deployERC20EscrowTask: Task = {
           kind: 'uups'
         }
       );
-      await erc20Escrow.deployTransaction();
+    
       let erc20EscrowImpl = await upgrades.erc1967.getImplementationAddress(erc20Escrow.target);
       await ctx.saveContractConfig(ContractName.WegaERC20Escrow, erc20Escrow, erc20EscrowImpl);
       await verify(ctx, erc20EscrowImpl, []);
@@ -489,7 +492,7 @@ const deployERC20EscrowTask: Task = {
       erc20Escrow = (await WegaERC20Escrow.connect(owner).deploy());
       await erc20Escrow.connect(owner).initialize(...inputs.escrow);
       await ctx.saveContractConfig(ContractName.WegaERC20Escrow, erc20Escrow);
-      await erc20Escrow.deployTransaction();
+    
       await verify(ctx, erc20Escrow.address, [...inputs.escrow]);
     }
     ctx.log('Adding protocol admins')
@@ -533,7 +536,7 @@ const deployFeeManagerTask: Task = {
           kind: 'uups'
         }
       );
-      await feeManager.deployTransaction();
+    
       let feeManagerImpl = await upgrades.erc1967.getImplementationAddress(feeManager.target);
       await ctx.saveContractConfig(ContractName.FeeManager, feeManager, feeManagerImpl);
       await verify(ctx, feeManagerImpl, []);
@@ -542,7 +545,7 @@ const deployFeeManagerTask: Task = {
       feeManager = await FeeManager.connect(owner).deploy();
       await feeManager.connect(owner).initialize();
       await ctx.saveContractConfig(ContractName.FeeManager, feeManager);
-      await feeManager.deployTransaction();  
+      
       await verify(ctx, feeManager.target, []);
     }
     ctx.log('Adding protocol admins')
@@ -582,7 +585,6 @@ const deployERC20DummyTask: Task = {
     const { WegaERC20Dummy } = ctx.artifacts
     const erc20Dummy = await WegaERC20Dummy.connect(owner).deploy(inputs.tokenReceivers) as Contract;
     await ctx.saveContractConfig(ContractName.WegaERC20Dummy, erc20Dummy);
-    await erc20Dummy.deployTransaction();
     await verify(ctx, erc20Dummy.target as string, []);
     
     // // mint Token Ids
@@ -634,7 +636,7 @@ const upgradeGameControllerTask: Task = {
         kind: 'uups',
         redeployImplementation: 'always'
     });
-    await gameController.deployTransaction();
+  
     let gameCtlImpl = await upgrades.erc1967.getImplementationAddress(WegaGameController.address);
     await ctx.saveContractConfig(ContractName.WegaGameController, gameController, gameCtlImpl, [legacyAddress, ...WegaGameController.legacyAddresses]);
     await verify(ctx, gameCtlImpl, []);
