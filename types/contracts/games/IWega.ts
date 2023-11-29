@@ -24,6 +24,7 @@ import type {
 export interface IWegaInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "multiplePlayersResults"
       | "play(bytes32,address[],uint256[],uint256,uint256)"
       | "play(bytes32,address[],uint256,uint256)"
       | "playerResults"
@@ -32,6 +33,10 @@ export interface IWegaInterface extends Interface {
       | "winners"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "multiplePlayersResults",
+    values: [BytesLike, AddressLike[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "play(bytes32,address[],uint256[],uint256,uint256)",
     values: [
@@ -60,6 +65,10 @@ export interface IWegaInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "winners", values: [BytesLike]): string;
 
+  decodeFunctionResult(
+    functionFragment: "multiplePlayersResults",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "play(bytes32,address[],uint256[],uint256,uint256)",
     data: BytesLike
@@ -126,6 +135,12 @@ export interface IWega extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  multiplePlayersResults: TypedContractMethod<
+    [escrowHash: BytesLike, players: AddressLike[]],
+    [bigint[][]],
+    "view"
+  >;
+
   "play(bytes32,address[],uint256[],uint256,uint256)": TypedContractMethod<
     [
       escrowHash: BytesLike,
@@ -169,6 +184,13 @@ export interface IWega extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "multiplePlayersResults"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, players: AddressLike[]],
+    [bigint[][]],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "play(bytes32,address[],uint256[],uint256,uint256)"
   ): TypedContractMethod<

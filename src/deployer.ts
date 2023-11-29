@@ -170,8 +170,8 @@ export class Deployer {
         address: value.address,
         implementation: value.implementation,
         deploymentBlock:
-          value.transaction &&
-          ethers.toBigInt(String(value.transaction.blockNumber)).toString(16),
+          value.transaction && value.transaction.blockNumber ?
+          ethers.toBigInt(String(value.transaction.blockNumber)).toString(16) : null,
         forwarder: value.forwarder,
         legacyAddresses: uniq(value.legacyAddresses)
       };
@@ -199,12 +199,13 @@ export class Deployer {
 
   async saveContractConfig (
     name: ContractName | ArtifactName,
-    contract: Contract,
+    contract: any,
     implAddress?: string,
     legacyAddresses?: string[], 
   ): Promise<void> {
     const config = this.getDeployConfig();
-    const transaction = contract.deployTransaction && (await contract.deployTransaction());
+    // console.log(contract.deployTransaction)
+    const transaction =  typeof contract.deployTransaction === 'function' ? (await contract.deployTransaction()) : contract.deployTransaction;
     const _config = merge(config, {
       contracts: {
         [name as string]: {

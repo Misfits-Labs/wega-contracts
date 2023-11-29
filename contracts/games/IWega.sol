@@ -23,11 +23,17 @@ interface IWega is IWegaDiceGame, IWegaCoinFlipGame {
  function winners(bytes32 escrowHash) external view returns (address[] memory);
 
  /**
-  * @notice returns players of a game
+  * @notice returns reesults of players of a game
   * @param escrowHash id of the escrow
   * @param player player address
  */
  function playerResults(bytes32 escrowHash, address player) external view returns (uint256[] memory);
+ /**
+  * @notice returns results of players of a game
+  * @param escrowHash id of the escrow
+  * @param players player addresseses
+ */
+ function multiplePlayersResults(bytes32 escrowHash, address[] memory players) external view returns (uint256[][] memory results);
 
  /**
   * @notice returns player points for a game

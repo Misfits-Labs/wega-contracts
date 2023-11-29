@@ -15,6 +15,30 @@ const _abi = [
       },
       {
         internalType: "address[]",
+        name: "players",
+        type: "address[]",
+      },
+    ],
+    name: "multiplePlayersResults",
+    outputs: [
+      {
+        internalType: "uint256[][]",
+        name: "results",
+        type: "uint256[][]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+      {
+        internalType: "address[]",
         name: "currentPlayers",
         type: "address[]",
       },

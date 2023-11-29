@@ -10,7 +10,6 @@ import { unwrap } from '../src/helpers';
 import { toBigInt } from 'ethers';
 
 async function main() {
-  console.log('Network:', network.name);
 
   const chainId: number = unwrap(network.config, 'chainId');
   const drandChainhash: string = "dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493";
@@ -21,9 +20,11 @@ async function main() {
   }
 
   const deployer = await Deployer.create();
-  const drandIndexesToAdd = 500;
+  const drandIndexesToAdd = 1000;
   const initialDrands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(0, 101); 
-  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(101, drandIndexesToAdd + 1); 
+  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(101, drandIndexesToAdd + 1);
+  deployer.log('Network:', network.name);
+
   const deployConfig = await deployer.execute(['full'], config, {
     tokenReceivers: chainId == 1337 ? [
       '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
@@ -40,12 +41,14 @@ async function main() {
     ] : [
       "0x34fc161801F76173352b1C43f904d2F7cC5cB6C9",
       "0x6f915E4e31755c09CCCc0B12DA730377913802f3",
-      "0x24597c5c68687e816ffc0c69e064cb70bb62a9cd"
+      "0x24597c5c68687e816ffc0c69e064cb70bb62a9cd",
+      "0x011dF297Da65Cb87a9a8878fF4C8F7d0D3814314",
+      "0xd3d52Ea63F1b89b7567CCEa367Dc641A66fD2507"
     ],
     escrow: ['Wega ERC20 Escrow Service', '0.0.0'],
     initialDrands,
     drands,
-    feeTaker: chainId == 1337 ? '0xBcd4042DE499D14e55001CcbB24a551F3b954096' : '0x13C38b2bd4cF15985a1505fc4FAA65aE2AdE45A5',
+    feeTaker: chainId == 1337 ? '0xBcd4042DE499D14e55001CcbB24a551F3b954096' : chainId === 80001 ? "0x011dF297Da65Cb87a9a8878fF4C8F7d0D3814314" : '0x13C38b2bd4cF15985a1505fc4FAA65aE2AdE45A5',
   });
   mergeNetworkConfig(deployConfig);
   mergeRandomNumConfig({[chainId]: {

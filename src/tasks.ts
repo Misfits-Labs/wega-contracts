@@ -244,7 +244,7 @@ const deployWegaGameControllerTask: Task = {
           kind: 'uups'
         }
       );
-    
+      await gameController.waitForDeployment();
       await gameController.initialize(
         WegaERC20Escrow.address, 
         WegaRandomizerController.address, 
@@ -315,6 +315,7 @@ const deployDiceGameTask: Task = {
           kind: 'uups'
         }
       );
+      await wegaDice.waitForDeployment();
     
       let wegaDiceImpl = await upgrades.erc1967.getImplementationAddress(wegaDice.target);
       await ctx.saveContractConfig(ContractName.WegaDiceGame, wegaDice, wegaDiceImpl);
@@ -376,6 +377,7 @@ const deployCoinFlipGameTask: Task = {
           kind: 'uups'
         }
       );
+      await wegaCoinFlip.waitForDeployment();
     
       let wegaCoinFlipImpl = await upgrades.erc1967.getImplementationAddress(wegaCoinFlip.target);
       await ctx.saveContractConfig(ContractName.WegaCoinFlipGame, wegaCoinFlip, wegaCoinFlipImpl);
@@ -428,7 +430,7 @@ const deployWegaRandomizerControllerTask: Task = {
           kind: 'uups'
         }
       );
-    
+      await randController.waitForDeployment()
       let randControllerImpl = await upgrades.erc1967.getImplementationAddress(randController.target);
       await ctx.saveContractConfig(ContractName.WegaRandomizerController, randController, randControllerImpl);
       await verify(ctx, randControllerImpl, []);
@@ -484,6 +486,7 @@ const deployERC20EscrowTask: Task = {
           kind: 'uups'
         }
       );
+      await erc20Escrow.waitForDeployment();
     
       let erc20EscrowImpl = await upgrades.erc1967.getImplementationAddress(erc20Escrow.target);
       await ctx.saveContractConfig(ContractName.WegaERC20Escrow, erc20Escrow, erc20EscrowImpl);
@@ -536,7 +539,7 @@ const deployFeeManagerTask: Task = {
           kind: 'uups'
         }
       );
-    
+      await feeManager.waitForDeployment();
       let feeManagerImpl = await upgrades.erc1967.getImplementationAddress(feeManager.target);
       await ctx.saveContractConfig(ContractName.FeeManager, feeManager, feeManagerImpl);
       await verify(ctx, feeManagerImpl, []);
@@ -718,6 +721,58 @@ const upgradeContractTask: Task = {
     return dependencies;
   },
 }
+/**
+* upgrades any contract in the wega protocol
+*/
+const verifyContractTask: Task = {
+  tags: ['verify_contract'],
+  priority: 1000,
+  inputOptions: true,
+  run: async (ctx: Deployer, dependencies: DependenciesMap, inputs: { 
+    forceImportAddress?: string;
+    artifactName: ArtifactName;
+    contractName: ContractName,
+  }[]) => {
+    await Promise.all(inputs.map(async input => {
+      ctx.log(`Verify ${input.contractName}`, JSON.stringify(input));
+      const ContractConfig: DeployedContract = unwrap(dependencies, input.artifactName);
+      const instance = ctx.artifacts[input.artifactName].attach(ContractConfig.address);
+      const impl = await upgrades.erc1967.getImplementationAddress(ContractConfig.address as string)
+      await ctx.saveContractConfig(input.contractName, instance, impl);
+      await verify(ctx, impl, []);
+      mergeNetworkConfig(ctx.getNetworkConfig());
+      ctx.log(`Verify ${input.contractName} success`);
+    }))
+    ctx.log(`Verify Contracts Complement`);
+  },
+  ensureDependencies: (ctx: Deployer, config?: DeployedContractList): DependenciesMap => {
+    config = merge(ctx.getDeployConfig(), config);
+    const { 
+      WegaERC20Escrow,
+      WegaERC20Dummy,
+      WegaGameController,
+      WegaRandomizerController,
+      WegaDiceGame,
+      WegaCoinFlipGame,
+      FeeManager
+    } = config?.contracts || {};
+    const dependencies = { 
+      WegaERC20Escrow,
+      WegaERC20Dummy,
+      WegaGameController,
+      WegaRandomizerController,
+      WegaDiceGame,
+      WegaCoinFlipGame,
+      FeeManager   
+     };
+    for (const [key, value] of Object.entries(dependencies)) {
+      if (!value || !value.address) {
+        throw new Error(`${key} contract not found for network ${network.config.chainId}`);
+      }
+    }
+    return dependencies;
+  },
+}
 
 export const tasks: Task[] = [
   deployERC20DummyTask, // 1
@@ -731,4 +786,5 @@ export const tasks: Task[] = [
   setFeeRulesTask, // 9
   upgradeContractTask,
   upgradeGameControllerTask,
+  verifyContractTask,
 ];

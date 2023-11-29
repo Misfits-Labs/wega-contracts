@@ -48,6 +48,7 @@ export async function upgradeContract({
       ) 
       legacyAddress = forceImportContract.target as string;  
       contractInstance = await upgrades.upgradeProxy(forceImportContract, options);
+      await contractInstance.waitForDeployment();
     } else { 
       legacyAddress = deployedContractConfig.implementation as string;
       contractInstance = await upgrades.upgradeProxy(
@@ -55,6 +56,7 @@ export async function upgradeContract({
         implementationFactory, 
         options
       );
+      await contractInstance.waitForDeployment();
     }
     if(contractInstance.deployTransAction) await contractInstance.deployTransAction();
     return {contractInstance, legacyAddress};

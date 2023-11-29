@@ -29,6 +29,7 @@ contract FeeManager is WegaProtocolAdminRole, IFeeManager, IFeeManagerEvents, UU
   mapping(address => FeeConfig) public _feeRules;
   
   function initialize() public initializer {
+    __UUPSUpgradeable_init();
     __FeeManager_init();
   }
   

@@ -32,8 +32,8 @@ async function getRandomNumber(
    headers: {
      'Access-Control-Allow-Origin': '*'
    },
-   credentials: 'same-origin' as RequestCredentials,
-   cache: 'no-cache' as RequestCache
+   credentials: 'strict-origin-when-cross-origin' as RequestCredentials,
+   cache: 'no-cache' as RequestCache,
   }
 
   const url = `https://api.drand.sh/dbd506d6ef76e5f386f41c651dcb808c5bcbd75471cc4eafa3f4df7ad4e4c493/public/4000`;

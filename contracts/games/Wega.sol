@@ -63,8 +63,17 @@ abstract contract Wega is IWega, WegaProtocolAdminRole, UUPSUpgradeable {
     return _winners[escrowHash].values();
   }
   
-  function playerResults(bytes32 escrowHash, address player) external view override returns(uint256[] memory) {
+  function playerResults(bytes32 escrowHash, address player) public view override returns(uint256[] memory) {
     return _gameResults[escrowHash][player];
+  }
+
+  function multiplePlayersResults(bytes32 escrowHash, address[] memory players) external view override returns (
+    uint256[][] memory results
+  ){
+    results = new uint256[][](players.length);
+    for(uint i = 0; i< players.length;i++) {
+      results[i] = playerResults(escrowHash, players[i]);
+    }
   }
 
   function playerScore(bytes32 escrowHash, address player) external view override returns(uint256){

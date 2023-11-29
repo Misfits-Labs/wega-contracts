@@ -40,6 +40,7 @@ export interface WegaInterface extends Interface {
       | "hasRole"
       | "initialize"
       | "isWegaProtocolAdmin"
+      | "multiplePlayersResults"
       | "owner"
       | "play(bytes32,address[],uint256[],uint256,uint256)"
       | "play(bytes32,address[],uint256,uint256)"
@@ -125,6 +126,10 @@ export interface WegaInterface extends Interface {
   encodeFunctionData(
     functionFragment: "isWegaProtocolAdmin",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "multiplePlayersResults",
+    values: [BytesLike, AddressLike[]]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -244,6 +249,10 @@ export interface WegaInterface extends Interface {
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isWegaProtocolAdmin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "multiplePlayersResults",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -513,6 +522,12 @@ export interface Wega extends BaseContract {
     "view"
   >;
 
+  multiplePlayersResults: TypedContractMethod<
+    [escrowHash: BytesLike, players: AddressLike[]],
+    [bigint[][]],
+    "view"
+  >;
+
   owner: TypedContractMethod<[], [string], "view">;
 
   "play(bytes32,address[],uint256[],uint256,uint256)": TypedContractMethod<
@@ -674,6 +689,13 @@ export interface Wega extends BaseContract {
   getFunction(
     nameOrSignature: "isWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "multiplePlayersResults"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, players: AddressLike[]],
+    [bigint[][]],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;

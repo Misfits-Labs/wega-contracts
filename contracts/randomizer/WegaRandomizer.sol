@@ -22,6 +22,7 @@ contract WegaRandomizer is IWegaRandomizer, Ownable, Nonces {
 
   using EnumerableMap for EnumerableMap.UintToUintMap;
   using Math for uint256;
+  
   EnumerableMap.UintToUintMap private _randomNumbers;
  
   constructor(uint256[] memory randomNumbers) Ownable(_msgSender()) {

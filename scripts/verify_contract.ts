@@ -12,7 +12,7 @@ async function main () {
   if (!config) {
     throw new Error(`HDNS config not found for network ${chainId}`);
   }
-  await deployer.execute(['upgrade_contract'], config, [ 
+  await deployer.execute(['verify_contract'], config, [ 
     {
       artifactName: ArtifactName.WegaDiceGame,
       contractName: ContractName.WegaDiceGame,
@@ -22,7 +22,7 @@ async function main () {
       contractName: ContractName.WegaCoinFlipGame,
     },
   ]);
-  deployer.log('Upgrade: Contract', network.name);
+  deployer.log('Verify: Contract', network.name);
 }
 
 main()
