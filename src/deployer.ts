@@ -119,7 +119,10 @@ export class Deployer {
       minters,
     });
   }
-
+  getNonceSigner(signer: SignerWithAddress) {
+    return new ethers.NonceManager(signer);
+  }
+  
   async execute (tags: string[], config?: DeployedContractList, inputs?: any): Promise<DeployedContractsConfig> {
     tags = tags || [];
 

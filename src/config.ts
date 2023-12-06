@@ -8,7 +8,7 @@ const drandConfigPath = './.random-numbers'
 
 export function getConfig (): DeployedContractsConfig {
   const file = fs.existsSync(configPath) ? fs.readFileSync(configPath).toString() : '{}';
-  return JSON.parse(file.length ? file : '{ "version": "0.0.0 }');
+  return JSON.parse(file.length ? file : '{ "version": "0.1.0 }');
 }
 
 export function getNetworkConfig (chainId: number): DeployedContractList {

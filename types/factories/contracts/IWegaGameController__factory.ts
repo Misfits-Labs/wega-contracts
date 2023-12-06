@@ -110,17 +110,17 @@ const _abi = [
         type: "bytes32",
       },
       {
-        internalType: "address",
-        name: "player",
-        type: "address",
+        internalType: "address[]",
+        name: "players",
+        type: "address[]",
       },
     ],
     name: "gameResults",
     outputs: [
       {
-        internalType: "uint256[]",
+        internalType: "uint256[][]",
         name: "",
-        type: "uint256[]",
+        type: "uint256[][]",
       },
     ],
     stateMutability: "nonpayable",

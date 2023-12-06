@@ -121,6 +121,35 @@ const _abi = [
         name: "escrowHash",
         type: "bytes32",
       },
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "getClaimAmount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "feeAmount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "claimAmount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
     ],
     name: "getWagerRequest",
     outputs: [
@@ -297,6 +326,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "escrowHash",
+        type: "bytes32",
+      },
+    ],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;

@@ -101,7 +101,7 @@ export interface IWegaGameControllerInterface extends Interface {
   encodeFunctionData(functionFragment: "existsGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "gameResults",
-    values: [string, BytesLike, AddressLike]
+    values: [string, BytesLike, AddressLike[]]
   ): string;
   encodeFunctionData(functionFragment: "getGame", values: [BytesLike]): string;
   encodeFunctionData(
@@ -228,8 +228,8 @@ export interface IWegaGameController extends BaseContract {
   existsGame: TypedContractMethod<[game: string], [boolean], "nonpayable">;
 
   gameResults: TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint[]],
+    [game: string, escrowHash: BytesLike, players: AddressLike[]],
+    [bigint[][]],
     "nonpayable"
   >;
 
@@ -311,8 +311,8 @@ export interface IWegaGameController extends BaseContract {
   getFunction(
     nameOrSignature: "gameResults"
   ): TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint[]],
+    [game: string, escrowHash: BytesLike, players: AddressLike[]],
+    [bigint[][]],
     "nonpayable"
   >;
   getFunction(

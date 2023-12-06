@@ -14,7 +14,7 @@ interface IFeeManager {
   * @param applier address that will apply the fee
   * @param transferAmount transfaction amount of transfer actiuon
   */
-  function calculateFeesForTransfer(address applier, uint256 transferAmount) external returns (address feeTaker, uint256 feeAmount, uint256 sendAmount);
+  function calculateFeesForTransfer(address applier, uint256 transferAmount) external view returns (address feeTaker, uint256 feeAmount, uint256 sendAmount);
   /**
   * @notice allows an admin to set fee rules  
   * @param configs fee rules to be applied

@@ -19,8 +19,9 @@ async function main () {
   }
   const deployer = await Deployer.create();
   const drandIndexesToAdd = 1000;
-  const initialDrands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(0, 101); 
-  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(101, drandIndexesToAdd + 1);
+  const initialDrands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(0, 1100);
+  const drands = randomNumConfig[chainId].drands.map(({ randomness }) => toBigInt(randomness)).slice(1101, 2101);
+  console.log('these are the drands', initialDrands, drands)
   deployer.log('Network:', network.name);
 
 

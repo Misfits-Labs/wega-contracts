@@ -234,13 +234,13 @@ const config: HardhatUserConfig = {
     },
     polygon: {
       url: process.env.POLYGON_RPC_URL,
-      chainId: 134,
+      chainId: 137,
       accounts: process.env.POLYGON_DEPLOYER_PRIVATE_KEY ? [
         process.env.POLYGON_DEPLOYER_PRIVATE_KEY as string,
         process.env.POLYGON_PROTOCOL_ADMIN_PRIVATE_KEY as string
       ] : undefined,
       loggingEnabled: true,
-      blockGasLimit: 268435455,
+      blockGasLimit: 44000000000 
     },
     skaleCalypsoTestnet: {
       url: process.env.SKALE_CALYPSO_RPC_URL,

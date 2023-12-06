@@ -55,12 +55,14 @@ export interface IWegaERC20EscrowInterface extends Interface {
       | "createWagerRequest"
       | "deposit"
       | "depositOf"
+      | "getClaimAmount"
       | "getWagerRequest"
       | "getWagerRequests"
       | "hash"
       | "setFeeManager"
       | "setWithdrawers"
       | "wagerBalance"
+      | "withdraw"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -77,6 +79,10 @@ export interface IWegaERC20EscrowInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "depositOf",
+    values: [BytesLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getClaimAmount",
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
@@ -103,6 +109,7 @@ export interface IWegaERC20EscrowInterface extends Interface {
     functionFragment: "wagerBalance",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "withdraw", values: [BytesLike]): string;
 
   decodeFunctionResult(
     functionFragment: "containsPlayer",
@@ -114,6 +121,10 @@ export interface IWegaERC20EscrowInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "depositOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getClaimAmount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getWagerRequest",
     data: BytesLike
@@ -135,6 +146,7 @@ export interface IWegaERC20EscrowInterface extends Interface {
     functionFragment: "wagerBalance",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 }
 
 export interface IWegaERC20Escrow extends BaseContract {
@@ -209,6 +221,12 @@ export interface IWegaERC20Escrow extends BaseContract {
     "nonpayable"
   >;
 
+  getClaimAmount: TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike],
+    [[bigint, bigint] & { feeAmount: bigint; claimAmount: bigint }],
+    "view"
+  >;
+
   getWagerRequest: TypedContractMethod<
     [escrowHash: BytesLike],
     [IEscrow.ERC20WagerRequestStructOutput],
@@ -246,6 +264,8 @@ export interface IWegaERC20Escrow extends BaseContract {
   >;
 
   wagerBalance: TypedContractMethod<[escrowHash: BytesLike], [bigint], "view">;
+
+  withdraw: TypedContractMethod<[escrowHash: BytesLike], [void], "nonpayable">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -285,6 +305,13 @@ export interface IWegaERC20Escrow extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "getClaimAmount"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike],
+    [[bigint, bigint] & { feeAmount: bigint; claimAmount: bigint }],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getWagerRequest"
   ): TypedContractMethod<
     [escrowHash: BytesLike],
@@ -320,6 +347,9 @@ export interface IWegaERC20Escrow extends BaseContract {
   getFunction(
     nameOrSignature: "wagerBalance"
   ): TypedContractMethod<[escrowHash: BytesLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "withdraw"
+  ): TypedContractMethod<[escrowHash: BytesLike], [void], "nonpayable">;
 
   filters: {};
 }

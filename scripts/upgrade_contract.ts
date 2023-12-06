@@ -14,12 +14,8 @@ async function main () {
   }
   await deployer.execute(['upgrade_contract'], config, [ 
     {
-      artifactName: ArtifactName.WegaDiceGame,
-      contractName: ContractName.WegaDiceGame,
-    },
-    {
-      artifactName: ArtifactName.WegaCoinFlipGame,
-      contractName: ContractName.WegaCoinFlipGame,
+      artifactName: ArtifactName.WegaERC20Escrow,
+      contractName: ContractName.WegaERC20Escrow,
     },
   ]);
   deployer.log('Upgrade: Contract', network.name);

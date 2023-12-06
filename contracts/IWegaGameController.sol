@@ -60,16 +60,16 @@ interface IWegaGameController {
   function getGame(bytes32 escrowHash) external returns(IWega.Wega memory);
   
   /**
-   * @notice returns game result for player of game
+   * @notice returns game result for players of a game
    * @param game name of the game
    * @param escrowHash id of the escrow
-   * @param player player to retrieve results of
+   * @param players players to retrieve results of
    */
   function gameResults(
     string memory game, 
     bytes32 escrowHash, 
-    address player
-  ) external returns(uint256[] memory);
+    address[] memory players
+  ) external returns(uint256[][] memory);
  
   /**
    * @notice returns player points for a game

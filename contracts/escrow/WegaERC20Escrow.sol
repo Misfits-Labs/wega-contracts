@@ -56,7 +56,7 @@ contract WegaERC20Escrow is
     mapping(bytes32 => uint256) private _escrowBalances;
 
     // request accountBalances
-    mapping(address => uint256) private _accountBalances;
+    mapping(address => mapping(bytes32 => uint256)) private _accountBalances;
 
     // stores all the transfer Ids, will be used enumeration
     EnumerableSet.Bytes32Set private _escrowHashes;
@@ -96,9 +96,9 @@ contract WegaERC20Escrow is
         GAME_CONTROLLER_ROLE = keccak256('GAME_CONTROLLER_ROLE');
         _setRoleAdmin(GAME_CONTROLLER_ROLE, WEGA_PROTOCOL_ADMIN_ROLE);
         NAME = 'Wega ERC20 Escrow Service';
-        VERSION = '0.0.0';
+        VERSION = '0.1.0';
         TYPE = "TOKEN-ERC20";
-        APPLY_FEES = false;
+        APPLY_FEES = true;
     }
 
     function toggleFees() external onlyWegaProtocolAdmin {
@@ -271,19 +271,36 @@ contract WegaERC20Escrow is
         uint256 withdrawableAmount = _wagerRequests[escrowHash].totalWager.mulDiv(1, winners_.length);
         for (uint256 i = 0; i < winners_.length; i++) {
             require(containsPlayer(escrowHash, winners_[i]), INVALID_REQUEST_DATA);
-            _accountBalances[winners_[i]] = withdrawableAmount;
+            _accountBalances[winners_[i]][escrowHash] = withdrawableAmount;
         }
         _wagerRequests[escrowHash].state = TransactionState.READY;
         emit SetWithdrawers(escrowHash, winners_);
     }
 
-    function withdraw(bytes32 escrowHash) public nonReentrant {
+    function getClaimAmount(bytes32 escrowHash, address account) public view override returns (uint256 feeAmount, uint256 claimAmount) {
+        if(APPLY_FEES && _feeManager.shouldApplyFees(address(this))){
+            (
+                ,
+                feeAmount, 
+                claimAmount
+            ) = _feeManager.calculateFeesForTransfer(address(this), _getTotalBalance(escrowHash, account));
+        } else {
+            feeAmount = 0;
+            claimAmount = _getTotalBalance(escrowHash, account);
+        }
+    }
+
+    function _getTotalBalance(bytes32 escrowHash, address account) internal view returns (uint256) {
+        return _accountBalances[account][escrowHash];
+    }
+    
+    function withdraw(bytes32 escrowHash) public override nonReentrant {
         ERC20WagerRequest memory request = _wagerRequests[escrowHash];
         require(request.state == TransactionState.READY, INVALID_REQUEST_STATE);
-        require(_accountBalances[_msgSender()] > 0 ether, INVALID_WITHDRAW_BALANCE);
-        uint256 transferAmount = _accountBalances[_msgSender()];
+        require(_accountBalances[_msgSender()][escrowHash] > 0 ether, INVALID_WITHDRAW_BALANCE);
+        uint256 transferAmount = _getTotalBalance(escrowHash, _msgSender());
         _escrowBalances[escrowHash] -= transferAmount;
-        delete _accountBalances[_msgSender()];
+        delete _accountBalances[_msgSender()][escrowHash];
         _wagerRequests[escrowHash].state = TransactionState.CLOSED;
         if(APPLY_FEES && _feeManager.shouldApplyFees(address(this))) {
             (

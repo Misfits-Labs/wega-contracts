@@ -50,7 +50,6 @@ export interface FeeManagerInterface extends Interface {
       | "DEFAULT_ADMIN_ROLE"
       | "UPGRADE_INTERFACE_VERSION"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
-      | "_feeRules"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
       | "calculateFeesForTransfer"
@@ -99,10 +98,6 @@ export interface FeeManagerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "_feeRules",
-    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
@@ -210,7 +205,6 @@ export interface FeeManagerInterface extends Interface {
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "_feeRules", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "addWegaProtocolAdmin",
     data: BytesLike
@@ -457,19 +451,6 @@ export interface FeeManager extends BaseContract {
 
   WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
-  _feeRules: TypedContractMethod<
-    [arg0: AddressLike],
-    [
-      [string, string, bigint, boolean] & {
-        applier: string;
-        feeTaker: string;
-        feeShare: bigint;
-        shouldApply: boolean;
-      }
-    ],
-    "view"
-  >;
-
   addWegaProtocolAdmin: TypedContractMethod<
     [account: AddressLike],
     [void],
@@ -609,20 +590,6 @@ export interface FeeManager extends BaseContract {
   getFunction(
     nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "_feeRules"
-  ): TypedContractMethod<
-    [arg0: AddressLike],
-    [
-      [string, string, bigint, boolean] & {
-        applier: string;
-        feeTaker: string;
-        feeShare: bigint;
-        shouldApply: boolean;
-      }
-    ],
-    "view"
-  >;
   getFunction(
     nameOrSignature: "addWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;

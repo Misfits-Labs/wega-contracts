@@ -62,14 +62,14 @@ contract WegaGameController is
   function __WegaController_init(
     address erc20EscrowAddress, 
     GameSettings[] memory gameSettings
-  ) public onlyInitializing {
+  ) internal onlyInitializing {
     __WegaController_init_unchained(erc20EscrowAddress, gameSettings);
   } 
 
   function __WegaController_init_unchained(
     address erc20EscrowAddress, 
     GameSettings[] memory gameSettings
-  ) public onlyInitializing {
+  ) internal onlyInitializing {
     erc20Escrow = IWegaERC20Escrow(erc20EscrowAddress);
     for(uint256 i = 0; i < gameSettings.length; i++) {
       _registeredGames[gameSettings[i].name.keyHash()] = gameSettings[i].proxy;
@@ -206,9 +206,9 @@ contract WegaGameController is
   function gameResults(
     string memory game,
     bytes32 escrowHash, 
-    address player
-  ) external view override returns(uint256[] memory) {
-    return IWega(getGameSettings(game).proxy).playerResults(escrowHash, player);
+    address[] memory players_
+  ) external view override returns(uint256[][] memory) {
+    return IWega(getGameSettings(game).proxy).multiplePlayersResults(escrowHash, players_);
   }
 
   function playerScore(

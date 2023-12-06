@@ -13,8 +13,6 @@ import "./IFeeManager.sol";
 import "./utils/Distribution.sol";
 import "./games/IWega.sol";
 
-import 'hardhat/console.sol';
-
 /**
   * @title GameController (MVP)
   * @author @RasenGUY @Daosourced.
@@ -26,7 +24,7 @@ contract FeeManager is WegaProtocolAdminRole, IFeeManager, IFeeManagerEvents, UU
   using Distribution for uint256;
   
   /**@notice fee applier to feeRule */  
-  mapping(address => FeeConfig) public _feeRules;
+  mapping(address => FeeConfig) internal _feeRules;
   
   function initialize() public initializer {
     __UUPSUpgradeable_init();

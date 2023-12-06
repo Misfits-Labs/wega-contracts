@@ -135,7 +135,7 @@ export interface IFeeManager extends BaseContract {
         sendAmount: bigint;
       }
     ],
-    "nonpayable"
+    "view"
   >;
 
   getFeeRule: TypedContractMethod<
@@ -171,7 +171,7 @@ export interface IFeeManager extends BaseContract {
         sendAmount: bigint;
       }
     ],
-    "nonpayable"
+    "view"
   >;
   getFunction(
     nameOrSignature: "getFeeRule"

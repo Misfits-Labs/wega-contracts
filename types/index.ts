@@ -52,8 +52,6 @@ export type { Math } from "./@openzeppelin/contracts/utils/math/Math";
 export { Math__factory } from "./factories/@openzeppelin/contracts/utils/math/Math__factory";
 export type { Nonces } from "./@openzeppelin/contracts/utils/Nonces";
 export { Nonces__factory } from "./factories/@openzeppelin/contracts/utils/Nonces__factory";
-export type { ReentrancyGuard } from "./@openzeppelin/contracts/utils/ReentrancyGuard";
-export { ReentrancyGuard__factory } from "./factories/@openzeppelin/contracts/utils/ReentrancyGuard__factory";
 export type { EnumerableMap } from "./@openzeppelin/contracts/utils/structs/EnumerableMap";
 export { EnumerableMap__factory } from "./factories/@openzeppelin/contracts/utils/structs/EnumerableMap__factory";
 export type { WegaERC20Dummy } from "./contracts/dummies/WegaERC20Dummy";

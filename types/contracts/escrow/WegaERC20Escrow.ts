@@ -68,6 +68,7 @@ export interface WegaERC20EscrowInterface extends Interface {
       | "createWagerRequest"
       | "deposit"
       | "depositOf"
+      | "getClaimAmount"
       | "getRoleAdmin"
       | "getWagerRequest"
       | "getWagerRequests"
@@ -162,6 +163,10 @@ export interface WegaERC20EscrowInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "depositOf",
+    values: [BytesLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getClaimAmount",
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
@@ -302,6 +307,10 @@ export interface WegaERC20EscrowInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "depositOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getClaimAmount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getRoleAdmin",
     data: BytesLike
@@ -696,6 +705,12 @@ export interface WegaERC20Escrow extends BaseContract {
     "view"
   >;
 
+  getClaimAmount: TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike],
+    [[bigint, bigint] & { feeAmount: bigint; claimAmount: bigint }],
+    "view"
+  >;
+
   getRoleAdmin: TypedContractMethod<[role: BytesLike], [string], "view">;
 
   getWagerRequest: TypedContractMethod<
@@ -890,6 +905,13 @@ export interface WegaERC20Escrow extends BaseContract {
   ): TypedContractMethod<
     [escrowHash: BytesLike, account: AddressLike],
     [bigint],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getClaimAmount"
+  ): TypedContractMethod<
+    [escrowHash: BytesLike, account: AddressLike],
+    [[bigint, bigint] & { feeAmount: bigint; claimAmount: bigint }],
     "view"
   >;
   getFunction(

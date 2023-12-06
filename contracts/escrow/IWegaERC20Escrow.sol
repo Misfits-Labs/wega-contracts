@@ -93,4 +93,17 @@ interface IWegaERC20Escrow {
  * @param feeManager address of the fee manager
  */
  function setFeeManager(address feeManager) external;
+ 
+ /**
+ * @notice allows a winner to withdraw from a completed game
+ * @param escrowHash allows a winner to withdraw from a completed game
+ */
+ function withdraw(bytes32 escrowHash) external; 
+ 
+ /**
+ * @notice retrieves the current escrow balance for of a account 
+ * @param escrowHash the current escrow balance for of a account 
+ * @param account the current escrow balance for of a account 
+ */
+ function getClaimAmount(bytes32 escrowHash, address account) external view returns (uint256 feeAmount, uint256 claimAmount);
 }

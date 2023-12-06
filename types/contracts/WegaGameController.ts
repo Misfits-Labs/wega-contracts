@@ -23,6 +23,27 @@ import type {
   TypedContractMethod,
 } from "../common";
 
+export declare namespace IWega {
+  export type WegaStruct = {
+    name: string;
+    currentPlayers: AddressLike[];
+    deposited: BigNumberish;
+    state: BigNumberish;
+  };
+
+  export type WegaStructOutput = [
+    name: string,
+    currentPlayers: string[],
+    deposited: bigint,
+    state: bigint
+  ] & {
+    name: string;
+    currentPlayers: string[];
+    deposited: bigint;
+    state: bigint;
+  };
+}
+
 export declare namespace IWegaGameController {
   export type GameSettingsStruct = {
     denominator: BigNumberish;
@@ -50,35 +71,12 @@ export declare namespace IWegaGameController {
   };
 }
 
-export declare namespace IWega {
-  export type WegaStruct = {
-    name: string;
-    currentPlayers: AddressLike[];
-    deposited: BigNumberish;
-    state: BigNumberish;
-  };
-
-  export type WegaStructOutput = [
-    name: string,
-    currentPlayers: string[],
-    deposited: bigint,
-    state: bigint
-  ] & {
-    name: string;
-    currentPlayers: string[];
-    deposited: bigint;
-    state: bigint;
-  };
-}
-
 export interface WegaGameControllerInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "DEFAULT_ADMIN_ROLE"
       | "UPGRADE_INTERFACE_VERSION"
       | "WEGA_PROTOCOL_ADMIN_ROLE"
-      | "__WegaController_init"
-      | "__WegaController_init_unchained"
       | "addWegaProtocolAdmin"
       | "addWegaProtocolAdmins"
       | "closeWegaProtocolAdmin"
@@ -143,14 +141,6 @@ export interface WegaGameControllerInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "__WegaController_init",
-    values: [AddressLike, IWegaGameController.GameSettingsStruct[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "__WegaController_init_unchained",
-    values: [AddressLike, IWegaGameController.GameSettingsStruct[]]
-  ): string;
-  encodeFunctionData(
     functionFragment: "addWegaProtocolAdmin",
     values: [AddressLike]
   ): string;
@@ -181,7 +171,7 @@ export interface WegaGameControllerInterface extends Interface {
   encodeFunctionData(functionFragment: "existsGame", values: [string]): string;
   encodeFunctionData(
     functionFragment: "gameResults",
-    values: [string, BytesLike, AddressLike]
+    values: [string, BytesLike, AddressLike[]]
   ): string;
   encodeFunctionData(functionFragment: "getGame", values: [BytesLike]): string;
   encodeFunctionData(
@@ -286,14 +276,6 @@ export interface WegaGameControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "WEGA_PROTOCOL_ADMIN_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "__WegaController_init",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "__WegaController_init_unchained",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -631,24 +613,6 @@ export interface WegaGameController extends BaseContract {
 
   WEGA_PROTOCOL_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
-  __WegaController_init: TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-
-  __WegaController_init_unchained: TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-
   addWegaProtocolAdmin: TypedContractMethod<
     [account: AddressLike],
     [void],
@@ -699,8 +663,8 @@ export interface WegaGameController extends BaseContract {
   existsGame: TypedContractMethod<[game: string], [boolean], "view">;
 
   gameResults: TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint[]],
+    [game: string, escrowHash: BytesLike, players_: AddressLike[]],
+    [bigint[][]],
     "view"
   >;
 
@@ -846,26 +810,6 @@ export interface WegaGameController extends BaseContract {
     nameOrSignature: "WEGA_PROTOCOL_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "__WegaController_init"
-  ): TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "__WegaController_init_unchained"
-  ): TypedContractMethod<
-    [
-      erc20EscrowAddress: AddressLike,
-      gameSettings: IWegaGameController.GameSettingsStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "addWegaProtocolAdmin"
   ): TypedContractMethod<[account: AddressLike], [void], "nonpayable">;
   getFunction(
@@ -913,8 +857,8 @@ export interface WegaGameController extends BaseContract {
   getFunction(
     nameOrSignature: "gameResults"
   ): TypedContractMethod<
-    [game: string, escrowHash: BytesLike, player: AddressLike],
-    [bigint[]],
+    [game: string, escrowHash: BytesLike, players_: AddressLike[]],
+    [bigint[][]],
     "view"
   >;
   getFunction(
