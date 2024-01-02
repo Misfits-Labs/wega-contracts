@@ -788,13 +788,23 @@ const upgradeContractTask: Task = {
     artifactName: ArtifactName;
     contractName: ContractName,
   }[]) => {
+    const { owner  } = ctx.accounts;
+    const nonceOwner = ctx.getNonceSigner(owner)
+
     await Promise.all(inputs.map(async input => {
       ctx.log(`Upgrade ${input.contractName}`, JSON.stringify(input));
       const ContractConfig: DeployedContract = unwrap(dependencies, input.artifactName);
+      let provider = nonceOwner.signer.provider;
+      const baseFee =  (await provider?.getBlock('latest'))?.baseFeePerGas as bigint;
+      const currentGasLimit = parseUnits('10', 'gwei');
+      const gasFee = baseFee + currentGasLimit   
+      
       const { legacyAddress, contractInstance } = await upgradeContract({
         implementationFactory: ctx.artifacts[input.artifactName],
         deployedContractConfig: ContractConfig,
-        options: { kind: 'uups', redeployImplementation: 'always', txOverrides: { maxFeePerGas: parseUnits('900', 'gwei') } },
+        options: { kind: 'uups', redeployImplementation: 'always', txOverrides: { 
+          maxFeePerGas: gasFee,
+        } },
         forceImport: input.forceImportAddress ? {
           address: input.forceImportAddress,
           options: { kind: 'uups', redeployImplementation: 'always'}

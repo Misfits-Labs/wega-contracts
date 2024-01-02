@@ -6,11 +6,13 @@
                 "WegaERC20Escrow": {
                     "address": "0x1fFd5291E09264174d9956187cf8eFAE01E34875",
                     "legacyAddresses": [
+                        "0x0C2Af2C8B3Ef546Bd2F9743Faa106e0C7b5f7F4A",
+                        "0xed4a0cb18aF2D6b022F8f99Cf09b91aa06A9513d",
                         "0x2EE1d66d4c62a8c648f36fC8Faa7f8454F470520",
                         "0x65BdAB5722E4f5F7c377d73d5c0073Bb0671597d"
                     ],
                     "deploymentBlock": null,
-                    "implementation": "0xed4a0cb18aF2D6b022F8f99Cf09b91aa06A9513d"
+                    "implementation": "0xd6957163fF4Cf665dA19f2bB70Ba90cc2c91d54D"
                 },
                 "WegaERC20Dummy": {
                     "address": "0x0000000000000000000000000000000000000000"

@@ -278,12 +278,13 @@ contract WegaERC20Escrow is
     }
 
     function getClaimAmount(bytes32 escrowHash, address account) public view override returns (uint256 feeAmount, uint256 claimAmount) {
+        ERC20WagerRequest memory request = _wagerRequests[escrowHash];
         if(APPLY_FEES && _feeManager.shouldApplyFees(address(this))){
             (
                 ,
                 feeAmount, 
                 claimAmount
-            ) = _feeManager.calculateFeesForTransfer(address(this), _getTotalBalance(escrowHash, account));
+            ) = _feeManager.calculateFeesForTransfer(address(this), _getTotalBalance(escrowHash, account) - request.wagerAmount);
         } else {
             feeAmount = 0;
             claimAmount = _getTotalBalance(escrowHash, account);
@@ -299,6 +300,7 @@ contract WegaERC20Escrow is
         require(request.state == TransactionState.READY, INVALID_REQUEST_STATE);
         require(_accountBalances[_msgSender()][escrowHash] > 0 ether, INVALID_WITHDRAW_BALANCE);
         uint256 transferAmount = _getTotalBalance(escrowHash, _msgSender());
+        uint256 feeTransferAmount = transferAmount - request.wagerAmount;
         _escrowBalances[escrowHash] -= transferAmount;
         delete _accountBalances[_msgSender()][escrowHash];
         _wagerRequests[escrowHash].state = TransactionState.CLOSED;
@@ -307,10 +309,10 @@ contract WegaERC20Escrow is
                 address feeTaker,
                 uint256 feeAmount, 
                 uint256 sendAmount
-            ) = _feeManager.calculateFeesForTransfer(address(this), transferAmount);
+            ) = _feeManager.calculateFeesForTransfer(address(this), feeTransferAmount);
             ERC20Upgradeable(request.tokenAddress).transfer(
                 _msgSender(),
-                sendAmount
+                (transferAmount + request.wagerAmount + sendAmount)
             );
             ERC20Upgradeable(request.tokenAddress).transfer(
                 feeTaker,
